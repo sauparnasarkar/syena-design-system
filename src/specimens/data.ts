@@ -34,8 +34,9 @@ export const emitters = [
 ];
 
 export const composition = years.map((year, i) => {
-  const co2 = 70 + i * 0.5 + wave(i, 1) * 0.6;
-  const methane = 18 - i * 0.12 + wave(i, 2) * 0.3;
+  // Shares of a total: each part stays at or above zero and the parts add up to 100.
+  const co2 = 62 + i * 0.4 + wave(i, 1) * 0.4;
+  const methane = 22 - i * 0.22 + wave(i, 2) * 0.3;
   const nitrous = 6 + wave(i, 3) * 0.2;
   const other = 100 - co2 - methane - nitrous;
   return { year, parts: [co2, methane, nitrous, other] };

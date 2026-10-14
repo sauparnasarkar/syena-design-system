@@ -1,7 +1,7 @@
 import type { Data } from 'plotly.js';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, waitFor } from 'storybook/test';
-import { anomaly, emitters, futureYears, observed, scenarios, composition, compositionNames } from '../specimens/data';
+import { anomaly, emitters, observed, scenarios, composition, compositionNames } from '../specimens/data';
 import { divergingColour, projectionDash, seriesColour } from './palette';
 import { PlotlyChart } from './PlotlyChart';
 import { useChartTokens, type ChartTokens } from './tokens';
@@ -49,8 +49,8 @@ const categorical = (t: ChartTokens) => ({
   data: compositionNames.map((name, k): Data => ({
     type: 'scatter', mode: 'lines', name, x: composition.map((c) => c.year), y: composition.map((c) => c.parts[k]),
     line: { color: k === 3 ? t.other : seriesColour(t, k + 1) },
-  })).concat([{ type: 'scatter', mode: 'lines', name: 'Scenario (projection)', x: futureYears.slice(0, 1).map(() => 2024), y: [75], line: { color: seriesColour(t, 5), dash: projectionDash(t) } } as Data]),
-  layout: { yaxis: { title: { text: 'Share of CO₂-equivalent (%)' } } },
+  })),
+  layout: { yaxis: { title: { text: 'Share of CO₂-equivalent (%)' }, rangemode: 'tozero' as const } },
 });
 
 const meta: Meta = { title: 'Charts/Themed Plotly chart', parameters: { layout: 'fullscreen' } };
@@ -61,7 +61,7 @@ const make = (build: Parameters<typeof Panel>[0]['build'], label: string): Story
 const LINE = 'Annual emissions, observed to 2024 with a projection to 2050 and its range.';
 const BAR = 'Emissions in 2024 for eight countries, largest first.';
 const DIV = 'Yearly temperature anomaly against the 1991 to 2020 baseline.';
-const CAT = 'Share of greenhouse gas emissions by gas, five series.';
+const CAT = 'Share of greenhouse gas emissions by gas, four series.';
 
 export const LineWithRangeNight: Story = { render: make(lineWithRange, LINE), play: rendered, globals: { theme: 'night' } };
 export const LineWithRangeTidewater: Story = { render: make(lineWithRange, LINE), play: rendered, globals: { theme: 'tidewater' } };

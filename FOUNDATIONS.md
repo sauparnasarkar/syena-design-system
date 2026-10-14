@@ -1712,6 +1712,15 @@ of §2.5, cell padding is a spacing step, and the icon size is the small icon.
 | `borderRadius` | `radius-control` |
 | `iconSize` | `icon-small` |
 | `rowBorder`, `headerRowBorder`, `pinnedColumnBorder` width | `layout-border-hairline` |
+| Popup, dropdown, card, dialog and drag shadows | `elevation-2`, `elevation-2`, `elevation-1`, `elevation-3`, `elevation-2` |
+| Menu, picker list, tooltip and tab colours and borders | the overlay and inverse surfaces, `color-border-default`, `color-accent-*` |
+| Input, button, checkbox and toggle colours | `color-surface-base`, `color-border-emphasis`, `color-accent-*`, `color-text-on-accent` |
+| Loading and modal overlays, skeleton | `color-surface-raised` and `color-surface-sunken` mixed with transparency, `color-border-default` |
+| Colours of grid features this system does not use (find, batch edit, formula, range charts, filter-builder pills, value-change) | drawn from tokens so no grid default can render |
+
+No grid default colour or shadow may render. A story reads every custom property the grid declares
+and fails if any colour in it is not a token value or built from token values, and a unit test lists
+every parameter the theme sets.
 
 #### Accessibility
 

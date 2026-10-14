@@ -4,11 +4,19 @@ import { useGridTheme } from './theme';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-/** Cell styling for figures: the figure face with tabular, lining numerals. */
+/** Cell styling for figures: the figure face with tabular, lining numerals, right-aligned. */
 export const figureCell: Record<string, string> = {
   fontFamily: 'var(--syn-family-figure)',
   fontFeatureSettings: 'var(--syn-figure-feature-settings)',
+  textAlign: 'right',
 };
+
+/** A numeric column: header and cells right-aligned, figures in the figure face. */
+export const numericColumn = <Row,>(): Pick<ColDef<Row>, 'type' | 'cellStyle' | 'headerStyle'> => ({
+  type: 'rightAligned',
+  cellStyle: figureCell,
+  headerStyle: { textAlign: 'right' },
+});
 
 export interface ThemedGridProps<Row> {
   rowData: Row[];
@@ -17,12 +25,13 @@ export interface ThemedGridProps<Row> {
   ariaLabel: string;
   height: number;
   onReady?: (api: GridApi<Row>) => void;
+  defaultColDef?: ColDef<Row>;
   /** Shown instead of rows when there are none: say why, and offer the way out. */
   noRowsOverlayComponent?: () => React.ReactNode;
 }
 
 /** A data grid themed from tokens. The data table component builds on this. */
-export function ThemedGrid<Row>({ rowData, columnDefs, ariaLabel, height, onReady, noRowsOverlayComponent }: ThemedGridProps<Row>) {
+export function ThemedGrid<Row>({ rowData, columnDefs, defaultColDef, ariaLabel, height, onReady, noRowsOverlayComponent }: ThemedGridProps<Row>) {
   const theme = useGridTheme();
   if (!theme) return null;
   return (
@@ -31,6 +40,7 @@ export function ThemedGrid<Row>({ rowData, columnDefs, ariaLabel, height, onRead
         theme={theme}
         rowData={rowData}
         columnDefs={columnDefs}
+        defaultColDef={defaultColDef}
         rowSelection={{ mode: 'singleRow', checkboxes: false, enableClickSelection: true }}
         noRowsOverlayComponent={noRowsOverlayComponent}
         onGridReady={(e: GridReadyEvent<Row>) => onReady?.(e.api)}

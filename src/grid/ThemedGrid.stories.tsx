@@ -1,7 +1,7 @@
 import type { ColDef } from 'ag-grid-community';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
-import { figureCell, ThemedGrid } from './ThemedGrid';
+import { numericColumn, ThemedGrid } from './ThemedGrid';
 
 type Row = { indicator: string; y1990: number; y2000: number; y2010: number; y2024: number; change: number };
 
@@ -14,7 +14,7 @@ const rows: Row[] = [
 ];
 
 const numeric = (field: keyof Row, headerName: string): ColDef<Row> => ({
-  field, headerName, type: 'rightAligned', cellStyle: figureCell, width: 110,
+  field, headerName, ...numericColumn<Row>(), width: 110,
   valueFormatter: (p) => (typeof p.value === 'number' ? p.value.toLocaleString('en-GB') : ''),
 });
 
@@ -30,9 +30,11 @@ type Story = StoryObj;
 
 const wide = { width: 'min(100%, 1000px)' } as const;
 
+const filterable = { filter: true, suppressHeaderFilterButton: false } satisfies ColDef<Row>;
+
 const grid = (props: Partial<React.ComponentProps<typeof ThemedGrid<Row>>> = {}, colExtra: Partial<ColDef<Row>> = {}) => (
   <div style={{ padding: 'var(--syn-space-4)', ...wide }}>
-    <ThemedGrid<Row> rowData={rows} columnDefs={columns(colExtra)} ariaLabel="Indicators, 1990 to 2024" height={300} {...props} />
+    <ThemedGrid<Row> rowData={rows} columnDefs={columns(colExtra)} defaultColDef={filterable} ariaLabel="Indicators, 1990 to 2024" height={300} {...props} />
   </div>
 );
 
@@ -43,9 +45,41 @@ const noRows = () => (
   </div>
 );
 
+const textRight = (el: Element) => {
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  return Math.round(range.getBoundingClientRect().right);
+};
+
+const openFilter = async (canvasElement: HTMLElement, headerText: string) => {
+  const canvas = within(canvasElement);
+  await waitFor(() => expect(canvasElement.querySelector('.ag-header-cell')).not.toBeNull());
+  const header = canvas.getByText(headerText).closest('.ag-header-cell') as HTMLElement;
+  await userEvent.hover(header);
+  await userEvent.click(header.querySelector('.ag-header-cell-filter-button') as HTMLElement);
+  await waitFor(() => expect(document.querySelector('.ag-filter-menu')).not.toBeNull());
+};
+
 const stories = {
   Default: { render: () => grid(), play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     await waitFor(() => expect(canvasElement.querySelector('.ag-row')).not.toBeNull());
+    // Numeric columns and their headers are right-aligned: the text ends at the same edge.
+    for (const year of ['1990', '2000', '2010', '2024']) {
+      const header = within(canvasElement).getByText(year).closest('.ag-header-cell') as HTMLElement;
+      const colId = header.getAttribute('col-id')!;
+      const cell = canvasElement.querySelector(`.ag-grid-scrolling-rows .ag-row [col-id="${colId}"]`) as HTMLElement;
+      await expect(getComputedStyle(cell).textAlign).toBe('right');
+      await expect(getComputedStyle(header).textAlign).toBe('right');
+      await expect(Math.abs(textRight(header.querySelector('.ag-header-cell-text')!) - textRight(cell))).toBeLessThanOrEqual(1);
+    }
+  } },
+  FilterPopupOpen: { render: () => grid(), play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    await openFilter(canvasElement, '2024');
+  } },
+  FilterTypeListOpen: { render: () => grid(), play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    await openFilter(canvasElement, '2024');
+    await userEvent.click(document.querySelector('.ag-filter-menu .ag-picker-field-wrapper') as HTMLElement);
+    await waitFor(() => expect(document.querySelector('.ag-popup .ag-list')).not.toBeNull());
   } },
   SortedColumn: { render: () => grid({}, {}), play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement);
@@ -86,3 +120,7 @@ export const PinnedColumnNight: Story = { ...stories.PinnedColumn, globals: { th
 export const PinnedColumnTidewater: Story = { ...stories.PinnedColumn, globals: { theme: 'tidewater' } };
 export const EmptyNight: Story = { ...stories.Empty, globals: { theme: 'night' } };
 export const EmptyTidewater: Story = { ...stories.Empty, globals: { theme: 'tidewater' } };
+export const FilterPopupOpenNight: Story = { ...stories.FilterPopupOpen, globals: { theme: 'night' } };
+export const FilterPopupOpenTidewater: Story = { ...stories.FilterPopupOpen, globals: { theme: 'tidewater' } };
+export const FilterTypeListOpenNight: Story = { ...stories.FilterTypeListOpen, globals: { theme: 'night' } };
+export const FilterTypeListOpenTidewater: Story = { ...stories.FilterTypeListOpen, globals: { theme: 'tidewater' } };
