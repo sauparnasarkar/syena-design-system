@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { scrollToJumpTarget } from '../../lib/scrollToJumpTarget';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { ShellContext } from './ShellContext';
 import styles from './AppShell.module.css';
@@ -56,7 +57,7 @@ export function AppShell({ rail, topBar, analysisBar, strip, children, footer, n
   return (
     <ShellContext.Provider value={state}>
       <div className={[styles.app, compact ? styles.compact : ''].join(' ')}>
-        <nav aria-label="Skip links"><a href="#content" className={styles.skip} onClick={(event) => { event.preventDefault(); document.getElementById('content')?.focus(); }}>{skipLabel}</a></nav>
+        <nav aria-label="Skip links"><a href="#content" className={styles.skip} onClick={(event) => { event.preventDefault(); scrollToJumpTarget('content'); }}>{skipLabel}</a></nav>
         {compact ? topBar : rail}
         <div className={styles.column}>
           {compact ? null : analysisBar}

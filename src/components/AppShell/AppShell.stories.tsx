@@ -58,10 +58,19 @@ export const Wide: Story = {
     await expect(canvas.getByRole('complementary', { name: 'Sources and methodology' })).toBeInTheDocument();
     await expect(canvas.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     // The skip link is the first stop, and it lands on the canvas.
+    window.scrollTo(0, 400);
     await userEvent.tab();
     await expect(canvas.getByRole('link', { name: 'Skip to content' })).toHaveFocus();
     await userEvent.keyboard('{Enter}');
     await waitFor(() => expect(canvas.getByRole('main')).toHaveFocus());
+    // The canvas lands below the sticky analysis bar: its first heading is not covered (WCAG 2.4.11).
+    const heading = canvas.getAllByRole('heading', { level: 2 })[0];
+    await waitFor(() => {
+      const box = heading.getBoundingClientRect();
+      const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+      expect(hit === heading || heading.contains(hit)).toBe(true);
+    });
+    window.scrollTo(0, 0);
   },
 };
 
