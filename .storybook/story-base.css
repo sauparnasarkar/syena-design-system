@@ -1,41 +1,6 @@
-/* Minimal page defaults for stories. */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html {
-  font-size: 100%;
-  -webkit-text-size-adjust: 100%;
-}
-
-body {
-  margin: 0;
-  background: var(--syn-color-surface-base);
-  color: var(--syn-color-text-secondary);
-  font-family: var(--syn-family-ui);
-  font-size: var(--syn-type-text-md-size);
-  line-height: var(--syn-type-text-md-line);
-  letter-spacing: var(--syn-type-text-md-tracking);
-}
-
+/* Page frame for stories. Everything else comes from the base layer. */
 :where([data-syn-theme]) {
   min-height: 100vh;
   background: var(--syn-color-surface-base);
   color: var(--syn-color-text-secondary);
-}
-
-h1, h2, h3, h4, p, ul, ol, dl, dd, figure {
-  margin: 0;
-}
-
-ul, ol {
-  padding: 0;
-  list-style: none;
-}
-
-button, input, select {
-  font: inherit;
-  color: inherit;
 }
