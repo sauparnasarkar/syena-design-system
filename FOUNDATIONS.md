@@ -845,3 +845,134 @@ distance between the two outer colours:
 
 At build time the same checks run on the emitted tokens, and the build fails if any required
 pair falls below its target.
+
+---
+
+## 4. Application shell
+
+Every Syena analysis product shares one shell. It has four regions: a **navigation rail**
+on the left, a **contextual analysis bar** at the top of the content column, a **canvas** of
+modules, and a sticky **source and methodology strip** at the bottom of the content column.
+Wireframes of every layout in this section are in Storybook under *Shell / Wireframes*.
+
+Serves principles 1.1 (evidence stays legible) and 1.3 (analytical density).
+
+### 4.1 Regions
+
+```
+┌──────┬──────────────────────────────────────────────────────┐
+│      │  Analysis bar    title · purpose                     │
+│      │                  geography · period · metric · scenario
+│ Rail ├──────────────────────────────────────────────────────┤
+│      │                                                      │
+│      │  Canvas          modules in an auto-fit grid         │
+│      │                                                      │
+│      ├──────────────────────────────────────────────────────┤
+│      │  Source and methodology strip                        │
+└──────┴──────────────────────────────────────────────────────┘
+```
+
+**Navigation rail.** Primary navigation only.
+
+- Contents, top to bottom: an optional product-switcher slot (empty by default; a product that
+  belongs to a family fills it); the product mark; destination groups (an `overline` group label
+  and a list of destinations, each an icon and a label); a collapse control at the foot.
+- Widths: `rail-width-expanded` and `rail-width-collapsed` (§2.5). The collapsed rail shows
+  icons only; each icon has an accessible name and shows its label in a tooltip on hover and
+  on keyboard focus.
+- The current destination is marked with `aria-current="page"`, an `accent-tint`
+  background and `accent-text` colour. The mark is not colour alone: the label is also
+  semibold.
+- Surface: `surface-sunken`, separated from the content column by a `border-default`
+  hairline.
+- The destinations are fixed per product; the rail never carries filters.
+
+**Analysis bar.** The one place where the analytical context is set.
+
+- Row 1: the view title (`title-sm`) and a one-sentence purpose line (`text-sm`, `text-muted`)
+  that says what question the view answers.
+- Row 2: the controls that set context for every module on the canvas. A view declares which
+  of four slots it uses, in this order: **geography**, **period**, **metric**,
+  **scenario**. Unused slots are absent, not disabled. A control that applies to one module
+  only belongs in that module's header, not in the bar.
+- Each control is a labelled field at `control-height`. Labels sit above fields in
+  `caption`. Fields use `border-emphasis` so their boundary reaches 3:1.
+- Surface: `surface-raised`, separated by a hairline. The bar does not scroll with the
+  canvas; it stays at the top of the content column.
+- Changing a control updates every module together. A module that cannot honour the
+  selection says why in place (§5, inline alert), and never silently shows other data.
+
+**Canvas.** The scrolling region.
+
+- A single auto-fit grid: columns are as many as fit at `module-min`, up to `content-max`,
+  with `gutter` between modules. A module may span the full row.
+- Modules sit on `surface-raised` with a `border-default` hairline and `radius-card`;
+  padding is `space(4)`.
+- Chart modules use the dark `data-surface` panel inside the module (§6).
+
+**Source and methodology strip.** Principle 1.1 made structural.
+
+- Always visible at the bottom of the content column. One line at `caption` size, on
+  `surface-sunken`: source names, the period shown and the as-of date, then a *Methodology*
+  disclosure button.
+- The strip's text is generated from the data of the modules currently on the canvas; it
+  lists every source once.
+- The disclosure opens a panel above the line, in the strip, with three columns: sources
+  (name, publisher, licence, release date, link), definitions (metric, unit, baseline,
+  adjustments) and method notes (projection method, range definition). The panel pushes the
+  canvas up rather than covering it, and closes with `Escape` or its button.
+- The strip never collapses to nothing. Below the compact breakpoint the line shortens to
+  *Sources* plus the disclosure button.
+
+### 4.2 Responsive behaviour
+
+| Width | Rail | Analysis bar | Strip |
+|---|---|---|---|
+| from `bp-regular` | Expanded; user may collapse; the choice is remembered | Single row of controls | Full line |
+| `bp-compact` to `bp-regular` | Collapsed to icons; user may expand it as an overlay | Controls wrap to two rows if needed | Full line |
+| below `bp-compact` | Hidden. A top bar of `bar-height` carries a navigation button, the view title and an analysis-controls button | Opens as a sheet from the top bar's controls button; shows a one-line summary of the current selection in the top bar | *Sources* and the disclosure button |
+
+Below `bp-compact`, the navigation opens as a drawer over a scrim at `layer-overlay`. It
+traps focus, closes on `Escape`, on selecting a destination and on scrim click, and returns
+focus to the navigation button. Touch controls use `control-height-touch`.
+
+The shell reflows without horizontal scrolling at every width from the reflow floor (320 px)
+upward. Wide content (tables, charts) scrolls or resizes inside its own module; charts are
+drawn at the width of their module, so their text is never scaled.
+
+### 4.3 Landmarks, order and keyboard
+
+| Region | Element and name |
+|---|---|
+| Rail | `nav` named *Primary* |
+| Analysis bar | `section` (a `group`) named *Analysis controls*; the view title is the page's `h1` |
+| Canvas | `main` |
+| Strip | `aside` named *Sources and methodology* |
+
+- Reading and tab order: skip link ("Skip to content"), rail, analysis bar, canvas, strip.
+- The skip link is the first focusable element and becomes visible on focus.
+- Within the rail, destinations are a list of links; the collapse control is the last
+  element. Arrow keys are not required; the standard tab order is used.
+- The disclosure button exposes `aria-expanded` and `aria-controls`.
+- Focus is never lost when the rail collapses or expands: the control that was activated
+  keeps focus.
+
+### 4.4 Tokens consumed
+
+Surfaces `base`, `raised`, `sunken`, `overlay`; text `primary`, `secondary`, `muted`;
+borders `default`, `emphasis`; accent `tint` and `text`; layout `rail-width-*`, `bar-height`,
+`control-height`, `control-height-touch`, `gutter`, `module-min`, `content-max`,
+`border-hairline`; layers `sticky`, `rail`, `overlay`; elevation 3 for the drawer; motion
+`base` for rail width and drawer transitions.
+
+### 4.5 Wireframes
+
+| Story | Shows |
+|---|---|
+| Desktop | Expanded rail, analysis bar with four controls, canvas, closed strip |
+| Desktop sources open | The strip's methodology panel open |
+| Tablet | Collapsed rail |
+| Phone | Top bar, canvas, short strip |
+| Phone navigation open | Drawer over scrim |
+| Phone analysis controls open | Analysis bar as a sheet |
+| Desktop tidewater | The desktop layout in the light theme |
