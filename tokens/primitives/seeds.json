@@ -1,0 +1,26 @@
+{
+  "$description": "Brand and status seed colours per theme, keyed by role. Roles a theme does not list are derived by the colour generator.",
+  "night": {
+    "surface-base": { "$type": "color", "$value": "#121e35" },
+    "surface-raised": { "$type": "color", "$value": "#1e2f52" },
+    "border-default": { "$type": "color", "$value": "#2c3e63" },
+    "text-secondary": { "$type": "color", "$value": "#d7e0f0" },
+    "text-muted": { "$type": "color", "$value": "#b4c3df" },
+    "accent-fill": { "$type": "color", "$value": "#2d9cbd" },
+    "signal-positive-fill": { "$type": "color", "$value": "#3bbd8e" },
+    "signal-caution-fill": { "$type": "color", "$value": "#d9a83c" },
+    "signal-negative-fill": { "$type": "color", "$value": "#e4677d" }
+  },
+  "tidewater": {
+    "surface-base": { "$type": "color", "$value": "#dce8ed" },
+    "border-default": { "$type": "color", "$value": "#c7d9e0" },
+    "data-surface": { "$type": "color", "$value": "#061e28" },
+    "text-primary": { "$type": "color", "$value": "#071c24" },
+    "text-secondary": { "$type": "color", "$value": "#3c5460" },
+    "text-muted": { "$type": "color", "$value": "#4a6270" },
+    "accent-fill": { "$type": "color", "$value": "#0a6e8c" },
+    "signal-positive-fill": { "$type": "color", "$value": "#129455" },
+    "signal-caution-fill": { "$type": "color", "$value": "#e8a317" },
+    "signal-negative-fill": { "$type": "color", "$value": "#d0392f" }
+  }
+}
