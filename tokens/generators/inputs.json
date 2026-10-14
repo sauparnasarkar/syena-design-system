@@ -1,0 +1,123 @@
+{
+  "type": {
+    "rootPx": 16,
+    "ratio": 1.2,
+    "readingLeading": 1.5,
+    "floorPx": 12,
+    "leadingGridPx": 2,
+    "roles": {
+      "overline": {
+        "step": -2,
+        "family": "ui",
+        "weight": 600
+      },
+      "caption": {
+        "step": -2,
+        "family": "ui",
+        "weight": 400
+      },
+      "text-sm": {
+        "step": -1.5,
+        "family": "ui",
+        "weight": 400
+      },
+      "text-md": {
+        "step": -1,
+        "family": "ui",
+        "weight": 400
+      },
+      "text-lg": {
+        "step": 0,
+        "family": "ui",
+        "weight": 400
+      },
+      "title-sm": {
+        "step": 1,
+        "family": "ui",
+        "weight": 600
+      },
+      "title-md": {
+        "step": 2,
+        "family": "ui",
+        "weight": 600
+      },
+      "title-lg": {
+        "step": 3,
+        "family": "ui",
+        "weight": 600
+      },
+      "display": {
+        "step": 5,
+        "family": "ui",
+        "weight": 600
+      },
+      "figure-sm": {
+        "step": 1,
+        "family": "figure",
+        "weight": 500
+      },
+      "figure-md": {
+        "step": 3,
+        "family": "figure",
+        "weight": 500
+      },
+      "figure-lg": {
+        "step": 5,
+        "family": "figure",
+        "weight": 500
+      }
+    },
+    "iconSteps": {
+      "small": 0,
+      "medium": 1,
+      "large": 3.8
+    }
+  },
+  "space": {
+    "unitPx": 5,
+    "steps": 10,
+    "doublingSteps": 2
+  },
+  "layout": {
+    "ratio": 1.2,
+    "reflowFloorPx": 320,
+    "touchTargetPx": 44,
+    "labelCharacters": 20,
+    "ringDivisor": 3,
+    "moduleExponent": 3,
+    "statExponent": 1,
+    "fieldExponent": -0.5,
+    "breakpointExponents": {
+      "compact": 4,
+      "regular": 7,
+      "wide": 9
+    }
+  },
+  "motion": {
+    "frameMs": 16.6667,
+    "fibonacciFrames": [
+      5,
+      8,
+      13
+    ]
+  },
+  "elevation": {
+    "levels": 3,
+    "alphaBase": 0.1
+  },
+  "colour": {
+    "zoneDivisions": 8,
+    "categories": 8,
+    "sequentialSteps": 7,
+    "divergingSteps": 3,
+    "jnd": 0.02,
+    "changeSeparation": 10,
+    "topLightness": 0.9875,
+    "stepRatio": 1.2,
+    "rampSteps": 12,
+    "dashOn": 3,
+    "dashOff": 2,
+    "lightestSeriesStep": 1,
+    "lineSlots": 4
+  }
+}
