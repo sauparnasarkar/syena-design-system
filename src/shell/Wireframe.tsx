@@ -122,7 +122,7 @@ function CompactBar({ menuOpen }: { menuOpen?: boolean }) {
       <button type="button" className={styles.item} aria-label="Open navigation" aria-expanded={menuOpen ? 'true' : 'false'}>
         <span className={styles.glyph} aria-hidden="true" />
       </button>
-      <span className={styles.compactTitle}>Country profile</span>
+      <h1 className={styles.compactTitle}>Country profile</h1>
       <button type="button" className={styles.item} aria-label="Open analysis controls">
         <span className={styles.glyph} aria-hidden="true" />
       </button>

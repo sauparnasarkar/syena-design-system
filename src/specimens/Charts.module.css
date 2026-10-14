@@ -1,0 +1,83 @@
+.chart {
+  display: block;
+  max-width: 100%;
+}
+
+.grid {
+  stroke: var(--syn-data-gridline);
+  stroke-width: var(--syn-layout-border-hairline);
+}
+
+.tick {
+  fill: var(--syn-data-text-muted);
+  font-family: var(--syn-family-figure);
+  font-size: var(--syn-type-caption-size);
+  font-feature-settings: var(--syn-figure-feature-settings);
+}
+
+.axisTitle {
+  fill: var(--syn-data-text-muted);
+  font-family: var(--syn-family-ui);
+  font-size: var(--syn-type-caption-size);
+}
+
+.value {
+  fill: var(--syn-data-text);
+  font-family: var(--syn-family-figure);
+  font-size: var(--syn-type-text-sm-size);
+  font-feature-settings: var(--syn-figure-feature-settings);
+}
+
+.cellValue {
+  font-family: var(--syn-family-figure);
+  font-size: var(--syn-type-text-sm-size);
+  font-feature-settings: var(--syn-figure-feature-settings);
+}
+
+.line {
+  fill: none;
+  stroke-width: var(--syn-layout-focus-ring-width);
+  stroke-linejoin: round;
+}
+
+.dashed {
+  fill: none;
+  stroke-width: var(--syn-layout-focus-ring-width);
+  stroke-dasharray: calc(3 * var(--syn-layout-focus-ring-width)) calc(2 * var(--syn-layout-focus-ring-width));
+}
+
+.band {
+  opacity: var(--syn-opacity-band);
+}
+
+.projection {
+  fill: var(--syn-data-uncertainty);
+  opacity: var(--syn-opacity-projection);
+}
+
+.annotation {
+  fill: var(--syn-data-annotation);
+  font-family: var(--syn-family-ui);
+  font-size: var(--syn-type-caption-size);
+}
+
+.direct {
+  font-family: var(--syn-family-ui);
+  font-size: var(--syn-type-text-sm-size);
+  paint-order: stroke;
+  stroke: var(--syn-data-surface);
+  stroke-width: calc(3 * var(--syn-layout-focus-ring-width));
+  stroke-linejoin: round;
+}
+
+.reference {
+  stroke: var(--syn-data-annotation);
+  stroke-width: var(--syn-layout-focus-ring-width);
+  stroke-dasharray: 0 calc(2 * var(--syn-layout-focus-ring-width));
+  stroke-linecap: round;
+}
+
+.baseline {
+  stroke: var(--syn-data-annotation);
+  stroke-width: var(--syn-layout-focus-ring-width);
+}

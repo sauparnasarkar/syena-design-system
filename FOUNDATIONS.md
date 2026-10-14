@@ -946,7 +946,7 @@ drawn at the width of their module, so their text is never scaled.
 | Region | Element and name |
 |---|---|
 | Rail | `nav` named *Primary* |
-| Analysis bar | `section` (a `group`) named *Analysis controls*; the view title is the page's `h1` |
+| Analysis bar | `section` (a `group`) named *Analysis controls*; the view title is the page's `h1` (below `bp-compact` the top bar's title is) |
 | Canvas | `main` |
 | Strip | `aside` named *Sources and methodology* |
 
@@ -1059,8 +1059,8 @@ with named values; there are no colour-named variants.
   Height `bar-height`; buttons are `control-height-touch` square.
 - **States.** Navigation open; controls open.
 - **Tokens.** `surface-raised`, `border-default`, `text-primary`.
-- **Accessibility.** Buttons have names and `aria-expanded`; the title is not the `h1`
-  (the analysis bar's title is).
+- **Accessibility.** Buttons have names and `aria-expanded`. At these widths the top bar's
+  title is the page's `h1`; at wider widths the analysis bar's title is.
 
 #### SidebarNav
 
@@ -1684,3 +1684,16 @@ Parameter names are confirmed when the grid theme is built.
 - Every interactive cell element has an accessible name that includes the row.
 - At 200 percent zoom the content reflows into the scroll region without loss of the first
   column or the header.
+
+### 6.3 Specimens
+
+Three representative screens are built as static Storybook stories, each in both themes,
+using the tokens and the specifications above. Their data is generated for layout review and
+is labelled as such on the screen.
+
+| Story | Exercises |
+|---|---|
+| Specimens / Overview | KPI row, trend with projection and range, ranking bars, heat grid with a no-data cell, diverging bars |
+| Specimens / Country profile | Analysis bar with three controls, tags, indicator table with grouped header and selected row, stacked composition |
+| Specimens / Forecasts | Scenario chart with three paths and ranges, warning alert, scenario summary table, diverging bars |
+| Specimens / Figure pairing | Key figures at three sizes, tabular against proportional digits in a right-aligned column, a chart axis |
