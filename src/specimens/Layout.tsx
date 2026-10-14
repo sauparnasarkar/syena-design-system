@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Icon } from '../components/Icon/Icon';
-import { useCompact } from './hooks';
+import { useIsMobile } from '../hooks/useIsMobile';
 import styles from './Layout.module.css';
 
 const destinations = [
@@ -15,7 +15,7 @@ export type Control =
 const summary = (controls: Control[]) => controls.map((c) => (c.kind === 'field' ? c.value : c.value)).join(' · ');
 
 export function SpecimenShell({ current, title, purpose, controls, strip, children }: { current: string; title: string; purpose: string; controls: Control[]; strip: string; children: ReactNode }) {
-  const compact = useCompact();
+  const compact = useIsMobile();
   return (
     <div className={styles.app} data-syn-compact={compact ? 'true' : undefined}>
       <nav aria-label="Skip links"><a href="#content" className={styles.skip}>Skip to content</a></nav>

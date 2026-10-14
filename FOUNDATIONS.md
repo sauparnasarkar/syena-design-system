@@ -1037,20 +1037,43 @@ with named values; there are no colour-named variants.
 
 #### AppShell *(new)*
 
-- **Purpose and props.** Lays out the shell (§4). Props: `rail`, `analysisBar`, `children`
-  (the canvas), `strip`, `skipLabel`.
+- **Purpose and props.** Lays out the shell (§4). Props: `rail`, `topBar`, `analysisBar`,
+  `strip`, `footer`, `children` (the canvas), `navigationOpen` and `controlsOpen` (each with an
+  `on…Change`; uncontrolled by default), `skipLabel`, and `compact`, which forces the compact or
+  wide layout instead of following the viewport, for previews and tests. Components inside the
+  shell read its state: the top bar's buttons open the drawer and the sheet without wiring, and
+  the rail knows it is in a drawer.
 - **Anatomy.** A two-column layout: rail, then a column of analysis bar, scrolling canvas
   and strip. Below `bp-compact` the rail is replaced by `TopBar` and a drawer.
 - **States.** Rail expanded or collapsed; drawer open or closed; strip panel open or closed.
 - **Tokens.** Layout `rail-width-*`, `bar-height`, `content-max`; layers `sticky`, `rail`,
   `overlay`; surfaces `base`, `sunken`.
-- **Accessibility.** Landmarks and order as in §4.3. Provides the skip link.
+- **Accessibility.** Landmarks and order as in §4.3. Provides the skip link, which moves focus
+  to the canvas. The drawer and the sheet are modal dialogs: focus moves in on opening, Tab
+  stays inside, Escape or the scrim closes them, and focus returns to the control that opened
+  them. Bars pinned to the top carry `data-syn-sticky="top"` so jump links land below them.
+
+#### AnalysisBar and SourceStrip *(shell parts)*
+
+- **AnalysisBar.** Props: `title`, `purpose`, and the controls as children. Sticky at the top of
+  the content column; at compact widths it appears in the sheet and its title becomes a level
+  two heading, because the top bar holds the page heading.
+- **SourceStrip.** Props: `summary`, `compactSummary` (*Sources* by default), `sources`,
+  `definitions`, `methodNotes`, and `open` / `defaultOpen` / `onOpenChange`. Sticky at the
+  bottom; the disclosure button exposes `aria-expanded` and `aria-controls`, and Escape closes
+  the panel.
+
+#### ProductMark
+
+- **Purpose and props.** Shows the app's mark. Props: `mark`, which is either `{ src, name }` or
+  `{ node, name }`. There is no default and no bundled artwork (§5.1).
 
 #### Rail
 
 - **Purpose and props.** Primary navigation. Props: `logo` (required: the app's mark as `src`
-  or `node`, plus a `name`; no default), `productSwitcher` (an optional slot above the mark,
-  empty by default; its items each take their own required mark and name), `groups`, `footerItems`, `collapsed`,
+  or `node`, plus a `name`; no default), `productName` (written beside the mark when
+  expanded), `productSwitcher` (an optional slot above the mark,
+  empty by default; its items each take their own required mark and name), `ariaLabel`, `groups`, `footerItems`, `collapsed`,
   `onCollapsedChange`, `onItemClick`, `current`.
 - **Anatomy.** Optional product-switcher slot, the app-supplied mark, grouped destinations (`SidebarNav`), foot
   with the collapse control. Search, notifications and a user menu are not part of the shell.
@@ -1074,9 +1097,10 @@ with named values; there are no colour-named variants.
 
 #### SidebarNav
 
-- **Purpose and props.** A grouped list of destinations. Props: `groups` (each with a label
-  and items), `footerItems`, `onItemClick`, `open` and `onToggle` for the compact drawer,
-  `hideMobileToggle`, `mobileToggleSide`, `mobileOnlyContent`, `className`.
+- **Purpose and props.** A grouped list of destinations. Props: `groups` (each with an id, a
+  label and items; an item has an id, a label, an optional `href`, `icon` and `count`),
+  `footerItems`, `current`, `collapsed`, `onItemClick`, `className`. The compact drawer is the
+  shell's, so the older open and toggle props are gone.
 - **Anatomy.** Group label, then a list of items: icon, label, optional count badge.
 - **States.** Default, hover, current, focus, collapsed (icon only).
 - **Tokens.** As `Rail`; item height `control-height`.

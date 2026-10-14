@@ -1,0 +1,42 @@
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: var(--syn-layer-sticky);
+  display: flex;
+  flex-direction: column;
+  gap: var(--syn-space-3);
+  padding: var(--syn-space-4) var(--syn-space-6) var(--syn-space-3);
+  border-bottom: var(--syn-layout-border-hairline) solid var(--syn-color-border-default);
+  background: var(--syn-color-surface-raised);
+}
+
+.sheet {
+  position: static;
+  padding: var(--syn-space-4);
+  border-bottom: 0;
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--syn-space-1) var(--syn-space-4);
+}
+
+.title {
+  color: var(--syn-color-text-primary);
+  font: var(--syn-type-title-md-weight) var(--syn-type-title-md-size) / var(--syn-type-title-md-line) var(--syn-type-title-md-family);
+  letter-spacing: var(--syn-type-title-md-tracking);
+}
+
+.purpose {
+  color: var(--syn-color-text-muted);
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--syn-space-4);
+}

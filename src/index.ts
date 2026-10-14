@@ -6,3 +6,18 @@ export { SynThemeProvider, useSynTheme, useResolvedToken, themeNames, type SynTh
 export { ThemeSwitch } from './theme/ThemeSwitch';
 export { resolveToken, resolveTokens, tokenVariable } from './theme/resolveToken';
 export type { ThemeName } from './generated/tokens';
+export { ProductMark, type ProductMarkSource } from './components/ProductMark/ProductMark';
+export { SidebarNav, type NavGroup, type NavItem, type SidebarNavProps } from './components/SidebarNav/SidebarNav';
+export { Rail, type RailProps } from './components/Rail/Rail';
+export { TopBar, type TopBarProps } from './components/TopBar/TopBar';
+export { AnalysisBar, type AnalysisBarProps } from './components/AnalysisBar/AnalysisBar';
+export { SourceStrip, type SourceStripProps } from './components/SourceStrip/SourceStrip';
+export { AppShell, type AppShellProps } from './components/AppShell/AppShell';
+export { useShell, type ShellState } from './components/AppShell/ShellContext';
+export { Footer, type FooterLink, type FooterProps } from './components/Footer/Footer';
+export { JumpLinks, type JumpLinkItem, type JumpLinksProps } from './components/JumpLinks/JumpLinks';
+export { BackToTop, type BackToTopProps } from './components/BackToTop/BackToTop';
+export { scrollToJumpTarget } from './lib/scrollToJumpTarget';
+export { useIsMobile } from './hooks/useIsMobile';
+export { useReducedMotion } from './hooks/useReducedMotion';
+export { useFocusTrap } from './hooks/useFocusTrap';
