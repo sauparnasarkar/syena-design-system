@@ -21,6 +21,8 @@ this folder's `src/` today and install it from a registry later without code cha
 ```ts
 import '@syena/ds/styles.css';
 import { SynThemeProvider } from '@syena/ds';
+
+<SynThemeProvider>{app}</SynThemeProvider>
 ```
 
 Themes are scoped with the `data-syn-theme` attribute: `night` and `tidewater`.

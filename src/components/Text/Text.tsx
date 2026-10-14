@@ -35,6 +35,8 @@ export interface TextProps extends Omit<HTMLAttributes<HTMLElement>, 'color'> {
   type?: TypeRole;
   /** A colour role. When omitted the text inherits its colour. */
   tone?: Tone;
+  /** For `as="label"`. */
+  htmlFor?: string;
   children?: ReactNode;
 }
 
