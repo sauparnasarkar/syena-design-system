@@ -319,7 +319,7 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
   const thresholds = { normal: 3 * jnd, protanopia: 2 * jnd, deuteranopia: 2 * jnd, tritanopia: 2 * jnd };
   const changeByView = Object.fromEntries(viewNames.map((v) => [v, distance(change.decrease, change.increase, v)]));
   const seqSteps = sequential.slice(1).map((c, i) => minViewDistance(c, sequential[i]));
-  const divSteps = Object.keys(diverging).map(Number).sort((a, b) => a - b).slice(1).map((k, i, arr) => minViewDistance(diverging[k], diverging[k - 1]));
+  const divSteps = Object.keys(diverging).map(Number).sort((a, b) => a - b).slice(1).map((k) => minViewDistance(diverging[k], diverging[k - 1]));
   const divAcross = {};
   viewNames.forEach((v) => { divAcross[v] = distance(diverging[-m], diverging[m], v); });
 

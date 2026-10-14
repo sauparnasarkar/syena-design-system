@@ -3,3 +3,6 @@ dist
 src/generated
 storybook-static
 .DS_Store
+coverage
+playwright-report
+test-results

@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Tokens, with contrast and colour-vision validation
+        run: npm run tokens
+      - name: Generated documentation is committed
+        run: git diff --exit-code FOUNDATIONS.md tokens
+      - run: npm run lint
+      - run: npm run typecheck
+      - name: Allowlist checks on source
+        run: npm run check:allowlist
+      - name: Build Storybook
+        run: npm run build-storybook
+      - name: Allowlist checks on build output
+        run: node scripts/check-allowlist.mjs --build storybook-static/assets
+      - name: Stories (interaction and axe) and unit tests
+        run: npx vitest run
+      - name: Visual comparison
+        if: ${{ hashFiles('tests/visual/__screenshots__/**') != '' }}
+        run: npm run test:visual

@@ -319,14 +319,14 @@
   white-space: nowrap;
 }
 
-.app[data-compact='true'] {
+.app[data-syn-compact='true'] {
   flex-direction: column;
 }
 
-.app[data-compact='true'] .canvas {
+.app[data-syn-compact='true'] .canvas {
   padding: var(--syn-space-4) var(--syn-space-3) var(--syn-space-6);
 }
 
-.app[data-compact='true'] .stripLine {
+.app[data-syn-compact='true'] .stripLine {
   padding: 0 var(--syn-space-3);
 }
