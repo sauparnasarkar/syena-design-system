@@ -1,0 +1,308 @@
+{
+  "color": {
+    "surface": {
+      "base": {
+        "$type": "color",
+        "$value": "#dce8ed"
+      },
+      "raised": {
+        "$type": "color",
+        "$value": "#f6fcff"
+      },
+      "sunken": {
+        "$type": "color",
+        "$value": "#cfdadf"
+      },
+      "overlay": {
+        "$type": "color",
+        "$value": "#f6fcff"
+      },
+      "inverse": {
+        "$type": "color",
+        "$value": "#071c24"
+      }
+    },
+    "text": {
+      "primary": {
+        "$type": "color",
+        "$value": "#071c24"
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": "#3c5460"
+      },
+      "muted": {
+        "$type": "color",
+        "$value": "#4a6270"
+      },
+      "disabled": {
+        "$type": "color",
+        "$value": "#95a1a5"
+      },
+      "on-accent": {
+        "$type": "color",
+        "$value": "#f6fcff"
+      },
+      "inverse": {
+        "$type": "color",
+        "$value": "#f6fcff"
+      },
+      "link": {
+        "$type": "color",
+        "$value": "#006784"
+      }
+    },
+    "border": {
+      "subtle": {
+        "$type": "color",
+        "$value": "#cfe1e8"
+      },
+      "default": {
+        "$type": "color",
+        "$value": "#c7d9e0"
+      },
+      "emphasis": {
+        "$type": "color",
+        "$value": "#6c7d83"
+      }
+    },
+    "accent": {
+      "fill": {
+        "$type": "color",
+        "$value": "#0a6e8c"
+      },
+      "hover": {
+        "$type": "color",
+        "$value": "#006784"
+      },
+      "active": {
+        "$type": "color",
+        "$value": "#00617c"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#006784"
+      },
+      "tint": {
+        "$type": "color",
+        "$value": "#ddf5ff"
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": "#5f5b96"
+      }
+    },
+    "signal": {
+      "positive": {
+        "fill": {
+          "$type": "color",
+          "$value": "#129455"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "#006d3c"
+        },
+        "tint": {
+          "$type": "color",
+          "$value": "#cdffdc"
+        }
+      },
+      "negative": {
+        "fill": {
+          "$type": "color",
+          "$value": "#d0392f"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "#b91f1a"
+        },
+        "tint": {
+          "$type": "color",
+          "$value": "#ffebe8"
+        }
+      },
+      "caution": {
+        "fill": {
+          "$type": "color",
+          "$value": "#e8a317"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "#7f5700"
+        },
+        "tint": {
+          "$type": "color",
+          "$value": "#ffeed5"
+        }
+      },
+      "info": {
+        "fill": {
+          "$type": "color",
+          "$value": "#0a6e8c"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "#006784"
+        },
+        "tint": {
+          "$type": "color",
+          "$value": "#ddf5ff"
+        }
+      }
+    },
+    "focus-ring": {
+      "$type": "color",
+      "$value": "#0a6e8c"
+    },
+    "shadow": {
+      "$type": "color",
+      "$value": "#071c24"
+    }
+  },
+  "data": {
+    "surface": {
+      "$type": "color",
+      "$value": "#061e28"
+    },
+    "text": {
+      "$type": "color",
+      "$value": "#8eaab7"
+    },
+    "text-muted": {
+      "$type": "color",
+      "$value": "#6c8793"
+    },
+    "gridline": {
+      "$type": "color",
+      "$value": "#2e4752"
+    },
+    "ink-dark": {
+      "$type": "color",
+      "$value": "#000910"
+    },
+    "ink-light": {
+      "$type": "color",
+      "$value": "#f6fcff"
+    },
+    "annotation": {
+      "$type": "color",
+      "$value": "#20b5e3"
+    },
+    "uncertainty": {
+      "$type": "color",
+      "$value": "#8eaab73b"
+    },
+    "no-data": {
+      "$type": "color",
+      "$value": "#676767"
+    },
+    "other": {
+      "$type": "color",
+      "$value": "#78858b"
+    },
+    "cat": {
+      "1": {
+        "$type": "color",
+        "$value": "#0096bd"
+      },
+      "2": {
+        "$type": "color",
+        "$value": "#ffb53b"
+      },
+      "3": {
+        "$type": "color",
+        "$value": "#f7a0ff"
+      },
+      "4": {
+        "$type": "color",
+        "$value": "#6579f8"
+      },
+      "5": {
+        "$type": "color",
+        "$value": "#908d00"
+      },
+      "6": {
+        "$type": "color",
+        "$value": "#007bcf"
+      },
+      "7": {
+        "$type": "color",
+        "$value": "#a582ef"
+      },
+      "8": {
+        "$type": "color",
+        "$value": "#937400"
+      }
+    },
+    "seq": {
+      "1": {
+        "$type": "color",
+        "$value": "#00708f"
+      },
+      "2": {
+        "$type": "color",
+        "$value": "#0082b6"
+      },
+      "3": {
+        "$type": "color",
+        "$value": "#1592e5"
+      },
+      "4": {
+        "$type": "color",
+        "$value": "#58a1ff"
+      },
+      "5": {
+        "$type": "color",
+        "$value": "#91b2ff"
+      },
+      "6": {
+        "$type": "color",
+        "$value": "#bac5ff"
+      },
+      "7": {
+        "$type": "color",
+        "$value": "#dbdaff"
+      }
+    },
+    "div": {
+      "mid": {
+        "$type": "color",
+        "$value": "#6d8793"
+      },
+      "pos-1": {
+        "$type": "color",
+        "$value": "#b49b7c"
+      },
+      "pos-2": {
+        "$type": "color",
+        "$value": "#e8b46f"
+      },
+      "pos-3": {
+        "$type": "color",
+        "$value": "#ffd7a4"
+      },
+      "neg-3": {
+        "$type": "color",
+        "$value": "#b2e8ff"
+      },
+      "neg-2": {
+        "$type": "color",
+        "$value": "#6ccdf2"
+      },
+      "neg-1": {
+        "$type": "color",
+        "$value": "#7da7b9"
+      }
+    },
+    "change": {
+      "decrease": {
+        "$type": "color",
+        "$value": "#37e88c"
+      },
+      "increase": {
+        "$type": "color",
+        "$value": "#d0392f"
+      }
+    }
+  }
+}

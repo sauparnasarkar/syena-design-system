@@ -75,7 +75,7 @@ Some colours already mean something to a climate reader, and the system protects
 
 - Green and red encode direction of emissions, decreasing and increasing. No brand,
   accent, series or decorative colour is a green or a red; the brand and accent hues are
-  kept at least a fixed hue distance from both signal hues (§3.3).
+  kept at least a fixed hue distance from both signal hues (§3.5).
 - Warm and cool hues encode above-baseline and below-baseline in diverging scales, such as
   temperature anomaly. Diverging scales are centred on a stated baseline and the baseline
   is printed on the chart.
@@ -434,3 +434,414 @@ stays reachable there.
 | `bp-regular` | 1147 px | 71.6875 |
 | `bp-wide` | 1651 px | 103.1875 |
 <!-- /generated:breakpoint-table -->
+
+---
+
+## 3. Colour system
+
+Colour is specified in OKLCH (lightness `L`, chroma `C`, hue `h`) because equal steps in `L`
+are close to equal steps in perceived lightness, which makes contrast predictable. Every
+colour in a theme is either a **seed**, a value authored for the theme and stored in
+`tokens/primitives/seeds.json`, or **derived** from the seeds by a rule in this section.
+`npm run tokens:generate` applies the rules, writes `tokens/themes/*.json`, runs every
+check below and fails if any required check fails. The tables in this section are filled in
+from that run.
+
+Serves principles 1.4 (colour belongs to the data), 1.5 (climate semantics are reserved)
+and 1.6 (accessible by construction).
+
+### 3.1 Themes
+
+| Theme | Polarity | Intent |
+|---|---|---|
+| `night` | dark | The default analytical theme: deep blue-grey surfaces, bright marks. |
+| `tidewater` | light | Daylight reading: cool light-grey canvas and white raised surfaces. Chart panels stay dark (see 3.6), so marks are validated on one kind of ground in every theme. |
+
+Polarity decides the direction of two operations used throughout: *toward emphasis* (lighter
+in a dark theme, darker in a light theme) and *elevation* (raised surfaces are lighter than
+the canvas in a dark theme; in a light theme they are the lightest surface and rely on
+shadow). A third theme is added by supplying seeds and a polarity; nothing else is chosen
+by hand.
+
+### 3.2 Seeds
+
+Seeds are the colours a theme's designer chooses: the canvas, the border, the body and muted
+text, the brand accent, the three status signals, and, where a theme has one, the chart
+ground, the raised surface and the highest-emphasis text. A role with no seed in a theme is
+derived. Seed values are in `tokens/primitives/seeds.json`.
+
+Brand direction: the accent of both themes is a blue-cyan (hue about 222° to 226°). Neither
+theme has a green or red brand colour (principle 1.5, rule in 3.5).
+
+### 3.3 Ramps
+
+A ramp is twelve colours at one hue, used where a theme needs a colour at a stated lightness
+(surfaces, borders, hover states) and published for product authors who need a tint. Lightness
+falls geometrically and chroma follows a bell, so ramps have the same shape in every hue:
+
+```
+L(i) = L₀ · τ⁻ⁱ                       i = 0 … 11     (L₀ at i = 0, 0.133 at i = 11)
+C(i) = C_peak · 4t(1 − t)            t = i / 11     (clamped to the sRGB gamut at L(i), h)
+```
+
+Contrast between steps is not constant, so the generator never assumes it: every pair a
+component depends on is measured directly (3.7).
+Primitives are not emitted as CSS variables (they exist as JSON and as TypeScript constants).
+
+<!-- generated:ramp-table -->
+| Step i | L(i) | night neutral | night brand | tidewater neutral | tidewater brand |
+|---|---|---|---|---|---|
+| 0 | 0.988 | `#fbfbfb` | `#fbfbfb` | `#fbfbfb` | `#fbfbfb` |
+| 1 | 0.823 | `#c0c5d0` | `#adcbd6` | `#c2c6c7` | `#b1cad4` |
+| 2 | 0.685 | `#919aac` | `#6da3b7` | `#959b9e` | `#75a2b4` |
+| 3 | 0.571 | `#6c788f` | `#34839c` | `#71797d` | `#438199` |
+| 4 | 0.476 | `#4f5d76` | `#006780` | `#555e62` | `#0f6681` |
+| 5 | 0.397 | `#394761` | `#004f63` | `#3f494d` | `#004f66` |
+| 6 | 0.329 | `#28354e` | `#003c4c` | `#2e373b` | `#003c4e` |
+| 7 | 0.277 | `#1c283e` | `#002d3a` | `#21292d` | `#002d3b` |
+| 8 | 0.231 | `#131d2f` | `#00212b` | `#171e21` | `#00212c` |
+| 9 | 0.191 | `#0d1421` | `#001720` | `#101517` | `#001720` |
+| 10 | 0.159 | `#0a0d14` | `#001016` | `#0b0e0f` | `#001017` |
+| 11 | 0.134 | `#080808` | `#080808` | `#080808` | `#080808` |
+<!-- /generated:ramp-table -->
+
+### 3.4 Semantic roles
+
+Semantic tokens are what components consume. Names follow
+`--syn-color-{group}-{role}[-{variant}]`.
+
+**Surfaces**
+
+- `surface-base`: the canvas. Seed.
+- `surface-raised`: cards and panels. Seed where given; otherwise one half-step of lightness
+  beyond the canvas, capped at `L(0)`, with chroma divided by τ.
+- `surface-sunken`: wells, table headers, inset regions. The deepest of a half, quarter or
+  eighth lightness step below the canvas (`L_base · τ^−e`, `e` = ½, ¼, ⅛) at which every body
+  text role still meets 4.5:1.
+- `surface-overlay`: menus, popovers, dialogs. Dark themes: raised surface plus half a step.
+  Light themes: the raised surface, separated by elevation 2 or 3.
+- `surface-inverse`: a surface of opposite polarity for toasts and tooltips, with
+  `text-inverse` on it.
+
+**Text**
+
+- `text-primary`: titles and figures. Seed where given; otherwise secondary text plus half a
+  step of lightness toward emphasis, capped at `L(0)`.
+- `text-secondary`: body text. Seed.
+- `text-muted`: captions, axis labels, helper text. Seed.
+- `text-disabled`: disabled labels. Lightness at which contrast against the canvas is
+  `√4.5` (the geometric mean of no contrast and the minimum for text). Exempt from the 4.5:1
+  rule by definition and never used for information that is not available elsewhere.
+- `text-on-accent`: label on a filled accent control. The lighter or darker of two neutral
+  inks, whichever has more contrast against `accent-fill`. A white label does not
+  reach 4.5:1 on night's accent, so night uses the dark ink and tidewater the light ink.
+- `text-inverse`: text on `surface-inverse`.
+- `text-link`: link text; the same colour as `accent-text`. Links are also underlined.
+
+**Borders**
+
+- `border-default`: card and field outlines that are decorative. Seed.
+- `border-subtle`: hairlines and row dividers; halfway in lightness between canvas and
+  `border-default`.
+- `border-emphasis`: outlines that identify a control or an active region. The nearest
+  lightness toward emphasis from `border-default` that reaches 3:1 against every surface.
+
+**Accent**
+
+- `accent-fill`: primary control fill, selection. Seed.
+- `accent-hover`, `accent-active`: a quarter and a half lightness step toward emphasis
+  (`L · τ^(±¼)`, `L · τ^(±½)`).
+- `accent-text`: accent-coloured text and icons. The nearest lightness toward emphasis from
+  `accent-fill` at which the colour reaches 4.5:1 on every surface and on `accent-tint`.
+- `accent-tint`: tinted background for chips, highlights and selected rows. Lightness is the
+  midpoint of canvas and raised surface; chroma is the accent's divided by τ⁴; hue is the
+  accent's.
+- `accent-secondary`: a second brand colour for non-data emphasis. Hue is the accent's plus
+  60°; lightness and chroma are the accent's.
+
+**Signals**
+
+`signal-{positive|negative|caution|info}-{fill|text|tint}`.
+
+- `fill`: the solid colour for dots, bars and badges. Seed for positive, negative and
+  caution; info uses the accent. A fill never carries a status alone: it always sits with
+  an icon and text, so it is not required to reach 3:1 and the contrast is reported
+  rather than enforced.
+- `text`: status text and icons. The nearest lightness toward emphasis from `fill` that
+  reaches 4.5:1 on every surface and on its own tint.
+- `tint`: alert and row backgrounds, built like `accent-tint`.
+
+**Other**
+
+- `focus-ring`: the nearest lightness toward emphasis from the accent that reaches 3:1
+  against every surface. The ring is drawn with a gap equal to the ring width, so the colours
+  it touches are surfaces.
+- `shadow`: the ink of elevation shadows (§2.6).
+
+<!-- generated:role-table -->
+| Token | night | tidewater |
+|---|---|---|
+| `color-surface-base` | `#121e35` | `#dce8ed` |
+| `color-surface-raised` | `#1e2f52` | `#f6fcff` |
+| `color-surface-sunken` | `#0d1930` | `#cfdadf` |
+| `color-surface-overlay` | `#25375a` | `#f6fcff` |
+| `color-surface-inverse` | `#d7e0f0` | `#071c24` |
+| `color-text-primary` | `#f9fbff` | `#071c24` |
+| `color-text-secondary` | `#d7e0f0` | `#3c5460` |
+| `color-text-muted` | `#b4c3df` | `#4a6270` |
+| `color-text-disabled` | `#44536d` | `#95a1a5` |
+| `color-text-on-accent` | `#01061b` | `#f6fcff` |
+| `color-text-inverse` | `#121e35` | `#f6fcff` |
+| `color-text-link` | `#41accd` | `#006784` |
+| `color-border-subtle` | `#1c2d50` | `#cfe1e8` |
+| `color-border-default` | `#2c3e63` | `#c7d9e0` |
+| `color-border-emphasis` | `#6c81ab` | `#6c7d83` |
+| `color-accent-fill` | `#2d9cbd` | `#0a6e8c` |
+| `color-accent-hover` | `#39a5c7` | `#006784` |
+| `color-accent-active` | `#45afd1` | `#00617c` |
+| `color-accent-text` | `#41accd` | `#006784` |
+| `color-accent-tint` | `#002c39` | `#ddf5ff` |
+| `color-accent-secondary` | `#8485cd` | `#5f5b96` |
+| `color-signal-positive-fill` | `#3bbd8e` | `#129455` |
+| `color-signal-positive-text` | `#3bbd8e` | `#006d3c` |
+| `color-signal-positive-tint` | `#003020` | `#cdffdc` |
+| `color-signal-negative-fill` | `#e4677d` | `#d0392f` |
+| `color-signal-negative-text` | `#f7788d` | `#b91f1a` |
+| `color-signal-negative-tint` | `#45141e` | `#ffebe8` |
+| `color-signal-caution-fill` | `#d9a83c` | `#e8a317` |
+| `color-signal-caution-text` | `#d9a83c` | `#7f5700` |
+| `color-signal-caution-tint` | `#342400` | `#ffeed5` |
+| `color-signal-info-fill` | `#2d9cbd` | `#0a6e8c` |
+| `color-signal-info-text` | `#41accd` | `#006784` |
+| `color-signal-info-tint` | `#002c39` | `#ddf5ff` |
+| `color-focus-ring` | `#2d9cbd` | `#0a6e8c` |
+| `color-shadow` | `#01071c` | `#071c24` |
+<!-- /generated:role-table -->
+
+### 3.5 Hue discipline
+
+Principle 1.5 is enforced by a rule, not by taste. Let `h₊` be the hue of the positive
+signal seed and `h₋` the hue of the negative signal seed. Each reserves a zone of half-width
+
+```
+D = 360° / 8 = 45°
+```
+
+No accent, secondary accent or categorical series colour may have a hue within `D` of `h₊`
+or `h₋`. The generator rejects candidates inside a zone and fails if a seed-derived colour
+lands in one.
+
+<!-- generated:zone-table -->
+| Hue | night / tidewater | Distance to positive | Distance to negative |
+|---|---|---|---|
+| positive signal | 164.7° / 154.7° | 0° / 0° | 153.3° / 126.3° |
+| negative signal | 11.4° / 28.4° | 153.3° / 126.3° | 0° / 0° |
+| accent | 222.5° / 225.8° | 57.8° / 71° | 148.9° / 162.7° |
+| secondary accent | 282.5° / 285.8° | 117.8° / 131° | 88.9° / 102.7° |
+<!-- /generated:zone-table -->
+
+The secondary accent is the accent hue plus 60°, which lies outside both zones in each
+theme. A hue inside a zone is available only through signal and change tokens.
+
+### 3.6 Data colour
+
+Data marks are drawn on `data-surface`, the chart ground. It is a dark surface in both
+themes: <!-- generated:ground-values -->
+night `#09152b`, tidewater `#061e28`
+<!-- /generated:ground-values -->. In night it is one full lightness step below the
+canvas (`L_base · τ⁻¹`); in tidewater it is a seed, so charts remain a dark panel on the
+light page. All data colours are validated against it.
+
+**Neutrals on the ground.** Each is the lightness that gives an exact contrast ratio against
+the ground, at the ground's hue:
+
+| Token | Contrast with ground | Use |
+|---|---|---|
+| `data-text` | 7:1 | Chart titles, tick labels that carry values |
+| `data-text-muted` | 4.5:1 | Axis titles, legends, source lines |
+| `data-annotation` | at least 4.5:1; the lightness of `data-text` at the accent hue and chroma `C_cap / τ²` | Reference lines, callout leaders and labels |
+| `data-other` | 4.5:1 | The remainder bucket of a part-to-whole chart |
+| `data-no-data` | 3:1 | Missing values; always drawn with a hatch, never as a solid |
+| `data-gridline` | √3 : 1 | Gridlines; informational contrast only |
+| `data-uncertainty` | 7:1 colour at α = τ⁻⁸ | Fill of uncertainty bands when a band is not tied to a series; series bands use the series colour at the same α |
+
+**Categorical** (`data-cat-1` … `data-cat-8`). Eight slots. A slot has the same hue family in
+every theme; each theme chooses its lightness and chroma.
+
+1. *Hues, shared by all themes.* Candidates are every hue in 3° steps outside the reserved
+   zones of every theme (so a hue is allowed only if it is allowed everywhere). Slot 1 is the
+   candidate nearest the mean accent hue, so the first series is the brand colour. Each next
+   slot takes the candidate whose smallest hue distance to the slots already chosen is
+   largest. The first four slots must differ in hue by at least `D` (45°), the same half-width
+   that protects the signals, so the four slots most used are separable by hue and not only by
+   lightness.
+2. *Lightness and chroma, per theme.* For each slot, candidates are the lightness levels
+   `L(j)` for `j = 1, 1½, …, 3` (a mark is never lighter than `L(1)`, so it keeps its hue) at
+   chroma `C_cap` and `C_cap / τ`. `C_cap` is the largest chroma among the three signal seeds,
+   so a series is never more saturated than a status. Candidates below 3:1 against the ground
+   are discarded. Slot 1 is the candidate closest in OKLab to the accent; each further slot is
+   the candidate whose smallest distance to the slots already chosen is largest, where the
+   distance for a pair is the smaller of its OKLab distance as seen normally and as simulated
+   for protanopia, deuteranopia and tritanopia (Machado et al., full severity, as implemented
+   in culori).
+3. *Thin dashed lines.* A 2-pixel dashed line presents less of its colour than a fill: with
+   the dash pattern of §6.1 it covers `3 / (3 + 2)` of its length. For the first four slots
+   (the slots that may be drawn as dashed lines) every candidate must also reach 3:1 against
+   the ground *as a line* (the colour mixed into the ground by that coverage, in linear
+   light), and the distance between slots is the smaller of the fill distance and the line
+   distance. Slots 5 to 8 are fills, bars and areas, or solid lines with markers and direct
+   labels, never dashed lines.
+
+Series are used in order. Beyond eight series, group the rest into `data-other`. The first
+four slots differ in hue by at least <!-- generated:cat-hue-separation -->
+48°
+<!-- /generated:cat-hue-separation --> (required: 45°).
+
+<!-- generated:cat-table -->
+| Token | Hue (both themes) | night | vs ground | tidewater | vs ground |
+|---|---|---|---|---|---|
+| `data-cat-1` | 225° | `#0096bd` | 5.28 | `#0096bd` | 4.98 |
+| `data-cat-2` | 75° | `#ffb53b` | 10.34 | `#ffb53b` | 9.74 |
+| `data-cat-3` | 324° | `#efa7f5` | 9.98 | `#f7a0ff` | 9.34 |
+| `data-cat-4` | 273° | `#8093ea` | 6.31 | `#6579f8` | 4.61 |
+| `data-cat-5` | 108° | `#7f7c00` | 4.15 | `#908d00` | 4.90 |
+| `data-cat-6` | 249° | `#057bcf` | 4.11 | `#007bcf` | 3.87 |
+| `data-cat-7` | 297° | `#b999ff` | 7.86 | `#a582ef` | 5.75 |
+| `data-cat-8` | 90° | `#bc9500` | 6.45 | `#937400` | 3.87 |
+<!-- /generated:cat-table -->
+
+**Sequential** (`data-seq-1` … `data-seq-7`). For magnitude (maps, heat views). Lightness rises
+linearly from the lightest step that still meets 3:1 on the ground (`data-seq-1`) to
+`L(½)` (`data-seq-7`); the hue rotates from the accent hue through 60° as lightness rises;
+chroma is `C_cap / τ`, clamped to the gamut. Lightness is monotonic, so order survives any
+colour-vision deficiency and greyscale printing.
+
+**Diverging** (`data-div-neg-3` … `data-div-pos-3`, with `data-div-mid`). For signed values
+around a stated baseline. The cool side (below baseline) uses the accent hue. The warm side
+(above baseline) uses the hue at distance `D` from the negative signal: the warmest hue the
+reserved zone allows. The midpoint is a neutral at 4.5:1 on the ground, lighter than `data-no-data` so that a
+baseline value and a missing value are never the same colour; lightness rises
+linearly to `L(½)` at both ends and chroma rises linearly from zero, so the baseline is the
+quietest colour and magnitude is the brightest.
+
+**Change** (`data-change-decrease`, `data-change-increase`). Emissions falling and rising use
+the positive and negative signal hues. Green and red are the classic failure pair for
+deuteranopia, so these two differ in lightness as well as hue: the generator picks the calmest
+pair (lowest combined lightness) that is at least ten just-noticeable differences apart under
+every colour-vision view. Change marks are always paired with a sign or arrow glyph.
+
+<!-- generated:change-table -->
+| View | night | tidewater |
+|---|---|---|
+| normal | 0.393 | 0.422 |
+| protanopia | 0.388 | 0.438 |
+| deuteranopia | 0.241 | 0.262 |
+| tritanopia | 0.406 | 0.427 |
+<!-- /generated:change-table -->
+
+### 3.7 Validation
+
+**Contrast ladder.** Targets are the WCAG 2.2 minimums: 4.5:1 for text, 3:1 for large text,
+UI boundaries, icons and chart marks. Primary text and chart text aim higher (7:1).
+
+<!-- generated:contrast-count -->
+night: 96 required pairs; tidewater: 96 required pairs.
+<!-- /generated:contrast-count -->
+
+The table shows each pair family at its worst surface in each theme:
+
+<!-- generated:contrast-table -->
+| Pair (worst surface) | Target | night | tidewater | Result |
+|---|---|---|---|---|
+| text-primary | 7:1 | 11.43 | 12.28 | pass |
+| text-secondary | 4.5:1 | 8.92 | 5.61 | pass |
+| text-muted | 4.5:1 | 6.66 | 4.51 | pass |
+| text-link | 4.5:1 | 4.52 | 4.51 | pass |
+| text-on-accent | 4.5:1 | 6.33 | 5.60 | pass |
+| text-inverse | 4.5:1 | 12.52 | 16.90 | pass |
+| signal-positive-text | 4.5:1 | 5.00 | 4.53 | pass |
+| signal-negative-text | 4.5:1 | 4.53 | 4.50 | pass |
+| signal-caution-text | 4.5:1 | 5.42 | 4.52 | pass |
+| signal-info-text | 4.5:1 | 4.52 | 4.51 | pass |
+| border-emphasis | 3:1 | 3.03 | 3.01 | pass |
+| focus-ring | 3:1 | 3.72 | 4.07 | pass |
+| data-text | 7:1 | 7.03 | 7.01 | pass |
+| data-text-muted | 4.5:1 | 4.54 | 4.51 | pass |
+| data-annotation | 4.5:1 | 7.27 | 7.17 | pass |
+| data-no-data | 3:1 | 3.03 | 3.03 | pass |
+| text on data-seq-1 (data-ink-light or data-ink-dark) | 4.5:1 | 5.81 | 5.46 | pass |
+| text on data-seq-2 (data-ink-light or data-ink-dark) | 4.5:1 | 4.50 | 4.65 | pass |
+| text on data-seq-3 (data-ink-light or data-ink-dark) | 4.5:1 | 5.78 | 6.00 | pass |
+| text on data-seq-4 (data-ink-light or data-ink-dark) | 4.5:1 | 7.46 | 7.60 | pass |
+| text on data-seq-5 (data-ink-light or data-ink-dark) | 4.5:1 | 9.47 | 9.57 | pass |
+| text on data-seq-6 (data-ink-light or data-ink-dark) | 4.5:1 | 11.99 | 11.96 | pass |
+| text on data-seq-7 (data-ink-light or data-ink-dark) | 4.5:1 | 14.88 | 14.80 | pass |
+| text on data-div-0 (data-ink-light or data-ink-dark) | 4.5:1 | 5.03 | 5.29 | pass |
+| text on data-div-1 (data-ink-light or data-ink-dark) | 4.5:1 | 7.38 | 7.57 | pass |
+| text on data-div-2 (data-ink-light or data-ink-dark) | 4.5:1 | 10.57 | 10.69 | pass |
+| text on data-div-3 (data-ink-light or data-ink-dark) | 4.5:1 | 14.82 | 14.82 | pass |
+| text on data-div--3 (data-ink-light or data-ink-dark) | 4.5:1 | 15.24 | 15.17 | pass |
+| text on data-div--2 (data-ink-light or data-ink-dark) | 4.5:1 | 11.06 | 11.13 | pass |
+| text on data-div--1 (data-ink-light or data-ink-dark) | 4.5:1 | 7.56 | 7.74 | pass |
+| data-other | 3:1 | 4.51 | 4.51 | pass |
+| data-cat-* | 3:1 | 3.55 | 3.16 | pass |
+| data-seq-* | 3:1 | 3.02 | 3.03 | pass |
+| data-div-* | 3:1 | 4.54 | 4.52 | pass |
+| data-change-decrease | 3:1 | 11.19 | 10.69 | pass |
+| data-change-increase | 3:1 | 3.78 | 3.52 | pass |
+<!-- /generated:contrast-table -->
+
+Pairs measured and reported but not required (decorative, or never used alone):
+
+<!-- generated:contrast-info -->
+| Theme | Pair (reported only) | Guide ratio | Measured |
+|---|---|---|---|
+| night | data-gridline on data-surface | 1.7 | 1.74 |
+| night | signal-positive-fill on surface-base | 3 | 7.01 |
+| night | signal-negative-fill on surface-base | 3 | 5.17 |
+| night | signal-caution-fill on surface-base | 3 | 7.62 |
+| night | signal-info-fill on surface-base | 3 | 5.23 |
+| tidewater | data-gridline on data-surface | 1.7 | 1.75 |
+| tidewater | signal-positive-fill on surface-base | 3 | 3.12 |
+| tidewater | signal-negative-fill on surface-base | 3 | 3.90 |
+| tidewater | signal-caution-fill on surface-base | 3 | 1.74 |
+| tidewater | signal-info-fill on surface-base | 3 | 4.64 |
+<!-- /generated:contrast-info -->
+
+**Colour-vision deficiency.** Distances are Euclidean in OKLab. One just-noticeable
+difference is `J = 0.02`. The categorical palette must be at least `3J` apart for every pair
+under normal vision and `2J` under each simulated deficiency:
+
+<!-- generated:cvd-table -->
+| View | Required | night min | closest pair | tidewater min | closest pair | Result |
+|---|---|---|---|---|---|---|
+| normal | 0.06 | 0.088 | 1–6 | 0.068 | 5–8 | pass |
+| protanopia | 0.04 | 0.046 | 4–7 | 0.049 | 4–7 | pass |
+| deuteranopia | 0.04 | 0.062 | 1–6 | 0.057 | 5–8 | pass |
+| tritanopia | 0.04 | 0.067 | 1–6 | 0.056 | 4–6 | pass |
+<!-- /generated:cvd-table -->
+
+The same distances, measured on the colours a thin dashed line presents (first four slots, which are the slots that may be dashed):
+
+<!-- generated:cat-line-table -->
+| View | Required | night min | tidewater min | Result |
+|---|---|---|---|---|
+| normal | 0.06 | 0.099 | 0.117 | pass |
+| protanopia | 0.04 | 0.063 | 0.086 | pass |
+| deuteranopia | 0.04 | 0.096 | 0.070 | pass |
+| tritanopia | 0.04 | 0.063 | 0.067 | pass |
+<!-- /generated:cat-line-table -->
+
+Ramps are validated by the smallest step between neighbours and, for diverging ramps, by the
+distance between the two outer colours:
+
+<!-- generated:seqdiv-table -->
+| Measure | night | tidewater | Required |
+|---|---|---|---|
+| Sequential, smallest step between neighbours | 0.057 | 0.049 | 0.04 |
+| Diverging, smallest step between neighbours | 0.091 | 0.094 | 0.04 |
+| Diverging, outer cool vs outer warm, worst view | 0.094 | 0.119 | 0.08 |
+<!-- /generated:seqdiv-table -->
+
+At build time the same checks run on the emitted tokens, and the build fails if any required
+pair falls below its target.

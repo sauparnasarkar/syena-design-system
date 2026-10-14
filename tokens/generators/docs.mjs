@@ -63,3 +63,103 @@ export function scaleBlocks(s, inputs) {
     'breakpoint-table': table(['Token', 'Value', 'rem'], bpRows),
   };
 }
+
+// ---- colour blocks ----
+
+const swatch = (hexValue) => `\`${hexValue}\``;
+
+function flatten(obj, path = []) {
+  const out = [];
+  for (const [k, v] of Object.entries(obj)) {
+    if (v && typeof v === 'object' && '$value' in v) out.push({ path: [...path, k], value: v.$value });
+    else if (v && typeof v === 'object') out.push(...flatten(v, [...path, k]));
+  }
+  return out;
+}
+
+export function colourBlocks(themes) {
+  const [night, tide] = themes;
+  const flat = (t) => new Map(flatten(t.tokens.color).map((e) => [e.path.join('-'), e.value]));
+  const n = flat(night);
+  const w = flat(tide);
+  const roleRows = [...n.keys()].map((k) => [`\`color-${k}\``, swatch(n.get(k)), swatch(w.get(k))]);
+
+  const group = (id) => id.replace(/ on (surface-\w+|signal-\w+-tint|accent-\w+|data-surface|accent-tint|surface-inverse)$/, '').replace(/^(data-(cat|seq|div))-.+$/, '$1-*');
+  const summarise = (theme) => {
+    const map = new Map();
+    for (const c of theme.checks.filter((x) => x.kind === 'required')) {
+      const g = group(c.id);
+      const cur = map.get(g);
+      if (!cur || c.ratio < cur.ratio) map.set(g, { ratio: c.ratio, target: c.target, pass: c.pass });
+      else if (!c.pass) cur.pass = false;
+    }
+    return map;
+  };
+  const sn = summarise(night);
+  const sw = summarise(tide);
+  const contrastRows = [...sn.keys()].map((g) => {
+    const a = sn.get(g); const b = sw.get(g);
+    return [`${g}`, `${a.target}:1`, `${a.ratio.toFixed(2)}`, `${b.ratio.toFixed(2)}`, a.pass && b.pass ? 'pass' : 'FAIL'];
+  });
+  const checkCount = (t) => `${t.checks.filter((c) => c.kind === 'required').length} required pairs`;
+
+  const info = [...night.checks, ...tide.checks].filter((c) => c.kind === 'informational')
+    .map((c) => [c.theme, c.id, c.target, c.ratio.toFixed(2)]);
+
+  const rampRows = night.ramps.neutral.map((s, i) => [
+    i, lchL(night, i), swatch(hexOf(night.ramps.neutral[i].color)), swatch(hexOf(night.ramps.brand[i].color)),
+    swatch(hexOf(tide.ramps.neutral[i].color)), swatch(hexOf(tide.ramps.brand[i].color)),
+  ]);
+
+  const grounds = [night, tide].map((t) => t.tokens.data.surface.$value);
+  const catRows = Object.keys(night.tokens.data.cat).map((k) => [
+    `\`data-cat-${k}\``, `${Math.round(night.palette.hues[k - 1])}°`,
+    swatch(night.tokens.data.cat[k].$value), night.checks.find((c) => c.id === `data-cat-${k} on data-surface`).ratio.toFixed(2),
+    swatch(tide.tokens.data.cat[k].$value), tide.checks.find((c) => c.id === `data-cat-${k} on data-surface`).ratio.toFixed(2),
+  ]);
+
+  const views = ['normal', 'protanopia', 'deuteranopia', 'tritanopia'];
+  const closest = (t, v) => {
+    const p = t.palette.pairs.reduce((a, b) => (b[v] < a[v] ? b : a));
+    return `${p.a}–${p.b}`;
+  };
+  const cvdRows = views.map((v) => [
+    v, night.palette.thresholds[v].toFixed(2),
+    night.palette.minByView[v].toFixed(3), closest(night, v), tide.palette.minByView[v].toFixed(3), closest(tide, v),
+    night.palette.minByView[v] >= night.palette.thresholds[v] && tide.palette.minByView[v] >= tide.palette.thresholds[v] ? 'pass' : 'FAIL',
+  ]);
+  const changeRows = views.map((v) => [
+    v, night.palette.change.byView[v].toFixed(3), tide.palette.change.byView[v].toFixed(3),
+  ]);
+  const seqDivRows = [
+    ['Sequential, smallest step between neighbours', Math.min(...night.palette.seqSteps).toFixed(3), Math.min(...tide.palette.seqSteps).toFixed(3), (2 * night.palette.jnd).toFixed(2)],
+    ['Diverging, smallest step between neighbours', Math.min(...night.palette.divSteps).toFixed(3), Math.min(...tide.palette.divSteps).toFixed(3), (2 * night.palette.jnd).toFixed(2)],
+    ['Diverging, outer cool vs outer warm, worst view', Math.min(...Object.values(night.palette.divAcross)).toFixed(3), Math.min(...Object.values(tide.palette.divAcross)).toFixed(3), (4 * night.palette.jnd).toFixed(2)],
+  ];
+  const zoneRows = night.zoneRows.map((r, i) => [
+    r.name, `${r.hue.toFixed(1)}° / ${tide.zoneRows[i].hue.toFixed(1)}°`,
+    `${r.distancePositive}° / ${tide.zoneRows[i].distancePositive}°`, `${r.distanceNegative}° / ${tide.zoneRows[i].distanceNegative}°`,
+  ]);
+
+  return {
+    'role-table': table(['Token', 'night', 'tidewater'], roleRows),
+    'contrast-table': table(['Pair (worst surface)', 'Target', 'night', 'tidewater', 'Result'], contrastRows),
+    'contrast-count': `night: ${checkCount(night)}; tidewater: ${checkCount(tide)}.`,
+    'contrast-info': table(['Theme', 'Pair (reported only)', 'Guide ratio', 'Measured'], info),
+    'ramp-table': table(['Step i', 'L(i)', 'night neutral', 'night brand', 'tidewater neutral', 'tidewater brand'], rampRows),
+    'cat-table': table(['Token', 'Hue (both themes)', 'night', 'vs ground', 'tidewater', 'vs ground'], catRows),
+    'cat-line-table': table(['View', 'Required', 'night min', 'tidewater min', 'Result'], views.map((v) => [
+      v, night.palette.thresholds[v].toFixed(2), night.palette.lineMinByView[v].toFixed(3), tide.palette.lineMinByView[v].toFixed(3),
+      night.palette.lineMinByView[v] >= night.palette.thresholds[v] && tide.palette.lineMinByView[v] >= tide.palette.thresholds[v] ? 'pass' : 'FAIL',
+    ])),
+    'cat-hue-separation': `${Math.round(Math.min(night.palette.hueSeparation, tide.palette.hueSeparation))}°`,
+    'cvd-table': table(['View', 'Required', 'night min', 'closest pair', 'tidewater min', 'closest pair', 'Result'], cvdRows),
+    'change-table': table(['View', 'night', 'tidewater'], changeRows),
+    'seqdiv-table': table(['Measure', 'night', 'tidewater', 'Required'], seqDivRows),
+    'zone-table': table(['Hue', 'night / tidewater', 'Distance to positive', 'Distance to negative'], zoneRows),
+    'ground-values': `night \`${grounds[0]}\`, tidewater \`${grounds[1]}\``,
+  };
+}
+import { formatHex, converter } from 'culori';
+const hexOf = (c) => formatHex(c);
+const lchL = (t, i) => converter('oklch')(t.ramps.neutral[i].color).l.toFixed(3);

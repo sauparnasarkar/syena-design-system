@@ -1,0 +1,48 @@
+{
+  "$description": "The words a token name may be built from. A token path is a category followed by elements; every element must be listed under its category, or be a number where the category allows numbers. The allowlist check reads this file.",
+  "prefix": "syn",
+  "joiner": "-",
+  "categories": {
+    "color": {
+      "elements": [
+        "surface", "base", "raised", "sunken", "overlay", "inverse",
+        "text", "primary", "secondary", "muted", "disabled", "on-accent", "link",
+        "border", "subtle", "default", "emphasis",
+        "accent", "fill", "hover", "active", "tint",
+        "signal", "positive", "negative", "caution", "info",
+        "focus-ring", "shadow"
+      ]
+    },
+    "data": {
+      "numbers": true,
+      "elements": [
+        "surface", "text", "text-muted", "gridline", "ink-dark", "ink-light", "annotation", "uncertainty", "no-data", "other",
+        "cat", "seq", "div", "neg", "pos", "mid", "change", "decrease", "increase"
+      ]
+    },
+    "type": {
+      "elements": [
+        "display", "title-lg", "title-md", "title-sm", "text-lg", "text-md", "text-sm",
+        "caption", "overline", "figure-lg", "figure-md", "figure-sm",
+        "size", "line", "tracking", "weight", "family"
+      ]
+    },
+    "family": { "elements": ["ui", "figure"] },
+    "figure": { "elements": ["size-adjust", "feature-settings"] },
+    "space": { "numbers": true, "elements": [] },
+    "radius": { "elements": ["control", "card", "pill"] },
+    "layout": {
+      "elements": [
+        "control-height", "control-height-sm", "control-height-touch", "rail-width-collapsed", "rail-width-expanded",
+        "bar-height", "gutter", "module-min", "stat-min", "field-min", "content-max", "border-hairline", "focus-ring-width"
+      ]
+    },
+    "elevation": { "numbers": true, "elements": [] },
+    "motion": { "elements": ["fast", "base", "slow"] },
+    "easing": { "elements": ["balanced", "emphasis"] },
+    "breakpoint": { "elements": ["compact", "regular", "wide"] },
+    "icon": { "elements": ["small", "medium", "large"] },
+    "opacity": { "elements": ["band", "projection", "dim"] },
+    "layer": { "elements": ["base", "sticky", "rail", "overlay", "modal"] }
+  }
+}

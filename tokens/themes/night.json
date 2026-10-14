@@ -1,0 +1,308 @@
+{
+  "color": {
+    "surface": {
+      "base": {
+        "$type": "color",
+        "$value": "#121e35"
+      },
+      "raised": {
+        "$type": "color",
+        "$value": "#1e2f52"
+      },
+      "sunken": {
+        "$type": "color",
+        "$value": "#0d1930"
+      },
+      "overlay": {
+        "$type": "color",
+        "$value": "#25375a"
+      },
+      "inverse": {
+        "$type": "color",
+        "$value": "#d7e0f0"
+      }
+    },
+    "text": {
+      "primary": {
+        "$type": "color",
+        "$value": "#f9fbff"
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": "#d7e0f0"
+      },
+      "muted": {
+        "$type": "color",
+        "$value": "#b4c3df"
+      },
+      "disabled": {
+        "$type": "color",
+        "$value": "#44536d"
+      },
+      "on-accent": {
+        "$type": "color",
+        "$value": "#01061b"
+      },
+      "inverse": {
+        "$type": "color",
+        "$value": "#121e35"
+      },
+      "link": {
+        "$type": "color",
+        "$value": "#41accd"
+      }
+    },
+    "border": {
+      "subtle": {
+        "$type": "color",
+        "$value": "#1c2d50"
+      },
+      "default": {
+        "$type": "color",
+        "$value": "#2c3e63"
+      },
+      "emphasis": {
+        "$type": "color",
+        "$value": "#6c81ab"
+      }
+    },
+    "accent": {
+      "fill": {
+        "$type": "color",
+        "$value": "#2d9cbd"
+      },
+      "hover": {
+        "$type": "color",
+        "$value": "#39a5c7"
+      },
+      "active": {
+        "$type": "color",
+        "$value": "#45afd1"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#41accd"
+      },
+      "tint": {
+        "$type": "color",
+        "$value": "#002c39"
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": "#8485cd"
+      }
+    },
+    "signal": {
+      "positive": {
+        "fill": {
+          "$type": "color",
+          "$value": "#3bbd8e"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "#3bbd8e"
+        },
+        "tint": {
+          "$type": "color",
+          "$value": "#003020"
+        }
+      },
+      "negative": {
+        "fill": {
+          "$type": "color",
+          "$value": "#e4677d"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "#f7788d"
+        },
+        "tint": {
+          "$type": "color",
+          "$value": "#45141e"
+        }
+      },
+      "caution": {
+        "fill": {
+          "$type": "color",
+          "$value": "#d9a83c"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "#d9a83c"
+        },
+        "tint": {
+          "$type": "color",
+          "$value": "#342400"
+        }
+      },
+      "info": {
+        "fill": {
+          "$type": "color",
+          "$value": "#2d9cbd"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "#41accd"
+        },
+        "tint": {
+          "$type": "color",
+          "$value": "#002c39"
+        }
+      }
+    },
+    "focus-ring": {
+      "$type": "color",
+      "$value": "#2d9cbd"
+    },
+    "shadow": {
+      "$type": "color",
+      "$value": "#01071c"
+    }
+  },
+  "data": {
+    "surface": {
+      "$type": "color",
+      "$value": "#09152b"
+    },
+    "text": {
+      "$type": "color",
+      "$value": "#90a2bf"
+    },
+    "text-muted": {
+      "$type": "color",
+      "$value": "#6f809c"
+    },
+    "gridline": {
+      "$type": "color",
+      "$value": "#314059"
+    },
+    "ink-dark": {
+      "$type": "color",
+      "$value": "#01061b"
+    },
+    "ink-light": {
+      "$type": "color",
+      "$value": "#f9fbff"
+    },
+    "annotation": {
+      "$type": "color",
+      "$value": "#44b0d2"
+    },
+    "uncertainty": {
+      "$type": "color",
+      "$value": "#90a2bf3b"
+    },
+    "no-data": {
+      "$type": "color",
+      "$value": "#636363"
+    },
+    "other": {
+      "$type": "color",
+      "$value": "#777f8d"
+    },
+    "cat": {
+      "1": {
+        "$type": "color",
+        "$value": "#0096bd"
+      },
+      "2": {
+        "$type": "color",
+        "$value": "#ffb53b"
+      },
+      "3": {
+        "$type": "color",
+        "$value": "#efa7f5"
+      },
+      "4": {
+        "$type": "color",
+        "$value": "#8093ea"
+      },
+      "5": {
+        "$type": "color",
+        "$value": "#7f7c00"
+      },
+      "6": {
+        "$type": "color",
+        "$value": "#057bcf"
+      },
+      "7": {
+        "$type": "color",
+        "$value": "#b999ff"
+      },
+      "8": {
+        "$type": "color",
+        "$value": "#bc9500"
+      }
+    },
+    "seq": {
+      "1": {
+        "$type": "color",
+        "$value": "#006c86"
+      },
+      "2": {
+        "$type": "color",
+        "$value": "#0080ae"
+      },
+      "3": {
+        "$type": "color",
+        "$value": "#3090d0"
+      },
+      "4": {
+        "$type": "color",
+        "$value": "#5ea1ec"
+      },
+      "5": {
+        "$type": "color",
+        "$value": "#89b2ff"
+      },
+      "6": {
+        "$type": "color",
+        "$value": "#b6c6ff"
+      },
+      "7": {
+        "$type": "color",
+        "$value": "#d9dbff"
+      }
+    },
+    "div": {
+      "mid": {
+        "$type": "color",
+        "$value": "#6f809c"
+      },
+      "pos-1": {
+        "$type": "color",
+        "$value": "#b49784"
+      },
+      "pos-2": {
+        "$type": "color",
+        "$value": "#e9b087"
+      },
+      "pos-3": {
+        "$type": "color",
+        "$value": "#ffd5b8"
+      },
+      "neg-3": {
+        "$type": "color",
+        "$value": "#aee9ff"
+      },
+      "neg-2": {
+        "$type": "color",
+        "$value": "#7ccbe6"
+      },
+      "neg-1": {
+        "$type": "color",
+        "$value": "#81a4b2"
+      }
+    },
+    "change": {
+      "decrease": {
+        "$type": "color",
+        "$value": "#41e4ab"
+      },
+      "increase": {
+        "$type": "color",
+        "$value": "#c14860"
+      }
+    }
+  }
+}
