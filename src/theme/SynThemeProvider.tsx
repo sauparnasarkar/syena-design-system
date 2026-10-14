@@ -133,3 +133,21 @@ export function useResolvedToken(name: string) {
     () => '',
   );
 }
+
+/**
+ * Several resolved tokens at once, as one object that changes only when a value does. Pass a
+ * module-level array so the names are stable.
+ */
+export function useResolvedTokens<const Names extends readonly string[]>(names: Names) {
+  const { scope, subscribe } = useSynTheme();
+  const snapshot = useSyncExternalStore(
+    subscribe,
+    () => (scope ? JSON.stringify(names.map((n) => resolveToken(n, scope))) : ''),
+    () => '',
+  );
+  return useMemo(() => {
+    if (!snapshot) return null;
+    const values = JSON.parse(snapshot) as string[];
+    return Object.fromEntries(names.map((n, i) => [n, values[i]])) as { [K in Names[number]]: string };
+  }, [snapshot, names]);
+}

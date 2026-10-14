@@ -85,13 +85,24 @@ export function checkClasses(cssFiles, utilities, { built }) {
   return problems;
 }
 
-/** data-* attributes: only data-syn-*. */
+/** data-* attributes: only data-syn-*. Looks where an attribute can appear: JSX, selectors, setAttribute and dataset. */
 export function checkDataAttributes(files, thirdParty = []) {
   const problems = [];
+  const patterns = [
+    /(?<=\s)(data-[a-z][a-z0-9-]*)(?=\s*=|\s|\/|>|\})/g,
+    /\[(data-[a-z][a-z0-9-]*)/g,
+    /(?:setAttribute|getAttribute|hasAttribute|removeAttribute)\(\s*['"](data-[a-z][a-z0-9-]*)/g,
+  ];
   for (const { path, text } of files) {
-    for (const m of text.matchAll(/(?<![-\w])data-[a-z][a-z0-9-]*/g)) {
-      if (m[0].startsWith('data-syn-') || thirdParty.includes(m[0])) continue;
-      problems.push(`${path}: attribute ${m[0]} is not data-syn-*`);
+    for (const re of patterns) {
+      for (const m of text.matchAll(re)) {
+        const name = m[1];
+        if (name.startsWith('data-syn-') || thirdParty.includes(name)) continue;
+        problems.push(`${path}: attribute ${name} is not data-syn-*`);
+      }
+    }
+    for (const m of text.matchAll(/dataset\.([A-Za-z]+)/g)) {
+      if (!m[1].startsWith('syn')) problems.push(`${path}: dataset.${m[1]} is not data-syn-*`);
     }
   }
   return problems;

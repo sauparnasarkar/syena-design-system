@@ -1,5 +1,6 @@
 import type { Preview } from '@storybook/react-vite';
-import { createElement, useLayoutEffect } from 'react';
+import { createElement } from 'react';
+import { SynThemeProvider } from '../src/theme/SynThemeProvider';
 import '@fontsource/poppins/latin-400.css';
 import '@fontsource/poppins/latin-500.css';
 import '@fontsource/poppins/latin-600.css';
@@ -20,10 +21,7 @@ const preview: Preview = {
   decorators: [
     (Story, context) => {
       const theme = (context.globals.theme ?? 'night') as ThemeName;
-      useLayoutEffect(() => {
-        document.documentElement.setAttribute('data-syn-theme', theme);
-      }, [theme]);
-      return createElement('div', { 'data-syn-theme': theme }, createElement(Story));
+      return createElement(SynThemeProvider, { theme, storageKey: null }, createElement(Story));
     },
   ],
   parameters: {
