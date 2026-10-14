@@ -1428,3 +1428,259 @@ with named values; there are no colour-named variants.
   a theme switch never shows stale values.
 - **Accessibility.** The provider follows the system preference when no choice is stored,
   and exposes the choice as a labelled control.
+
+---
+
+## 6. Chart and table specifications
+
+Charts and tables are the product. Both are themed from tokens (§3) and specified here for
+anatomy, states and behaviour. The chart library and the grid library are implementation
+details; the specifications describe what the reader sees.
+
+Serves principles 1.1 (evidence stays legible), 1.2 (honest uncertainty) and 1.4 (colour
+belongs to the data).
+
+### 6.1 Charts
+
+#### Panel and text
+
+- A chart sits on `data-surface`, inside a card (`ChartCard`, §5.5), with padding
+  `space(3)` and `radius-card`. The title and support text belong to the card header, above
+  the panel; the panel holds only the plot, legend and axis text.
+- Tick labels and numbers in tooltips use the figure face (tabular, lining) at `caption`
+  size in `data-text-muted`; axis titles use the UI face at `caption` in `data-text-muted`;
+  direct series labels use `text-sm` in the series colour's text-safe variant (the series
+  colour if it reaches 4.5:1, otherwise `data-text`).
+- Every axis title states the unit written out, and where relevant the baseline
+  ("°C above 1850 to 1900").
+- Numbers use thousands separators and a fixed number of decimals per axis. Minus signs are
+  the true minus character.
+
+#### Marks
+
+- Lines are `w` wide (table below). Observed series are solid; projected series are dashed
+  with the pattern below and continue from the last observation without a gap.
+- Bars have `radius-control / 2` top corners, no outline, and a `w` gap between neighbours.
+  Bar and area charts start at zero; line charts may start elsewhere, and then the axis
+  shows a break mark at the baseline.
+- Projected (dashed) series use the colours of the first four slots, which are validated as
+  thin dashed lines (§3.6). A chart with more than four projected series draws the rest as
+  solid lines with markers and direct labels.
+- Series colours are taken in order from `data-cat-1` onward. A series that means a
+  particular thing (observed temperature, the world total) keeps its colour across a view.
+- Markers appear on hover, on keyboard focus, and permanently when the spacing between
+  points is large enough.
+- Missing values leave a gap in lines and are drawn as hatched `data-no-data` in bars and
+  maps; they are never zero and never interpolated.
+
+<!-- generated:chart-table -->
+| Quantity | Formula | Value |
+|---|---|---|
+| Stroke width `w` | `focus-ring-width` | 2 px |
+| Dash pattern for projections | (3w, 2w) | 6 px on, 4 px off |
+| Marker diameter | 3w | 6 px |
+| Markers appear when point spacing is at least | 9w | 18 px |
+| Hatch stripe spacing for missing data | 3w | 6 px |
+| Band opacity `α` | τ⁻⁸ | 0.233 |
+| Nested bands, innermost to outermost | α · τ⁻ᵏ, k = 0, 1, 2 | 0.233, 0.194, 0.162 |
+| Opacity of series that are not hovered | τ⁻⁵ | 0.402 |
+| Default chart height | `module-min` · σ⁻¹ | 314 px |
+| Tooltip offset from the pointer | `space(3)` | 10 px |
+<!-- /generated:chart-table -->
+
+#### Legend
+
+- Placed above the plot, left-aligned, in one row that wraps. Each entry is a key that shows
+  the series' real mark (a short solid or dashed line, a bar swatch, a marker) and the name
+  in `text-sm`.
+- With four or fewer series, series are also labelled directly at the end of their line, so
+  the legend is a fallback and not the only carrier of identity.
+- Entries are toggle buttons (`aria-pressed`): activating one hides or shows the series; the
+  last visible series cannot be hidden.
+- Beyond eight series, the remainder are grouped as one *Other* entry in `data-other`.
+- A legend entry exists for every uncertainty band and for the projection region.
+
+#### Tooltip
+
+- Unified across series at the hovered x position. Surface `surface-overlay`, boundary
+  `border-default`, `elevation-2`, `radius-card`, padding `space(2)`.
+- Header: the x value with its period (`text-sm`, `text-primary`). Rows: key, series name,
+  value with unit in the figure face. Rows are ordered as the series are drawn.
+- Projected values carry the word *projection*. A band adds a row *66% range: low to high*.
+  A missing value reads *No data*.
+- Follows the pointer at the offset below and flips to stay inside the panel. On keyboard
+  focus it appears at the focused point.
+- Dismisses on `Escape`, pointer leave or focus leave; never traps focus.
+
+#### Label placement
+
+Direct labels, annotation labels and axis labels share one collision rule, applied in this
+order:
+
+1. A label stays inside the chart. Series-end labels sit in a margin reserved on the right,
+   sized to the longest label; annotation labels sit in a band above the plot.
+2. Labels never overlap each other or tick labels. Annotation labels are placed in rows from
+   the top of the band; a label that would overlap one already placed, with a margin of
+   `space(2)`, moves down one row, and the plot starts below the last row used.
+3. End labels are ordered by position and kept at least one line height apart.
+4. A label never sits on the axis: the nearest distance to the tick row is one `text-sm`
+   line.
+5. When the chart is too narrow for the margin (under about 520 px), series-end labels are
+   dropped and the legend carries identity.
+
+#### Annotations
+
+- Reference lines (a target year, a baseline) use `data-annotation`, one `w` wide, dotted;
+  the label sits at the top in `text-sm` and must not overlap data: it moves along the line
+  to the nearest clear spot.
+- Callouts are a label with a leader line to a point; at most three annotations are shown by
+  default, the rest appear on request.
+- Diverging charts draw the baseline as a solid `data-annotation` line and print its value.
+- An annotation is always text first: the same information is available in the chart's text
+  alternative.
+
+#### Uncertainty
+
+- A projection region begins at the last observation: a vertical `data-uncertainty` wash
+  at half the band opacity from that point to the right, with the label *Projection* at the
+  top.
+- A range is a filled band in the series colour at the band opacity, with its edges drawn
+  as hairlines in the series colour. Nested ranges (for example 66% inside 90%) use the
+  nested opacities, the widest range lightest.
+- A band is never drawn without a legend entry that names its interval and its source.
+- Scenario sets show scenarios as lines in series colours with the shared band behind them
+  in `data-uncertainty`; the scenario name is a direct label.
+
+#### Interaction
+
+- Hovering a series or its legend entry reduces the other series to the dimmed opacity.
+- Drag selection zooms on the x axis; a *Reset* button appears while zoomed. Zoom is also
+  available with the keyboard (`+`, `-`, arrow keys) when the plot has focus.
+- A year animation (`animationFrame`) steps with `motion-slow` and shows the year as text;
+  under reduced motion it jumps and does not play.
+- The first render fades in over `motion-base`; no other entrance animation.
+
+#### States
+
+| State | Treatment |
+|---|---|
+| Loading | Plot area filled with `data-gridline`-coloured placeholder bars; `aria-busy` |
+| Empty | A message in `data-text` that says why there is nothing to show and what to change |
+| Error | An inline alert on the panel with a retry action |
+| Stale | The as-of date turns `signal-caution-text` with the word *stale* when the data is older than its stated update interval |
+
+#### Text alternative and table view
+
+- Every chart has an `ariaLabel` that states what is plotted, the unit, the period and the
+  headline reading in one sentence. The plot is exposed as an image with that label and is
+  described by the card footer.
+- Every chart offers *View as table* in the card actions; it shows the plotted values in a
+  `Table` with the units in the headers.
+- With keyboard focus on the plot, left and right arrows move between points and the
+  tooltip follows; up and down arrows move between series.
+
+#### Footer
+
+- Every chart card ends with a footer in `caption` and `text-muted`: source name, the
+  period shown, the as-of date, and a link to the methodology strip (§4). A chart without a
+  source is not valid.
+
+#### Theme mapping for the plotting library
+
+| Chart element | Token |
+|---|---|
+| Paper | transparent |
+| Plot background | `data-surface` |
+| Colour sequence | `data-cat-1` to `data-cat-8` |
+| Sequential scale | `data-seq-1` to `data-seq-7` |
+| Diverging scale | `data-div-neg-3` to `data-div-pos-3` |
+| Font, ticks | figure face, `data-text-muted` |
+| Font, titles | UI face, `data-text-muted` |
+| Gridlines and axis lines | `data-gridline` |
+| Hover label | `surface-overlay`, `text-primary`, `border-default` |
+| Reference line | `data-annotation` |
+
+Values are read from the resolved token values (§5.7), so that charts follow the theme
+without a reload.
+
+### 6.2 Tables
+
+#### Density and type
+
+- Row height is `control-height` by default and `control-height-sm` for `size="small"`;
+  both become `control-height-touch` below `bp-compact`.
+- Cell text is `text-sm`. Header text is `text-sm` at weight 600 in `text-muted`; the unit
+  under a header is `caption` in `text-muted`.
+- Numeric cells are set in the figure face, right-aligned, with the same number of decimals
+  down a column. Text cells are left-aligned. Dates are left-aligned in the figure face.
+- Units live in the header, not in every cell.
+
+#### Header hierarchy
+
+1. *Group header* (optional): `overline`, spans its columns, with a `border-default`
+   underline across the span.
+2. *Column header*: name in `text-sm` semibold, unit beneath in `caption`.
+3. *Sort control*: the whole column header is a button; the current sort column shows a
+   direction glyph and `text-primary`.
+
+The header row is sticky at the top of the table's scroll region on `surface-sunken`, with a
+`border-default` bottom edge. The first column is sticky horizontally and gets a
+`border-subtle` right edge and, while content scrolls beneath it, `elevation-1`.
+
+#### Rows and states
+
+| State | Treatment |
+|---|---|
+| Default | `surface-raised`, `border-subtle` bottom edge when row borders are on |
+| Striped (optional) | alternate rows `surface-sunken` |
+| Hover | `surface-sunken` |
+| Selected | `accent-tint` with an inset `accent-fill` bar, `focus-ring-width` wide, at the start edge |
+| Focus | the cell shows the `focus-ring`; the ring is never clipped by the row |
+| Subtotal or total | weight 600 and a `border-default` top edge |
+| Expanded detail | detail row on `surface-sunken`, indented by `space(5)` |
+| Loading | skeleton rows in `border-subtle` |
+| Empty | a row-spanning message that says why and offers the way out ("Clear filters") |
+
+- Change columns show a direction glyph and a signed value, in the signal text colour of the
+  metric's tone; the glyph and sign carry the meaning as well as the colour.
+- Heat cells use the sequential or diverging ramp for fill; the cell text is whichever of
+  `data-text` and the dark ink reaches 4.5:1 on that fill.
+- In-cell bars use `data-cat-1` at the band opacity with the value printed beside them.
+
+#### Behaviour
+
+- Sorting: three-state (ascending, descending, none), announced through `aria-sort`; sorting
+  is stable and ties keep source order.
+- Large tables are virtualised; the row count and the visible range are available to
+  assistive technology.
+- The table scrolls inside its own region (a labelled, focusable scroll container) so the
+  page never scrolls in two directions; at 320 px width the first column stays visible.
+- Copy: selecting cells and copying yields tab-separated values with headers and units.
+
+#### Grid theme mapping
+
+The data grid library is themed through its parameter API, with values read from tokens.
+Parameter names are confirmed when the grid theme is built.
+
+| Grid parameter | Token |
+|---|---|
+| Background | `surface-raised` |
+| Text | `text-secondary` |
+| Header background | `surface-sunken` |
+| Header text | `text-muted` |
+| Row and column borders | `border-subtle` |
+| Accent | `accent-fill` |
+| Row hover | `surface-sunken` |
+| Selected row | `accent-tint` |
+| Fonts | UI face for text, figure face for numeric cells |
+| Font size | `type-text-sm-size` |
+| Row height, header height | `control-height`, `control-height` |
+| Corner radius | `radius-card` |
+
+#### Accessibility
+
+- A table has a caption or an accessible name that says what it holds and the period.
+- Header cells are `th` with `scope`; grouped headers use `colspan` with `scope="colgroup"`.
+- Every interactive cell element has an accessible name that includes the row.
+- At 200 percent zoom the content reflows into the scroll region without loss of the first
+  column or the header.
