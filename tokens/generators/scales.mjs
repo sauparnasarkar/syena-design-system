@@ -13,17 +13,17 @@ export function measureFonts() {
   const poppinsSemi = openSync(require.resolve('@fontsource/poppins/files/poppins-latin-600-normal.woff2'));
   const inter = openSync(require.resolve('@fontsource-variable/inter/files/inter-latin-wght-normal.woff2'));
 
-  const inkTop = (font, ch, variation) => {
+  const inkTop = (font, ch) => {
     // Measured on the default instance; cap height does not vary with weight in either face.
     return font.layout(ch).glyphs[0].bbox.maxY / font.unitsPerEm;
   };
-  const capHeight = (font, variation) => {
+  const capHeight = (font) => {
     const caps = ['H', 'E', 'Z', 'I'];
-    return caps.reduce((s, c) => s + inkTop(font, c, variation), 0) / caps.length;
+    return caps.reduce((s, c) => s + inkTop(font, c), 0) / caps.length;
   };
-  const digitTop = (font, variation) => {
+  const digitTop = (font) => {
     const ds = [...'0123456789'];
-    return ds.reduce((s, c) => s + inkTop(font, c, variation), 0) / ds.length;
+    return ds.reduce((s, c) => s + inkTop(font, c), 0) / ds.length;
   };
   const avgAdvance = (font) => {
     const text = 'abcdefghijklmnopqrstuvwxyz';

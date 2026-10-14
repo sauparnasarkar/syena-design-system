@@ -23,7 +23,7 @@ const preview: Preview = {
       useLayoutEffect(() => {
         document.documentElement.setAttribute('data-syn-theme', theme);
       }, [theme]);
-      return createElement('div', { 'data-syn-theme': theme, className: 'story-root' }, createElement(Story));
+      return createElement('div', { 'data-syn-theme': theme }, createElement(Story));
     },
   ],
   parameters: {

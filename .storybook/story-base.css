@@ -20,7 +20,7 @@ body {
   letter-spacing: var(--syn-type-text-md-tracking);
 }
 
-.story-root {
+:where([data-syn-theme]) {
   min-height: 100vh;
   background: var(--syn-color-surface-base);
   color: var(--syn-color-text-secondary);

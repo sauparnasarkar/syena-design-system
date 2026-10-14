@@ -17,7 +17,7 @@ const summary = (controls: Control[]) => controls.map((c) => (c.kind === 'field'
 export function SpecimenShell({ current, title, purpose, controls, strip, children }: { current: string; title: string; purpose: string; controls: Control[]; strip: string; children: ReactNode }) {
   const compact = useCompact();
   return (
-    <div className={styles.app} data-compact={compact ? 'true' : undefined}>
+    <div className={styles.app} data-syn-compact={compact ? 'true' : undefined}>
       <nav aria-label="Skip links"><a href="#content" className={styles.skip}>Skip to content</a></nav>
       {compact ? (
         <header className={styles.topBar}>
@@ -30,7 +30,7 @@ export function SpecimenShell({ current, title, purpose, controls, strip, childr
         </header>
       ) : (
         <nav aria-label="Primary" className={styles.rail}>
-          <div className={styles.productSlot} data-slot="product-switcher" />
+          <div className={styles.productSlot} data-syn-slot="product-switcher" />
           <div className={styles.brand}>
             <span className={styles.mark} aria-hidden="true" />
             <span className={styles.brandName}>Climate analysis</span>
