@@ -1,0 +1,70 @@
+.figure {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--syn-space-2);
+  font-feature-settings: var(--syn-figure-feature-settings);
+  white-space: nowrap;
+}
+
+.unit {
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+  letter-spacing: var(--syn-type-text-sm-tracking);
+  font-feature-settings: normal;
+  color: var(--syn-color-text-muted);
+}
+
+.srOnly {
+  position: absolute;
+  width: var(--syn-layout-border-hairline);
+  height: var(--syn-layout-border-hairline);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.sm {
+  font: var(--syn-type-figure-sm-weight) var(--syn-type-figure-sm-size) / var(--syn-type-figure-sm-line) var(--syn-type-figure-sm-family);
+  letter-spacing: var(--syn-type-figure-sm-tracking);
+}
+
+.md {
+  font: var(--syn-type-figure-md-weight) var(--syn-type-figure-md-size) / var(--syn-type-figure-md-line) var(--syn-type-figure-md-family);
+  letter-spacing: var(--syn-type-figure-md-tracking);
+}
+
+.lg {
+  font: var(--syn-type-figure-lg-weight) var(--syn-type-figure-lg-size) / var(--syn-type-figure-lg-line) var(--syn-type-figure-lg-family);
+  letter-spacing: var(--syn-type-figure-lg-tracking);
+}
+
+.tonePrimary {
+  color: var(--syn-color-text-primary);
+}
+
+.toneSecondary {
+  color: var(--syn-color-text-secondary);
+}
+
+.toneMuted {
+  color: var(--syn-color-text-muted);
+}
+
+.toneLink {
+  color: var(--syn-color-text-link);
+}
+
+.toneInverse {
+  color: var(--syn-color-text-inverse);
+}
+
+.tonePositive {
+  color: var(--syn-color-signal-positive-text);
+}
+
+.toneNegative {
+  color: var(--syn-color-signal-negative-text);
+}
+
+.toneCaution {
+  color: var(--syn-color-signal-caution-text);
+}

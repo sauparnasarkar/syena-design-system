@@ -1308,10 +1308,12 @@ with named values; there are no colour-named variants.
 
 - **Purpose and props.** A glyph. Props: `name`, `size`, `style`. Sizes `small`, `medium` and
   `large` are the icon sizes of §2.2.
-- **Anatomy.** An SVG on a square grid drawn with a stroke of `focus-ring-width`; colour is
-  `currentColor`. Size is set in CSS from the icon tokens, never in attributes.
+- **Anatomy.** An SVG on a square grid drawn with a stroke of `focus-ring-width` in rendered
+  pixels; colour is `currentColor`. Size comes from the icon tokens. Glyphs come from an
+  open-licensed set and are imported one at a time; consumers use `Icon` by name and never the
+  set directly.
 - **Accessibility.** Decorative by default (`aria-hidden`); an icon that carries meaning
-  takes a `title`.
+  takes a `title`, which becomes its accessible name.
 
 ---
 
@@ -1403,17 +1405,20 @@ with named values; there are no colour-named variants.
 #### Text
 
 - **Purpose and props.** The way application code sets type without raw class names. Props:
-  `as` (element), `role` (a type role: `display`, `title-*`, `text-*`, `caption`,
-  `overline`), `tone` (`primary`, `secondary`, `muted`, `link`, `inverse`, `positive`,
-  `negative`, `caution`).
+  `as` (a text element, `span` by default), `type` (a type role: `display`, `title-*`, `text-*`,
+  `caption`, `overline`; `text-md` by default), `tone` (`primary`, `secondary`, `muted`, `link`,
+  `inverse`, `positive`, `negative`, `caution`; inherited when omitted). The prop is `type` and
+  not `role` so that it never collides with the ARIA `role` attribute, which passes through.
 - **Anatomy.** One element carrying the role's size, line height, tracking, weight and face
   and the tone's colour.
 - **Accessibility.** Does not choose heading levels: `as` is explicit for headings.
 
 #### Figure
 
-- **Purpose and props.** A number set in the figure face. Props: `role` (`figure-sm`,
-  `figure-md`, `figure-lg`), `value`, `unit`, `tone`, `signed`.
+- **Purpose and props.** A number set in the figure face. Props: `size` (`sm`, `md`, `lg`, for
+  the `figure-*` roles), `value` (a number, or text already formatted), `unit`, `unitLabel` (the
+  unit spelled for screen readers), `decimals`, `locale`, `tone`, `signed`. Negative values use
+  the true minus character.
 - **Anatomy.** The value in the figure face with tabular, lining numerals; the unit in
   `text-sm` baseline-aligned after it; a sign shown when `signed`.
 - **Accessibility.** Renders text, not an image; units are spelled so that screen readers

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Glyph } from './glyphs';
+import { Icon } from '../components/Icon/Icon';
 import { useCompact } from './hooks';
 import styles from './Layout.module.css';
 
@@ -21,12 +21,12 @@ export function SpecimenShell({ current, title, purpose, controls, strip, childr
       <nav aria-label="Skip links"><a href="#content" className={styles.skip}>Skip to content</a></nav>
       {compact ? (
         <header className={styles.topBar}>
-          <button type="button" className={styles.barButton} aria-label="Open navigation" aria-expanded="false"><Glyph name="menu" /></button>
+          <button type="button" className={styles.barButton} aria-label="Open navigation" aria-expanded="false"><Icon name="menu" /></button>
           <div className={styles.barTitle}>
             <h1 className={styles.barHeading}>{title}</h1>
             <p className={styles.barSummary}>{summary(controls)}</p>
           </div>
-          <button type="button" className={styles.barButton} aria-label="Open analysis controls" aria-expanded="false"><Glyph name="filters" /></button>
+          <button type="button" className={styles.barButton} aria-label="Open analysis controls" aria-expanded="false"><Icon name="filters" /></button>
         </header>
       ) : (
         <nav aria-label="Primary" className={styles.rail}>
@@ -42,7 +42,7 @@ export function SpecimenShell({ current, title, purpose, controls, strip, childr
                 {g.items.map(([icon, label]) => (
                   <li key={label}>
                     <a href="#content" className={styles.item} aria-current={label === current ? 'page' : undefined}>
-                      <Glyph name={icon} />
+                      <Icon name={icon} />
                       <span>{label}</span>
                     </a>
                   </li>
@@ -52,7 +52,7 @@ export function SpecimenShell({ current, title, purpose, controls, strip, childr
           ))}
           <div className={styles.railFoot}>
             <a href="#content" className={styles.item}>
-              <Glyph name="collapse" />
+              <Icon name="collapse" />
               <span>Collapse</span>
             </a>
           </div>
@@ -72,7 +72,7 @@ export function SpecimenShell({ current, title, purpose, controls, strip, childr
                     <span className={styles.controlLabel}>{c.label}</span>
                     <button type="button" className={styles.field} aria-haspopup="listbox" aria-expanded="false" aria-label={`${c.label}: ${c.value}`}>
                       <span className={styles.fieldText}>{c.value}</span>
-                      <Glyph name="chevron" size="small" />
+                      <Icon name="chevron" size="small" />
                     </button>
                   </div>
                 ) : (

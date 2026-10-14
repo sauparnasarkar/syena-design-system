@@ -1,6 +1,7 @@
-.glyph {
+.icon {
   display: block;
   flex: none;
+  color: currentColor;
 }
 
 .small {
