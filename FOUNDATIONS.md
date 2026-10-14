@@ -49,8 +49,9 @@ Analysts work with many series on one screen. The system is compact by default.
 
 - The base text size and the spacing unit are inputs to the scale formulas (§2), so density
   can be changed in one place by moving the inputs rather than by editing components.
-- Controls have a single compact height and a larger touch height used below the tablet
-  breakpoint; there is no third size.
+- Controls have two heights: the default, and a small height for controls that sit inside
+  tables and toolbars. Below the compact breakpoint both are replaced by one touch height;
+  there is no other size.
 - Tables and chart annotations are designed for scanning: tabular numerals, right-aligned
   figures, restrained row separators (§6).
 - Density never reduces contrast, hit-target size on touch devices, or focus visibility.
@@ -976,3 +977,454 @@ borders `default`, `emphasis`; accent `tint` and `text`; layout `rail-width-*`, 
 | Phone navigation open | Drawer over scrim |
 | Phone analysis controls open | Analysis bar as a sheet |
 | Desktop tidewater | The desktop layout in the light theme |
+
+---
+
+## 5. Component specifications
+
+This section specifies the 29 components of the first product, the hooks and helper that go
+with them, and four new building blocks (`AppShell`, `Text`, `Figure` and the theme
+provider). For each: purpose and public props, anatomy, states, tokens consumed, and
+accessibility. Anatomy is written from the design, not from any existing markup; builders
+choose elements to meet the accessibility notes.
+
+Serves principles 1.3 (analytical density) and 1.6 (accessible by construction).
+
+### 5.1 Conventions that apply to every component
+
+**Tokens only.** Components consume semantic tokens (`--syn-*`). They contain no colour
+literals and no pixel values that are not tokens.
+
+**Control anatomy.** Every field-like control (button, select, field, segmented control)
+shares one box:
+
+- Height `control-height`, or `control-height-sm` when `size="small"`; both become
+  `control-height-touch` below `bp-compact`.
+- Horizontal padding `space(3)` (`space(2)` when small); gap between icon and label
+  `space(2)`.
+- Corner `radius-control`; boundary a `border-hairline` line in `border-emphasis`.
+- Label in `text-md` (`text-sm` when small).
+
+**State vocabulary.** Applied the same way everywhere:
+
+| State | Treatment |
+|---|---|
+| Hover | Fill moves one step toward emphasis: an `accent-hover` fill, or a `surface-sunken` wash on neutral controls |
+| Pressed | `accent-active`, or a `border-emphasis` outline on neutral controls |
+| Focus (keyboard) | `focus-ring` outline, `focus-ring-width` wide, offset by the same width; never removed |
+| Selected | `accent-tint` fill with `accent-text` label and a visible mark that is not colour alone (check, bar or weight) |
+| Disabled | `text-disabled` label, `border-subtle` boundary, no hover; remains in the tab order only if it explains itself |
+| Loading | `aria-busy="true"`; a spinner replaces the leading icon; width does not change |
+| Error | `signal-negative-text` message with an icon, field boundary in `signal-negative-fill`; the message is associated with the field |
+
+**Motion.** State changes use `motion-fast` with `easing-balanced`; panels that move (drawer,
+accordion) use `motion-base` with `easing-emphasis`. All are zero under reduced motion.
+
+**Naming.** Components are named for what they are. Variants that a product needs are props
+with named values; there are no colour-named variants.
+
+---
+
+### 5.2 Shell and navigation
+
+#### AppShell *(new)*
+
+- **Purpose and props.** Lays out the shell (§4). Props: `rail`, `analysisBar`, `children`
+  (the canvas), `strip`, `skipLabel`.
+- **Anatomy.** A two-column layout: rail, then a column of analysis bar, scrolling canvas
+  and strip. Below `bp-compact` the rail is replaced by `TopBar` and a drawer.
+- **States.** Rail expanded or collapsed; drawer open or closed; strip panel open or closed.
+- **Tokens.** Layout `rail-width-*`, `bar-height`, `content-max`; layers `sticky`, `rail`,
+  `overlay`; surfaces `base`, `sunken`.
+- **Accessibility.** Landmarks and order as in §4.3. Provides the skip link.
+
+#### Rail
+
+- **Purpose and props.** Primary navigation. Props: `logo`, `productSwitcher` (an optional
+  slot above the mark, empty by default), `groups`, `footerItems`, `collapsed`,
+  `onCollapsedChange`, `onItemClick`, `current`.
+- **Anatomy.** Optional product-switcher slot, mark, grouped destinations (`SidebarNav`), foot
+  with the collapse control. Search, notifications and a user menu are not part of the shell.
+- **States.** Expanded, collapsed; per destination: default, hover, current, focus.
+- **Tokens.** `surface-sunken`, `border-default`, `accent-tint`, `accent-text`,
+  `text-secondary`, `type-overline-*` for group labels, `layout-rail-width-*`.
+- **Accessibility.** `nav` named *Primary*; destinations are links; collapsed items carry
+  `aria-label` and a tooltip on hover and focus; `aria-current="page"` on the current item.
+
+#### TopBar *(compact widths only)*
+
+- **Purpose and props.** The bar shown below `bp-compact`. Props: `logo`, `title`,
+  `onOpenNavigation`, `onOpenControls`, `actions`.
+- **Anatomy.** Navigation button, view title, analysis-controls button; optional actions.
+  Height `bar-height`; buttons are `control-height-touch` square.
+- **States.** Navigation open; controls open.
+- **Tokens.** `surface-raised`, `border-default`, `text-primary`.
+- **Accessibility.** Buttons have names and `aria-expanded`; the title is not the `h1`
+  (the analysis bar's title is).
+
+#### SidebarNav
+
+- **Purpose and props.** A grouped list of destinations. Props: `groups` (each with a label
+  and items), `footerItems`, `onItemClick`, `open` and `onToggle` for the compact drawer,
+  `hideMobileToggle`, `mobileToggleSide`, `mobileOnlyContent`, `className`.
+- **Anatomy.** Group label, then a list of items: icon, label, optional count badge.
+- **States.** Default, hover, current, focus, collapsed (icon only).
+- **Tokens.** As `Rail`; item height `control-height`.
+- **Accessibility.** One `ul` per group, group label associated by `aria-labelledby`.
+
+#### JumpLinks and scrollToJumpTarget
+
+- **Purpose and props.** In-page navigation between sections of a long view. Props:
+  `items` (id, label), `activeId`. `scrollToJumpTarget(id)` scrolls a section into view
+  below the sticky analysis bar.
+- **Anatomy.** A horizontal list of links in `text-sm`; the active link has an underline of
+  `accent-fill` two focus-ring widths thick and `text-primary` colour.
+- **States.** Default, hover, active section, focus.
+- **Tokens.** `text-muted`, `text-primary`, `accent-fill`, `border-subtle`, `space(3)`.
+- **Accessibility.** `nav` named *On this page*; the active link has `aria-current="location"`.
+  Scrolling uses smooth behaviour only when motion is not reduced, and moves focus to the
+  target's heading so keyboard and screen-reader users arrive there too.
+
+#### BackToTop
+
+- **Purpose and props.** Returns to the top of the canvas after long scrolling. Props:
+  `targetId`, `avoidSelector` (an element it must not overlap, such as the prompt bar).
+- **Anatomy.** A `radius-pill` icon button at the lower right of the canvas, above the
+  strip; appears after one viewport of scrolling.
+- **States.** Hidden, visible, hover, focus.
+- **Tokens.** `surface-overlay`, `border-emphasis`, `elevation-2`, `layer-sticky`.
+- **Accessibility.** A button named *Back to top*; moves focus to `targetId`.
+
+#### Footer
+
+- **Purpose and props.** Page-end information. Props: `copyright`, `links`.
+- **Anatomy.** One line: copyright text and a list of links, in `caption`.
+- **States.** Link default, hover, focus.
+- **Tokens.** `text-muted`, `text-link`, `border-subtle`.
+- **Accessibility.** `footer` landmark; links are real links with visible underlines.
+
+---
+
+### 5.3 Controls
+
+#### Button
+
+- **Purpose and props.** Triggers an action. Props: `variant` (`primary`, `secondary`,
+  `ghost`), `size` (`default`, `small`), `disabled`, `isLoading`, `onClick`, `aria-pressed`
+  for toggle buttons, and the usual button attributes.
+- **Anatomy.** Optional leading icon, label, optional trailing icon. Icon-only buttons
+  require an accessible name.
+- **Variants.** *Primary*: `accent-fill` with `text-on-accent`. *Secondary*: transparent
+  with a `border-emphasis` boundary and `text-primary` label. *Ghost*: no boundary,
+  `accent-text` label, `accent-tint` on hover. One primary button per view region.
+- **States.** The common states (§5.1). Pressed toggle buttons show the selected state.
+- **Tokens.** `accent-*`, `text-on-accent`, `border-emphasis`, `focus-ring`,
+  `control-height*`, `radius-control`.
+- **Accessibility.** A `button` element. While loading, the label remains and the button is
+  `aria-busy`; activation is ignored.
+
+#### Link
+
+- **Purpose and props.** Navigation to another location. Props: `href`, `target`, `rel`.
+  External targets add the external-link icon and `rel="noopener noreferrer"`.
+- **Anatomy.** Text, underlined, in `text-link`; the underline offset is `space(1) / 2`.
+- **States.** Hover thickens the underline; visited is not distinguished; focus ring.
+- **Tokens.** `text-link`, `focus-ring`.
+- **Accessibility.** A real anchor. A link that opens a new tab says so in its name.
+
+#### Select
+
+- **Purpose and props.** Choose one option from a list. Props: `label`, `options`, `value`,
+  `onChange`, `size`, `suppressSearch`, `ariaLabel`, `disabled`.
+- **Anatomy.** Field with the label above, current value and a chevron; a listbox popover
+  with an optional search field above the options (hidden when `suppressSearch` or when
+  there are fewer options than the search threshold of `space(3)` options, that is ten).
+- **States.** Closed, open, option hover, option selected (check mark), disabled, error.
+- **Tokens.** Control anatomy; popover `surface-overlay`, `elevation-2`, `layer-overlay`,
+  `radius-card`; option rows at `control-height`.
+- **Accessibility.** Combobox pattern: `aria-expanded`, `aria-controls`,
+  `aria-activedescendant`; type-ahead; `Escape` closes and returns focus; the label is
+  associated, or `ariaLabel` is required.
+
+#### MultiSelect
+
+- **Purpose and props.** Choose several options. Props: `label`, `options`, `value`,
+  `onChange`, `maxSelected`.
+- **Anatomy.** As `Select`; the field shows the first selections as tags and a count for the
+  rest; options have checkboxes; a footer shows *n of max selected* and a *Clear* action.
+- **States.** As `Select`, plus limit reached: remaining options are disabled and the
+  footer says why.
+- **Tokens.** As `Select`; tags use `accent-tint`.
+- **Accessibility.** Listbox with `aria-multiselectable`; the selection count is announced
+  politely when it changes.
+
+#### SegmentedControl
+
+- **Purpose and props.** Switch between mutually exclusive views of the same data. Props:
+  `items`, `value`, `onChange`, `name`, `size`.
+- **Anatomy.** A joined row of options in one boundary; the selected option has an
+  `accent-tint` fill, `accent-text` label and an inset `accent-fill` bar along its
+  bottom edge.
+- **States.** Each option: default, hover, selected, focus, disabled.
+- **Tokens.** Control anatomy, `accent-tint`, `accent-text`, `accent-fill`.
+- **Accessibility.** Radio group semantics: one tab stop, arrow keys move and select; the
+  group has a name.
+
+#### Radio
+
+- **Purpose and props.** Choose one option from a short, visible set. Props: `name`,
+  `label`, `checked`, `onChange`.
+- **Anatomy.** A circular mark of `space(4)` diameter and a label; the checked mark has a
+  centre dot of half the diameter.
+- **States.** Unchecked, checked, hover, focus, disabled, error.
+- **Tokens.** `border-emphasis`, `accent-fill`, `focus-ring`.
+- **Accessibility.** Native radio input; the label is clickable; groups are in a `fieldset`
+  with a legend.
+
+#### Slider
+
+- **Purpose and props.** Choose one number in a range. Props: `label`, `min`, `max`, `step`,
+  `value`, `onChange`, `showValue`, `showRangeLabels`, `showThumbValue`.
+- **Anatomy.** Label and value above; a track of `space(1)` thickness with the filled part
+  in `accent-fill`; a thumb of `space(5)` diameter; optional min and max labels below and a
+  value bubble above the thumb.
+- **States.** Default, hover, dragging, focus, disabled.
+- **Tokens.** `border-default` (track), `accent-fill`, `surface-raised` (thumb face),
+  `border-emphasis`, `focus-ring`, `type-figure-sm` for the value.
+- **Accessibility.** `input type="range"` semantics: arrow keys step, Page keys jump by ten
+  steps, Home and End go to the ends; value text includes the unit.
+
+#### RangeSlider
+
+- **Purpose and props.** Choose a span. Props: `label`, `min`, `max`, `value` (a pair),
+  `thumbLabels`, `onChange`.
+- **Anatomy.** As `Slider` with two thumbs; the span between them is filled. Thumbs cannot
+  cross.
+- **States.** As `Slider`, per thumb.
+- **Tokens.** As `Slider`.
+- **Accessibility.** Two range inputs sharing a group named by `label`; `thumbLabels` name
+  them (for example *From year*, *To year*).
+
+#### PromptBar
+
+- **Purpose and props.** Free-text question entry for the assistant view. Props: `value`,
+  `onChange`, `onSubmit`, `variant`, `pinned`, `loading`, `ariaLabel`, `placeholder`,
+  `hint`, `aboveContent`, `belowContent`.
+- **Anatomy.** A multi-line field that grows to a maximum of six lines, a submit button, and
+  slots above (suggestions) and below (hint text). *Pinned* sticks it to the bottom of the
+  canvas above the strip.
+- **States.** Empty, filled, focused, loading (submit replaced by a stop control), disabled.
+- **Tokens.** `surface-raised`, `border-emphasis`, `radius-card`, `elevation-2` when
+  pinned, `text-md`.
+- **Accessibility.** A labelled textarea; `Enter` submits and `Shift+Enter` inserts a newline;
+  the hint is associated with `aria-describedby`; loading is announced.
+
+---
+
+### 5.4 Surfaces and feedback
+
+#### Card
+
+- **Purpose and props.** A container for a module. Props: `header`, `withBorder`, `padding`.
+- **Anatomy.** Surface with optional header (`CardHeader`) and body.
+- **States.** Static. Not interactive; use `Tile` for interactive surfaces.
+- **Tokens.** `surface-raised`, `border-default`, `radius-card`, padding `space(4)` by
+  default.
+- **Accessibility.** No role by default; a card that labels a region is a `section` with a
+  heading.
+
+#### CardHeader
+
+- **Purpose and props.** Title block for a card. Props: `title`, `supportText`, plus a
+  heading level.
+- **Anatomy.** Title in `title-sm`, support text in `text-sm` and `text-muted` beneath, an
+  actions slot at the end.
+- **Tokens.** `text-primary`, `text-muted`, `border-subtle` (optional divider).
+- **Accessibility.** The title is a real heading at the level given.
+
+#### Tile
+
+- **Purpose and props.** An interactive card, such as a suggested question. Props:
+  `interactive`, `role`, `tabIndex`, `onClick`, `onKeyDown`.
+- **Anatomy.** As `Card`; interactive tiles show a trailing arrow.
+- **States.** Default, hover (`surface-sunken` wash and `border-emphasis`), focus,
+  pressed.
+- **Tokens.** As `Card`, plus the state tokens.
+- **Accessibility.** An interactive tile is a button or link; Enter and Space activate a
+  button tile.
+
+#### Accordion
+
+- **Purpose and props.** Reveal supporting detail. Props: `items`, `openIds`,
+  `onOpenChange`, `multiple`.
+- **Anatomy.** A stack of rows; each has a header button with a rotating chevron and a
+  panel. Rows are separated by `border-subtle`.
+- **States.** Closed, open, hover, focus.
+- **Tokens.** `text-primary`, `border-subtle`, motion `base` for height.
+- **Accessibility.** Header buttons with `aria-expanded` and `aria-controls`; panels are
+  regions labelled by their header; arrow keys optionally move between headers.
+
+#### Tag
+
+- **Purpose and props.** A short label for a category or status. Props: `color`
+  (`neutral`, `accent`, `positive`, `negative`, `caution`), `size`.
+- **Anatomy.** Text in `caption`, padded `space(1)` by `space(2)`, `radius-control`.
+- **Tokens.** Neutral: `surface-sunken`, `text-secondary`. Coloured: the matching `tint`
+  with the matching `text`.
+- **Accessibility.** Colour is never the only carrier: a tag has text, and signal tags also
+  carry an icon.
+
+#### InlineAlert
+
+- **Purpose and props.** A message inside the flow. Props: `variant` (`default`, `warning`,
+  `error`), `title`, and content.
+- **Anatomy.** Icon, optional title in semibold, message in `text-md`; tinted background
+  and a `space(1)` bar at the start edge in the signal fill.
+- **States.** Static; dismissible alerts add a close button.
+- **Tokens.** `signal-info|caution|negative` `tint`, `text` and `fill`; `radius-control`.
+- **Accessibility.** `role="status"` for default and warning, `role="alert"` for errors;
+  icon and text carry the meaning, not colour.
+
+#### Spinner
+
+- **Purpose and props.** Indeterminate loading. Props: `label`.
+- **Anatomy.** A ring of `space(5)` diameter with a quarter-arc in `accent-fill` over a
+  `border-default` track; rotates once per `motion-slow` times four.
+- **States.** Spinning; under reduced motion a static partial ring with the label shown.
+- **Tokens.** `accent-fill`, `border-default`, `text-muted`.
+- **Accessibility.** `role="status"` with the label as its text (default *Loading*).
+
+#### Progress
+
+- **Purpose and props.** Determinate progress. Props: `value` (0 to 1 or 0 to 100 as
+  documented), `label`.
+- **Anatomy.** Label, a track of `space(2)` thickness and a fill in `accent-fill`;
+  the value is printed as a figure.
+- **Tokens.** `border-default`, `accent-fill`, `type-figure-sm`.
+- **Accessibility.** `role="progressbar"` with `aria-valuenow`, `aria-valuemin`,
+  `aria-valuemax` and a name.
+
+#### Icon
+
+- **Purpose and props.** A glyph. Props: `name`, `size`, `style`. Sizes `small`, `medium` and
+  `large` are the icon sizes of §2.2.
+- **Anatomy.** An SVG on a square grid drawn with a stroke of `focus-ring-width`; colour is
+  `currentColor`. Size is set in CSS from the icon tokens, never in attributes.
+- **Accessibility.** Decorative by default (`aria-hidden`); an icon that carries meaning
+  takes a `title`.
+
+---
+
+### 5.5 Data components
+
+#### KpiStat
+
+- **Purpose and props.** One headline figure with context. Props: `label`, `value`, `delta`,
+  `deltaDirection`, `tone`, `card`.
+- **Anatomy.** Label (`caption`, `text-muted`); value (`figure-md`, `text-primary`) with its
+  unit in `text-sm`; delta line: a direction glyph, the signed change, and the comparison
+  period in `text-sm`. `card` wraps it in a card.
+- **Delta tone.** `tone` is `positive` or `negative`. When it is omitted it is derived from
+  `deltaDirection` and the metric: emissions rising is negative, falling is positive. The delta is always shown with a sign or arrow glyph.
+- **States.** Static; loading shows placeholder bars with `aria-busy`.
+- **Tokens.** `type-figure-*`, `signal-positive|negative-text`, `text-muted`.
+- **Accessibility.** A group named by the label; the delta is written in words for screen
+  readers ("down 2.1 percent from 2022").
+
+#### Table
+
+- **Purpose and props.** A simple, static table for short lists. Props: `columns`, `rows`,
+  `size`, `striped`, `rowBorders`, `withBorder`, `caption`.
+- **Anatomy and states.** As the table specification in §6.2; `Table` is the lightweight
+  variant without sorting or virtualisation.
+- **Accessibility.** Native `table` with `caption`, `th scope`; numeric columns right-aligned
+  and set in the figure face.
+
+#### DataTable
+
+- **Purpose and props.** A sortable, scrollable data grid built on the grid library. Props:
+  `columns`, `rows`.
+- **Anatomy and states.** As §6.2, including the grid theme derived from tokens.
+- **Accessibility.** Grid semantics supplied by the library; header and cell focus styled
+  with `focus-ring`; a visible text alternative describes sorting.
+
+#### Chart
+
+- **Purpose and props.** A themed chart on the plotting library. Props: `series`, `xTitle`,
+  `yTitle`, `y2Title`, `y2TickFormat`, `ariaLabel`, `showLegend`, `height`,
+  `stackedAreaMode`, `barmode`, `orientation`, `referenceX`, `annotations`, `yRange`,
+  `animationFrame`, `outlineLocations`.
+- **Anatomy and states.** As §6.1: plot area on `data-surface`, axes, legend, tooltip,
+  annotations, uncertainty and the source footer.
+- **Accessibility.** `ariaLabel` is required; see §6.1 for the text alternative and the
+  table view.
+
+#### ChartCard
+
+- **Purpose and props.** A `Card` that frames a chart. Props: `title`, `supportText`,
+  `asOf`, `headingLevel`, `actions`, `id`, `expandable`, `className`, and the chart as
+  children.
+- **Anatomy.** `CardHeader` with title and support text; an actions slot (download, view as
+  table, expand); the chart on a `data-surface` panel; a footer line with the as-of date and
+  source.
+- **States.** Collapsed and expanded (`expandable` opens it to the full canvas width and
+  returns focus on close); loading; empty; error.
+- **Tokens.** `surface-raised`, `data-surface`, `data-text-muted`, `radius-card`.
+- **Accessibility.** The title is a heading at `headingLevel`; the expand control has
+  `aria-expanded`; the footer is part of the figure's description.
+
+#### Globe
+
+- **Purpose and props.** A rotating globe coloured by a country-level value. Props:
+  `isoCodes`, `locationNames`, `years`, `values`, `yearIndex`, `colorRange`, `colorScale`,
+  `zLog`, `noDataColor`, `hoverUnit`, `legendTitle`, `noDataLabel`, `ariaLabel`, `autoRotate`,
+  `allowSpinWithReducedMotion`, `rotationPeriodMs`, `blendMs`, `showLabels`, `maxSize`,
+  `fullWidth`, `transparent`, `title`, `caption`.
+- **Anatomy.** The globe on `data-surface`; a legend bar using the sequential or
+  diverging ramp; a hover read-out with name, value and unit; year caption.
+- **States.** Rotating, paused (on hover and focus, or when motion is reduced), loading,
+  no data (hatched, with the no-data label).
+- **Tokens.** `data-seq-*`, `data-div-*`, `data-no-data`, `data-text`.
+- **Accessibility.** Rotation stops under reduced motion unless explicitly allowed; the same
+  values are available as a table; the legend states the unit and baseline.
+
+---
+
+### 5.6 Hooks and helpers
+
+- **`useIsMobile`.** True below `bp-compact`. Updates on resize and orientation change;
+  returns the server-safe default `false` before mount.
+- **`useReducedMotion`.** True when the reader prefers reduced motion; updates when the
+  preference changes. Every animated component consults it.
+- **`scrollToJumpTarget`.** See *JumpLinks*.
+
+### 5.7 New building blocks
+
+#### Text
+
+- **Purpose and props.** The way application code sets type without raw class names. Props:
+  `as` (element), `role` (a type role: `display`, `title-*`, `text-*`, `caption`,
+  `overline`), `tone` (`primary`, `secondary`, `muted`, `link`, `inverse`, `positive`,
+  `negative`, `caution`).
+- **Anatomy.** One element carrying the role's size, line height, tracking, weight and face
+  and the tone's colour.
+- **Accessibility.** Does not choose heading levels: `as` is explicit for headings.
+
+#### Figure
+
+- **Purpose and props.** A number set in the figure face. Props: `role` (`figure-sm`,
+  `figure-md`, `figure-lg`), `value`, `unit`, `tone`, `signed`.
+- **Anatomy.** The value in the figure face with tabular, lining numerals; the unit in
+  `text-sm` baseline-aligned after it; a sign shown when `signed`.
+- **Accessibility.** Renders text, not an image; units are spelled so that screen readers
+  read them.
+
+#### SynThemeProvider
+
+- **Purpose and props.** Sets the active theme. `theme` (`night` or `tidewater`), children.
+  It sets `data-syn-theme` on its wrapper, exposes `useSynTheme()` for the current theme and
+  a setter, and `resolveToken(name)`, which reads the resolved value of a token for code
+  that cannot use CSS variables (chart libraries). `resolveToken` reads after layout so that
+  a theme switch never shows stale values.
+- **Accessibility.** The provider follows the system preference when no choice is stored,
+  and exposes the choice as a labelled control.
