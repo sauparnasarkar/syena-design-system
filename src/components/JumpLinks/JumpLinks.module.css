@@ -1,0 +1,27 @@
+.nav {
+  border-bottom: var(--syn-layout-border-hairline) solid var(--syn-color-border-subtle);
+}
+
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--syn-space-5);
+}
+
+.link {
+  display: block;
+  padding: var(--syn-space-2) 0;
+  border-bottom: var(--syn-layout-focus-ring-width) solid transparent;
+  color: var(--syn-color-text-muted);
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+  text-decoration: none;
+}
+
+.link:hover {
+  color: var(--syn-color-text-primary);
+}
+
+.link[aria-current='location'] {
+  border-bottom-color: var(--syn-color-accent-fill);
+  color: var(--syn-color-text-primary);
+}

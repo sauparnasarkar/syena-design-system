@@ -1,15 +1,4 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { breakpointPx } from '../generated/tokens';
-
-const query = `(max-width: ${breakpointPx.compact}px)`;
-const subscribe = (notify: () => void) => {
-  const m = window.matchMedia(query);
-  m.addEventListener('change', notify);
-  return () => m.removeEventListener('change', notify);
-};
-
-/** True below the compact breakpoint. */
-export const useCompact = () => useSyncExternalStore(subscribe, () => window.matchMedia(query).matches, () => false);
+import { useEffect, useRef, useState } from 'react';
 
 /** Width in pixels of the element the ref is attached to. */
 export function useWidth<T extends HTMLElement>() {

@@ -1,0 +1,98 @@
+.app {
+  display: flex;
+  min-height: 100vh;
+  background: var(--syn-color-surface-base);
+  color: var(--syn-color-text-secondary);
+}
+
+.compact {
+  flex-direction: column;
+}
+
+.column {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+}
+
+.canvas {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--syn-layout-gutter);
+  width: 100%;
+  max-width: var(--syn-layout-content-max);
+  padding: var(--syn-space-5) var(--syn-space-6) var(--syn-space-7);
+}
+
+.canvas:focus {
+  outline: none;
+}
+
+.compact .canvas {
+  padding: var(--syn-space-4) var(--syn-space-3) var(--syn-space-6);
+}
+
+.skip {
+  position: absolute;
+  inset-inline-start: var(--syn-space-3);
+  top: calc(-1 * var(--syn-space-10));
+  z-index: var(--syn-layer-modal);
+  padding: var(--syn-space-2) var(--syn-space-3);
+  border-radius: var(--syn-radius-control);
+  background: var(--syn-color-surface-inverse);
+  color: var(--syn-color-text-inverse);
+  font: var(--syn-type-text-md-weight) var(--syn-type-text-md-size) / var(--syn-type-text-md-line) var(--syn-type-text-md-family);
+}
+
+.skip:focus {
+  top: var(--syn-space-3);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--syn-layer-overlay);
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--syn-color-shadow) 55%, transparent);
+}
+
+.drawer {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: min(100%, var(--syn-layout-rail-width-expanded));
+  overflow-y: auto;
+  background: var(--syn-color-surface-overlay);
+  box-shadow: var(--syn-elevation-3);
+}
+
+.drawer:focus,
+.sheet:focus {
+  outline: none;
+}
+
+.sheet {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  background: var(--syn-color-surface-overlay);
+  box-shadow: var(--syn-elevation-3);
+}
+
+.drawer nav {
+  position: static;
+  width: 100%;
+  height: auto;
+  min-height: 100%;
+  border-inline-end: 0;
+  background: transparent;
+}
