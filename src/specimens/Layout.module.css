@@ -1,0 +1,332 @@
+.app {
+  display: flex;
+  min-height: 100vh;
+  background: var(--syn-color-surface-base);
+  color: var(--syn-color-text-secondary);
+}
+
+.rail {
+  position: sticky;
+  top: 0;
+  z-index: var(--syn-layer-rail);
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--syn-space-4);
+  width: var(--syn-layout-rail-width-expanded);
+  height: 100vh;
+  padding: var(--syn-space-4) var(--syn-space-3);
+  border-right: var(--syn-layout-border-hairline) solid var(--syn-color-border-default);
+  background: var(--syn-color-surface-sunken);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--syn-space-3);
+  padding: 0 var(--syn-space-2);
+  color: var(--syn-color-text-primary);
+}
+
+.mark {
+  width: var(--syn-space-6);
+  height: var(--syn-space-6);
+  border-radius: var(--syn-radius-card);
+  background: var(--syn-color-accent-fill);
+}
+
+.brandName {
+  composes: titleSm from './Type.module.css';
+  font-size: var(--syn-type-text-lg-size);
+}
+
+.groupLabel {
+  composes: overline from './Type.module.css';
+  padding: 0 var(--syn-space-2) var(--syn-space-1);
+  color: var(--syn-color-text-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--syn-space-1);
+}
+
+.item {
+  composes: textMd from './Type.module.css';
+  display: flex;
+  align-items: center;
+  gap: var(--syn-space-3);
+  min-height: var(--syn-layout-control-height);
+  padding: 0 var(--syn-space-2);
+  border-radius: var(--syn-radius-control);
+  color: var(--syn-color-text-secondary);
+  text-decoration: none;
+}
+
+.item[aria-current='page'] {
+  background: var(--syn-color-accent-tint);
+  color: var(--syn-color-accent-text);
+  font-weight: 600;
+}
+
+.railFoot {
+  margin-top: auto;
+}
+
+.column {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+}
+
+.analysis {
+  position: sticky;
+  top: 0;
+  z-index: var(--syn-layer-sticky);
+  display: flex;
+  flex-direction: column;
+  gap: var(--syn-space-3);
+  padding: var(--syn-space-4) var(--syn-space-6) var(--syn-space-3);
+  border-bottom: var(--syn-layout-border-hairline) solid var(--syn-color-border-default);
+  background: var(--syn-color-surface-raised);
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--syn-space-1) var(--syn-space-4);
+}
+
+.title {
+  composes: titleMd from './Type.module.css';
+  color: var(--syn-color-text-primary);
+}
+
+.purpose {
+  composes: textSm from './Type.module.css';
+  color: var(--syn-color-text-muted);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--syn-space-4);
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--syn-space-1);
+}
+
+.controlLabel {
+  composes: caption from './Type.module.css';
+  color: var(--syn-color-text-muted);
+}
+
+.field {
+  composes: textMd from './Type.module.css';
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--syn-space-3);
+  min-width: var(--syn-layout-field-min);
+  height: var(--syn-layout-control-height);
+  white-space: nowrap;
+  padding: 0 var(--syn-space-3);
+  border: var(--syn-layout-border-hairline) solid var(--syn-color-border-emphasis);
+  border-radius: var(--syn-radius-control);
+  background: var(--syn-color-surface-base);
+  color: var(--syn-color-text-primary);
+  cursor: pointer;
+}
+
+.segments {
+  display: inline-flex;
+  height: var(--syn-layout-control-height);
+  border: var(--syn-layout-border-hairline) solid var(--syn-color-border-emphasis);
+  border-radius: var(--syn-radius-control);
+  background: var(--syn-color-surface-base);
+  overflow: hidden;
+}
+
+.segment {
+  composes: textMd from './Type.module.css';
+  display: flex;
+  align-items: center;
+  padding: 0 var(--syn-space-3);
+  color: var(--syn-color-text-secondary);
+}
+
+.segment + .segment {
+  border-left: var(--syn-layout-border-hairline) solid var(--syn-color-border-subtle);
+}
+
+.segment[aria-checked='true'] {
+  background: var(--syn-color-accent-tint);
+  box-shadow: inset 0 calc(-1 * var(--syn-layout-focus-ring-width)) 0 var(--syn-color-accent-fill);
+  color: var(--syn-color-accent-text);
+  font-weight: 600;
+}
+
+.canvas {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--syn-layout-gutter);
+  width: 100%;
+  max-width: var(--syn-layout-content-max);
+  padding: var(--syn-space-5) var(--syn-space-6) var(--syn-space-7);
+}
+
+.strip {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--syn-layer-sticky);
+  border-top: var(--syn-layout-border-hairline) solid var(--syn-color-border-default);
+  background: var(--syn-color-surface-sunken);
+}
+
+.stripLine {
+  composes: caption from './Type.module.css';
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--syn-space-4);
+  min-height: var(--syn-layout-control-height);
+  padding: 0 var(--syn-space-6);
+  color: var(--syn-color-text-muted);
+}
+
+.stripText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stripButton {
+  composes: caption from './Type.module.css';
+  flex: none;
+  padding: var(--syn-space-1) var(--syn-space-2);
+  border: 0;
+  border-radius: var(--syn-radius-control);
+  background: transparent;
+  color: var(--syn-color-text-link);
+  text-decoration: underline;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--syn-layout-module-min)), 1fr));
+  gap: var(--syn-layout-gutter);
+}
+
+.rowWide {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--syn-layout-gutter);
+}
+
+.rowWide > * {
+  min-width: 0;
+}
+
+.rowWide > :first-child {
+  flex: 2 1 calc(2 * var(--syn-layout-module-min));
+}
+
+.rowWide > :last-child {
+  flex: 1 1 var(--syn-layout-module-min);
+}
+
+.skip {
+  position: absolute;
+  left: var(--syn-space-3);
+  top: calc(-1 * var(--syn-space-9));
+  composes: textMd from './Type.module.css';
+  padding: var(--syn-space-2) var(--syn-space-3);
+  border-radius: var(--syn-radius-control);
+  background: var(--syn-color-surface-inverse);
+  color: var(--syn-color-text-inverse);
+}
+
+.skip:focus {
+  top: var(--syn-space-3);
+}
+
+.fieldText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.productSlot:empty {
+  display: none;
+}
+
+.productSlot {
+  padding: 0 var(--syn-space-2);
+}
+
+/* Below the compact breakpoint */
+.topBar {
+  position: sticky;
+  top: 0;
+  z-index: var(--syn-layer-sticky);
+  display: flex;
+  align-items: center;
+  gap: var(--syn-space-2);
+  height: var(--syn-layout-bar-height);
+  padding: 0 var(--syn-space-2);
+  border-bottom: var(--syn-layout-border-hairline) solid var(--syn-color-border-default);
+  background: var(--syn-color-surface-raised);
+}
+
+.barButton {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--syn-layout-control-height-touch);
+  height: var(--syn-layout-control-height-touch);
+  padding: 0;
+  border: 0;
+  border-radius: var(--syn-radius-control);
+  background: transparent;
+  color: var(--syn-color-text-primary);
+}
+
+.barTitle {
+  flex: 1;
+  min-width: 0;
+}
+
+.barHeading {
+  composes: textMd from './Type.module.css';
+  color: var(--syn-color-text-primary);
+  font-weight: 600;
+}
+
+.barSummary {
+  composes: caption from './Type.module.css';
+  overflow: hidden;
+  color: var(--syn-color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app[data-compact='true'] {
+  flex-direction: column;
+}
+
+.app[data-compact='true'] .canvas {
+  padding: var(--syn-space-4) var(--syn-space-3) var(--syn-space-6);
+}
+
+.app[data-compact='true'] .stripLine {
+  padding: 0 var(--syn-space-3);
+}

@@ -328,6 +328,8 @@
 
 .compactTitle {
   color: var(--syn-color-text-primary);
+  font-size: var(--syn-type-text-md-size);
+  line-height: var(--syn-type-text-md-line);
   font-weight: 600;
 }
 

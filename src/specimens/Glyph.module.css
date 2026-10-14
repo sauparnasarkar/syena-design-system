@@ -1,0 +1,19 @@
+.glyph {
+  display: block;
+  flex: none;
+}
+
+.small {
+  width: var(--syn-icon-small);
+  height: var(--syn-icon-small);
+}
+
+.medium {
+  width: var(--syn-icon-medium);
+  height: var(--syn-icon-medium);
+}
+
+.large {
+  width: var(--syn-icon-large);
+  height: var(--syn-icon-large);
+}
