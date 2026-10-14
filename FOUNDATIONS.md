@@ -1436,13 +1436,23 @@ with named values; there are no colour-named variants.
 
 #### SynThemeProvider
 
-- **Purpose and props.** Sets the active theme. `theme` (`night` or `tidewater`), children.
-  It sets `data-syn-theme` on its wrapper, exposes `useSynTheme()` for the current theme and
-  a setter, and `resolveToken(name)`, which reads the resolved value of a token for code
-  that cannot use CSS variables (chart libraries). `resolveToken` reads after layout so that
-  a theme switch never shows stale values.
-- **Accessibility.** The provider follows the system preference when no choice is stored,
-  and exposes the choice as a labelled control.
+- **Purpose and props.** Sets the active theme. Props: `theme` (forces `night` or `tidewater`
+  and ignores any stored choice), `defaultChoice` (`system`, `night` or `tidewater`; `system`
+  by default), `storageKey` (where the choice is remembered, `syn-theme` by default, `null` to
+  turn remembering off), `syncDocument` (also set the attribute on the document element, so the
+  page background and portals follow the theme; on by default), `onThemeChange`, and children.
+- **Anatomy.** A wrapper that carries `data-syn-theme` and does not affect layout.
+- **Hooks and helpers.** `useSynTheme()` returns the theme in force, the reader's choice, and
+  `setChoice`. `useResolvedToken(name)` returns the resolved value of a token for code that
+  cannot use CSS variables (chart and grid libraries), and re-reads it after the new theme is in
+  the DOM, so a theme switch never paints the previous theme's value. `resolveToken(name,
+  element)` is the same read for code outside React. Names may be given bare
+  (`color-surface-base`), as a custom property or as `var(...)`.
+- **States.** Choice `system` follows the system colour preference live: dark gives `night` and
+  light gives `tidewater`. A stored choice wins over the system. Blocked storage is tolerated:
+  the choice then lasts for the session.
+- **Accessibility.** `ThemeSwitch` is the labelled control for the choice (System, Night,
+  Tidewater); it is a native select with a visible label.
 
 ---
 
