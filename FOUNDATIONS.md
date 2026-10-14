@@ -876,7 +876,7 @@ Serves principles 1.1 (evidence stays legible) and 1.3 (analytical density).
 **Navigation rail.** Primary navigation only.
 
 - Contents, top to bottom: an optional product-switcher slot (empty by default; a product that
-  belongs to a family fills it); the product mark; destination groups (an `overline` group label
+  belongs to a family fills it); the product mark, **supplied by the consuming app**; destination groups (an `overline` group label
   and a list of destinations, each an icon and a label); a collapse control at the foot.
 - Widths: `rail-width-expanded` and `rail-width-collapsed` (§2.5). The collapsed rail shows
   icons only; each icon has an accessible name and shows its label in a tooltip on hover and
@@ -995,6 +995,14 @@ Serves principles 1.3 (analytical density) and 1.6 (accessible by construction).
 **Tokens only.** Components consume semantic tokens (`--syn-*`). They contain no colour
 literals and no pixel values that are not tokens.
 
+**No brand assets.** The design system ships no logos, product marks or brand artwork. Every
+place that shows a mark (the rail's product mark, the top bar's logo, each product-switcher
+item) takes it from the consuming app through required props: either `src` (an image URL) or
+`node` (an SVG element), together with an accessible name. There is no default mark; omitting
+one is a type error. Stories and specimens use a neutral placeholder mark. Favicons and
+install icons stay in each app. Functional icons (§5.4) are separate and come from the icon
+set.
+
 **Control anatomy.** Every field-like control (button, select, field, segmented control)
 shares one box:
 
@@ -1040,10 +1048,11 @@ with named values; there are no colour-named variants.
 
 #### Rail
 
-- **Purpose and props.** Primary navigation. Props: `logo`, `productSwitcher` (an optional
-  slot above the mark, empty by default), `groups`, `footerItems`, `collapsed`,
+- **Purpose and props.** Primary navigation. Props: `logo` (required: the app's mark as `src`
+  or `node`, plus a `name`; no default), `productSwitcher` (an optional slot above the mark,
+  empty by default; its items each take their own required mark and name), `groups`, `footerItems`, `collapsed`,
   `onCollapsedChange`, `onItemClick`, `current`.
-- **Anatomy.** Optional product-switcher slot, mark, grouped destinations (`SidebarNav`), foot
+- **Anatomy.** Optional product-switcher slot, the app-supplied mark, grouped destinations (`SidebarNav`), foot
   with the collapse control. Search, notifications and a user menu are not part of the shell.
 - **States.** Expanded, collapsed; per destination: default, hover, current, focus.
 - **Tokens.** `surface-sunken`, `border-default`, `accent-tint`, `accent-text`,
@@ -1053,7 +1062,8 @@ with named values; there are no colour-named variants.
 
 #### TopBar *(compact widths only)*
 
-- **Purpose and props.** The bar shown below `bp-compact`. Props: `logo`, `title`,
+- **Purpose and props.** The bar shown below `bp-compact`. Props: `logo` (required, as for
+  `Rail`), `title`,
   `onOpenNavigation`, `onOpenControls`, `actions`.
 - **Anatomy.** Navigation button, view title, analysis-controls button; optional actions.
   Height `bar-height`; buttons are `control-height-touch` square.
