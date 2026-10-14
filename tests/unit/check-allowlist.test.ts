@@ -44,6 +44,13 @@ describe('data attributes', () => {
   });
 });
 
+describe('data attributes in other positions', () => {
+  it('flags selectors, setAttribute and dataset, and ignores token names', () => {
+    const text = `a[data-other] { } el.setAttribute('data-more', 'x'); el.dataset.foo; const names = ['data-surface', 'data-cat-1'];`;
+    expect(checkDataAttributes([file('a.ts', text)]).length).toBe(3);
+  });
+});
+
 describe('vocabulary', () => {
   const vocabulary = { categories: { color: { elements: ['text', 'primary'] }, space: { numbers: true, elements: [] } } };
   it('flags undeclared words and accepts numbers where allowed', () => {

@@ -7,6 +7,7 @@ export default defineConfig({
     projects: [
       {
         extends: true,
+        optimizeDeps: { include: ['plotly.js-basic-dist-min'] },
         plugins: [storybookTest({ configDir: '.storybook' })],
         test: {
           name: 'storybook',

@@ -1684,23 +1684,34 @@ The header row is sticky at the top of the table's scroll region on `surface-sun
 
 #### Grid theme mapping
 
-The data grid library is themed through its parameter API, with values read from tokens.
-Parameter names are confirmed when the grid theme is built.
+The data grid library is themed through its parameter API (`themeQuartz.withParams`), fed only
+with resolved token values, converted to the units the grid takes. No grid class is restyled in
+CSS. Numbers that look like sizes are not chosen: row and header height are the control height
+of §2.5, cell padding is a spacing step, and the icon size is the small icon.
 
 | Grid parameter | Token |
 |---|---|
-| Background | `surface-raised` |
-| Text | `text-secondary` |
-| Header background | `surface-sunken` |
-| Header text | `text-muted` |
-| Row and column borders | `border-subtle` |
-| Accent | `accent-fill` |
-| Row hover | `surface-sunken` |
-| Selected row | `accent-tint` |
-| Fonts | UI face for text, figure face for numeric cells |
-| Font size | `type-text-sm-size` |
-| Row height, header height | `control-height`, `control-height` |
-| Corner radius | `radius-card` |
+| `backgroundColor` | `color-surface-raised` |
+| `foregroundColor` | `color-text-secondary` |
+| `headerBackgroundColor`, `chromeBackgroundColor` | `color-surface-sunken` |
+| `headerTextColor` | `color-text-muted` |
+| `headerFontWeight` | `type-title-sm-weight` |
+| `borderColor`, `rowBorder` | `color-border-subtle` |
+| `headerRowBorder`, `pinnedColumnBorder` | `color-border-default` |
+| `accentColor` | `color-accent-fill` |
+| `rowHoverColor` | `color-surface-sunken` |
+| `selectedRowBackgroundColor` | `color-accent-tint` |
+| `focusShadow` | `color-focus-ring`, `layout-focus-ring-width` |
+| `menuBackgroundColor` | `color-surface-overlay` |
+| `fontFamily` | `family-ui` (figure columns set the figure face through the column's cell style) |
+| `fontSize`, `headerFontSize` | `type-text-sm-size` |
+| `rowHeight`, `headerHeight` | `layout-control-height` |
+| `spacing` | `space-2` |
+| `cellHorizontalPadding` | `space-4` |
+| `wrapperBorderRadius` | `radius-card` |
+| `borderRadius` | `radius-control` |
+| `iconSize` | `icon-small` |
+| `rowBorder`, `headerRowBorder`, `pinnedColumnBorder` width | `layout-border-hairline` |
 
 #### Accessibility
 
