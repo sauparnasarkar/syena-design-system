@@ -7,6 +7,7 @@ import { scalesToDtcg } from './emit.mjs';
 import { fillBlocks, scaleBlocks, colourBlocks } from './docs.mjs';
 import { buildTheme, planCategoricalHues } from './themes.mjs';
 import { lch } from './colour.mjs';
+import { writeCss } from './css.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..', '..');
@@ -111,6 +112,8 @@ fillBlocks(join(root, 'FOUNDATIONS.md'), {
     `| Figure size adjustment \`a\` | ${scales.figureFace.sizeAdjustPercent} % |`,
   ].join('\n'),
 });
+writeCss(root, themes.map((t) => ({ name: t.meta.name, polarity: t.meta.polarity })), scales);
+
 if (failures.length) {
   console.error(`validation failed:\n${failures.join('\n')}`);
   process.exit(1);
