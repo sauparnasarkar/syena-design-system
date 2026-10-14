@@ -7,7 +7,6 @@ import { scalesToDtcg } from './emit.mjs';
 import { fillBlocks, scaleBlocks, colourBlocks } from './docs.mjs';
 import { buildTheme, planCategoricalHues } from './themes.mjs';
 import { lch } from './colour.mjs';
-import { writeCss } from './css.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..', '..');
@@ -112,7 +111,12 @@ fillBlocks(join(root, 'FOUNDATIONS.md'), {
     `| Figure size adjustment \`a\` | ${scales.figureFace.sizeAdjustPercent} % |`,
   ].join('\n'),
 });
-writeCss(root, themes.map((t) => ({ name: t.meta.name, polarity: t.meta.polarity })), scales);
+// Contrast-matrix report: every measured pair, its target, ratio and whether it is required.
+const matrix = themes.flatMap((t) => t.checks.map((c) => ({ theme: t.meta.name, pair: c.id, foreground: c.foreground, background: c.background, target: c.target, ratio: c.ratio, required: c.kind === 'required', pass: c.pass })));
+mkdirSync(join(root, 'src', 'generated', 'reports'), { recursive: true });
+writeFileSync(join(root, 'src', 'generated', 'reports', 'contrast-matrix.json'), `${JSON.stringify(matrix, null, 2)}\n`);
+const lowest = themes.map((t) => { const req = matrix.filter((m) => m.theme === t.meta.name && m.required); const low = req.reduce((a, b) => (b.ratio / b.target < a.ratio / a.target ? b : a)); return `${t.meta.name}: ${req.length} required pairs, tightest ${low.pair} ${low.ratio}:1 (needs ${low.target}:1)`; });
+console.log(lowest.join('\n'));
 
 if (failures.length) {
   console.error(`validation failed:\n${failures.join('\n')}`);

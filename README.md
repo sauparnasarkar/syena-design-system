@@ -36,7 +36,7 @@ npm run lint
 npm run check:allowlist
 ```
 
-`npm run tokens` fails if a required contrast, hue-zone or colour-vision check does not hold.
+`npm run tokens` runs in two stages: the generators compute and validate the token JSON (fails if a required contrast, hue-zone or colour-vision check does not hold), then Style Dictionary writes `src/generated/tokens.css` and `tokens.ts`, plus `reports/contrast-matrix.json` and `reports/token-count.json` (fails outside 150 to 300 custom properties).
 `npm run check:allowlist` fails if the source uses a colour literal, a custom property the token
 build does not define, a class that is not a CSS Module class or a declared utility, a `data-*`
 attribute other than `data-syn-*`, or a token word that is not in `tokens/vocabulary.json`.
