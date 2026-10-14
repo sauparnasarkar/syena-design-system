@@ -55,3 +55,13 @@ Baselines are platform specific; create them on the platform that runs the compa
 
 Pull requests name the section of `FOUNDATIONS.md` they implement. Scales are changed by
 changing the formulas and inputs, never by editing generated values.
+
+## Third-party material
+
+| Material | Licence | Use |
+|---|---|---|
+| [Lucide](https://lucide.dev) (`lucide-react`) | ISC. Icons derived from Feather are also under the MIT licence (Cole Bemis, 2013-present). The licence notices ship with the package. | Icon glyphs, wrapped by the `Icon` component and imported one at a time so unused icons are dropped from bundles |
+| Poppins (`@fontsource/poppins`) | SIL Open Font License 1.1 | Interface typeface |
+| Inter (`@fontsource-variable/inter`) | SIL Open Font License 1.1 | Figure typeface |
+
+Components wrap third-party icons; consumers import `Icon`, not the icon package.

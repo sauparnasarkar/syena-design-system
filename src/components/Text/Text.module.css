@@ -1,0 +1,81 @@
+.text {
+  margin: 0;
+}
+
+.display {
+  font: var(--syn-type-display-weight) var(--syn-type-display-size) / var(--syn-type-display-line) var(--syn-type-display-family);
+  letter-spacing: var(--syn-type-display-tracking);
+}
+
+.titleLg {
+  font: var(--syn-type-title-lg-weight) var(--syn-type-title-lg-size) / var(--syn-type-title-lg-line) var(--syn-type-title-lg-family);
+  letter-spacing: var(--syn-type-title-lg-tracking);
+}
+
+.titleMd {
+  font: var(--syn-type-title-md-weight) var(--syn-type-title-md-size) / var(--syn-type-title-md-line) var(--syn-type-title-md-family);
+  letter-spacing: var(--syn-type-title-md-tracking);
+}
+
+.titleSm {
+  font: var(--syn-type-title-sm-weight) var(--syn-type-title-sm-size) / var(--syn-type-title-sm-line) var(--syn-type-title-sm-family);
+  letter-spacing: var(--syn-type-title-sm-tracking);
+}
+
+.textLg {
+  font: var(--syn-type-text-lg-weight) var(--syn-type-text-lg-size) / var(--syn-type-text-lg-line) var(--syn-type-text-lg-family);
+  letter-spacing: var(--syn-type-text-lg-tracking);
+}
+
+.textMd {
+  font: var(--syn-type-text-md-weight) var(--syn-type-text-md-size) / var(--syn-type-text-md-line) var(--syn-type-text-md-family);
+  letter-spacing: var(--syn-type-text-md-tracking);
+}
+
+.textSm {
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+  letter-spacing: var(--syn-type-text-sm-tracking);
+}
+
+.caption {
+  font: var(--syn-type-caption-weight) var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-type-caption-family);
+  letter-spacing: var(--syn-type-caption-tracking);
+}
+
+.overline {
+  font: var(--syn-type-overline-weight) var(--syn-type-overline-size) / var(--syn-type-overline-line) var(--syn-type-overline-family);
+  letter-spacing: var(--syn-type-overline-tracking);
+  text-transform: uppercase;
+}
+
+.tonePrimary {
+  color: var(--syn-color-text-primary);
+}
+
+.toneSecondary {
+  color: var(--syn-color-text-secondary);
+}
+
+.toneMuted {
+  color: var(--syn-color-text-muted);
+}
+
+.toneLink {
+  color: var(--syn-color-text-link);
+}
+
+.toneInverse {
+  color: var(--syn-color-text-inverse);
+}
+
+.tonePositive {
+  color: var(--syn-color-signal-positive-text);
+}
+
+.toneNegative {
+  color: var(--syn-color-signal-negative-text);
+}
+
+.toneCaution {
+  color: var(--syn-color-signal-caution-text);
+}

@@ -2,7 +2,7 @@ import { AnomalyChart, CompositionChart, Fit, HeatGrid, RankingChart, TrendChart
 import { anomaly, fmt, observed, scenarios, signed } from './data';
 import { SpecimenShell, layoutStyles } from './Layout';
 import { Alert, ChartCard, Kpi, Kpis, Tag, partStyles as p } from './Parts';
-import { Glyph } from './glyphs';
+import { Icon } from '../components/Icon/Icon';
 
 const FOOT = 'Source: illustrative values for layout review, not measurements · As of October 2026';
 const STRIP = 'Source: illustrative values for layout review · Period 1990 to 2050 · As of October 2026 · Methodology describes how projections and ranges are produced';
@@ -119,7 +119,7 @@ export function CountryProfile() {
                       {r.values.map((v, i) => <td key={i} className={p.num}>{fmt(v, r.decimals)}</td>)}
                       <td className={`${p.num} ${good ? p.positive : p.negative}`}>
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--syn-space-1)' }}>
-                          <Glyph name={change < 0 ? 'down' : 'up'} size="small" />{signed(change, 1)}%
+                          <Icon name={change < 0 ? 'down' : 'up'} size="small" />{signed(change, 1)}%
                         </span>
                       </td>
                     </tr>
@@ -184,7 +184,7 @@ export function Forecasts() {
                       <th scope="row">{s.name}</th>
                       {[2030, 2040, 2050].map((y) => <td key={y} className={p.num}>{fmt(at(s, y).value, 1)}</td>)}
                       <td className={`${p.num} ${p.positive}`}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--syn-space-1)' }}><Glyph name="down" size="small" />{signed(change, 0)}%</span>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--syn-space-1)' }}><Icon name="down" size="small" />{signed(change, 0)}%</span>
                       </td>
                       <td className={p.num}>{fmt(end.low, 1)} to {fmt(end.high, 1)}</td>
                     </tr>

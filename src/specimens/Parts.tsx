@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Glyph } from './glyphs';
+import { Icon } from '../components/Icon/Icon';
 import styles from './Parts.module.css';
 
 export function Kpi({ label, value, unit, delta, note, direction, tone }: { label: string; value: string; unit: string; delta: string; note: string; direction: 'up' | 'down'; tone: 'positive' | 'negative' | 'neutral' }) {
@@ -12,7 +12,7 @@ export function Kpi({ label, value, unit, delta, note, direction, tone }: { labe
         <span className={styles.kpiUnit}>{unit}</span>
       </span>
       <span className={`${styles.kpiDelta} ${styles[tone]}`}>
-        <Glyph name={direction} size="small" />
+        <Icon name={direction} size="small" />
         <span className={styles.num} aria-hidden="true">{delta}</span>
         <span className={styles.deltaNote} aria-hidden="true">{note}</span>
         <span className={styles.srOnly}>{words}</span>
@@ -47,8 +47,8 @@ export function ChartCard({ title, support, keys, footer, children, headingLevel
           {support ? <p className={styles.cardSupport}>{support}</p> : null}
         </div>
         <div className={styles.actions}>
-          <button type="button" className={styles.iconButton} aria-label={`View ${title} as a table`}><Glyph name="table" size="small" /></button>
-          <button type="button" className={styles.iconButton} aria-label={`Download ${title}`}><Glyph name="download" size="small" /></button>
+          <button type="button" className={styles.iconButton} aria-label={`View ${title} as a table`}><Icon name="table" size="small" /></button>
+          <button type="button" className={styles.iconButton} aria-label={`Download ${title}`}><Icon name="download" size="small" /></button>
         </div>
       </div>
       <div className={styles.panel}>
@@ -69,7 +69,7 @@ export function ChartCard({ title, support, keys, footer, children, headingLevel
 export function Alert({ tone, title, children }: { tone: 'warning' | 'info'; title: string; children: ReactNode }) {
   return (
     <div className={`${styles.alert} ${styles[tone]}`} role="status">
-      <span className={styles.alertIcon}><Glyph name={tone === 'warning' ? 'warning' : 'info'} /></span>
+      <span className={styles.alertIcon}><Icon name={tone === 'warning' ? 'warning' : 'info'} /></span>
       <p><span className={styles.alertTitle}>{title}. </span>{children}</p>
     </div>
   );
