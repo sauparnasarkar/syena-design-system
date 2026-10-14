@@ -1,0 +1,9 @@
+/* One focus ring for every interactive element: visible on keyboard focus, never removed. */
+:focus-visible {
+  outline: var(--syn-layout-focus-ring-width) solid var(--syn-color-focus-ring);
+  outline-offset: var(--syn-layout-focus-ring-width);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}

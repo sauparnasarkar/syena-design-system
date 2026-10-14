@@ -3,7 +3,7 @@ import { createElement, useLayoutEffect } from 'react';
 import '@fontsource/poppins/latin-400.css';
 import '@fontsource/poppins/latin-500.css';
 import '@fontsource/poppins/latin-600.css';
-import '../src/generated/tokens.css';
+import '../src/styles.css';
 import './story-base.css';
 
 const themes = ['night', 'tidewater'] as const;

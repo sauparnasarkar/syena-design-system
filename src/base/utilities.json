@@ -1,0 +1,32 @@
+{
+  "$description": "Utility classes that application code may use. The allowlist check reads this file.",
+  "classes": [
+    "syn-display",
+    "syn-title-lg",
+    "syn-title-md",
+    "syn-title-sm",
+    "syn-text-lg",
+    "syn-text-md",
+    "syn-text-sm",
+    "syn-caption",
+    "syn-overline",
+    "syn-figure-lg",
+    "syn-figure-md",
+    "syn-figure-sm",
+    "syn-numeric",
+    "syn-tone-primary",
+    "syn-tone-secondary",
+    "syn-tone-muted",
+    "syn-tone-link",
+    "syn-tone-inverse",
+    "syn-tone-positive",
+    "syn-tone-negative",
+    "syn-tone-caution",
+    "syn-surface-base",
+    "syn-surface-raised",
+    "syn-surface-sunken",
+    "syn-surface-overlay",
+    "syn-surface-inverse",
+    "syn-visually-hidden"
+  ]
+}

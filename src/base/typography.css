@@ -1,0 +1,83 @@
+/* Element defaults, from the type roles. */
+html {
+  font-size: 100%;
+}
+
+body {
+  background: var(--syn-color-surface-base);
+  color: var(--syn-color-text-secondary);
+  font-family: var(--syn-type-text-md-family);
+  font-size: var(--syn-type-text-md-size);
+  font-weight: var(--syn-type-text-md-weight);
+  line-height: var(--syn-type-text-md-line);
+  letter-spacing: var(--syn-type-text-md-tracking);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--syn-color-text-primary);
+}
+
+h1 {
+  font: var(--syn-type-title-lg-weight) var(--syn-type-title-lg-size) / var(--syn-type-title-lg-line) var(--syn-type-title-lg-family);
+  letter-spacing: var(--syn-type-title-lg-tracking);
+}
+
+h2 {
+  font: var(--syn-type-title-md-weight) var(--syn-type-title-md-size) / var(--syn-type-title-md-line) var(--syn-type-title-md-family);
+  letter-spacing: var(--syn-type-title-md-tracking);
+}
+
+h3 {
+  font: var(--syn-type-title-sm-weight) var(--syn-type-title-sm-size) / var(--syn-type-title-sm-line) var(--syn-type-title-sm-family);
+  letter-spacing: var(--syn-type-title-sm-tracking);
+}
+
+h4,
+h5,
+h6 {
+  font-weight: 600;
+}
+
+small {
+  font-size: var(--syn-type-caption-size);
+  line-height: var(--syn-type-caption-line);
+  letter-spacing: var(--syn-type-caption-tracking);
+}
+
+strong,
+b {
+  font-weight: 600;
+}
+
+a {
+  color: var(--syn-color-text-link);
+  text-decoration: underline;
+}
+
+table {
+  font-size: var(--syn-type-text-sm-size);
+  line-height: var(--syn-type-text-sm-line);
+}
+
+::selection {
+  background: var(--syn-color-accent-tint);
+  color: var(--syn-color-text-primary);
+}
+
+/* Native fields, until a component styles them: boundary that reaches 3:1, no browser colours. */
+input,
+select,
+textarea {
+  padding: var(--syn-space-1) var(--syn-space-2);
+  border: var(--syn-layout-border-hairline) solid var(--syn-color-border-emphasis);
+  border-radius: var(--syn-radius-control);
+  background: var(--syn-color-surface-base);
+  color: var(--syn-color-text-primary);
+}
