@@ -1,0 +1,93 @@
+.button {
+  position: relative;
+  justify-content: center;
+  overflow: hidden;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.iconOnly {
+  width: var(--syn-layout-control-height);
+  padding: 0;
+}
+
+.primary {
+  border-color: var(--syn-color-accent-fill);
+  background: var(--syn-color-accent-fill);
+  color: var(--syn-color-text-on-accent);
+}
+
+.primary:hover:not(:disabled) {
+  border-color: var(--syn-color-accent-hover);
+  background: var(--syn-color-accent-hover);
+}
+
+.primary:active:not(:disabled) {
+  border-color: var(--syn-color-accent-active);
+  background: var(--syn-color-accent-active);
+}
+
+.secondary {
+  background: transparent;
+}
+
+.secondary:active:not(:disabled) {
+  border-color: var(--syn-color-accent-fill);
+}
+
+.ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--syn-color-accent-text);
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--syn-color-accent-tint);
+}
+
+/* A pressed toggle shows the selected state. */
+.button[aria-pressed='true'] {
+  border-color: var(--syn-color-accent-fill);
+  background: var(--syn-color-accent-tint);
+  color: var(--syn-color-accent-text);
+}
+
+.primary:disabled {
+  border-color: var(--syn-color-border-subtle);
+  background: var(--syn-color-surface-sunken);
+  color: var(--syn-color-text-disabled);
+}
+
+.loading {
+  cursor: progress;
+}
+
+/* Progress without a change of width: a bar along the bottom edge, and a ring in place of the icon. */
+.loading::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: var(--syn-layout-focus-ring-width);
+  background: currentColor;
+  opacity: var(--syn-opacity-dim);
+  animation: sweep var(--syn-motion-slow) var(--syn-easing-balanced) infinite alternate;
+}
+
+@keyframes sweep {
+  from { transform: scaleX(0.15); transform-origin: left; }
+  to { transform: scaleX(1); transform-origin: left; }
+}
+
+.spinner {
+  width: var(--syn-icon-small);
+  height: var(--syn-icon-small);
+  border: var(--syn-layout-focus-ring-width) solid currentColor;
+  border-inline-end-color: transparent;
+  border-radius: var(--syn-radius-pill);
+  animation: turn var(--syn-motion-slow) linear infinite;
+}
+
+@keyframes turn {
+  to { transform: rotate(1turn); }
+}

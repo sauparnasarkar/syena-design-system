@@ -1007,7 +1007,8 @@ set.
 shares one box:
 
 - Height `control-height`, or `control-height-sm` when `size="small"`; both become
-  `control-height-touch` below `bp-compact`.
+  `control-height-touch` on touch devices (a coarse primary pointer), which is also what phones
+  and tablets below `bp-compact` are.
 - Horizontal padding `space(3)` (`space(2)` when small); gap between icon and label
   `space(2)`.
 - Corner `radius-control`; boundary a `border-hairline` line in `border-emphasis`.
@@ -1144,8 +1145,9 @@ with named values; there are no colour-named variants.
 #### Button
 
 - **Purpose and props.** Triggers an action. Props: `variant` (`primary`, `secondary`,
-  `ghost`), `size` (`default`, `small`), `disabled`, `isLoading`, `onClick`, `aria-pressed`
-  for toggle buttons, and the usual button attributes.
+  `ghost`), `size` (`default`, `small`), `disabled`, `isLoading`, `icon`, `trailingIcon`,
+  `onClick`, `aria-pressed` for toggle buttons, and the usual button attributes. The type
+  requires either children or an `aria-label`.
 - **Anatomy.** Optional leading icon, label, optional trailing icon. Icon-only buttons
   require an accessible name.
 - **Variants.** *Primary*: `accent-fill` with `text-on-accent`. *Secondary*: transparent
@@ -1154,6 +1156,8 @@ with named values; there are no colour-named variants.
 - **States.** The common states (§5.1). Pressed toggle buttons show the selected state.
 - **Tokens.** `accent-*`, `text-on-accent`, `border-emphasis`, `focus-ring`,
   `control-height*`, `radius-control`.
+- **Loading.** The label stays and the width does not change: a bar runs along the bottom
+  edge, and a ring replaces the leading icon if there is one.
 - **Accessibility.** A `button` element. While loading, the label remains and the button is
   `aria-busy`; activation is ignored.
 
@@ -1169,7 +1173,8 @@ with named values; there are no colour-named variants.
 #### Select
 
 - **Purpose and props.** Choose one option from a list. Props: `label`, `options`, `value`,
-  `onChange`, `size`, `suppressSearch`, `ariaLabel`, `disabled`.
+  `onChange` (called with the chosen value), `size`, `suppressSearch`, `ariaLabel`, `disabled`,
+  `placeholder`, `error`. An option is `{ value, label, disabled? }`.
 - **Anatomy.** Field with the label above, current value and a chevron; a listbox popover
   with an optional search field above the options (hidden when `suppressSearch` or when
   there are fewer options than the search threshold of `space(3)` options, that is ten).
@@ -1183,7 +1188,7 @@ with named values; there are no colour-named variants.
 #### MultiSelect
 
 - **Purpose and props.** Choose several options. Props: `label`, `options`, `value`,
-  `onChange`, `maxSelected`.
+  `onChange` (called with the list of chosen values), `maxSelected`, and the rest as for `Select`.
 - **Anatomy.** As `Select`; the field shows the first selections as tags and a count for the
   rest; options have checkboxes; a footer shows *n of max selected* and a *Clear* action.
 - **States.** As `Select`, plus limit reached: remaining options are disabled and the
@@ -1195,7 +1200,8 @@ with named values; there are no colour-named variants.
 #### SegmentedControl
 
 - **Purpose and props.** Switch between mutually exclusive views of the same data. Props:
-  `items`, `value`, `onChange`, `name`, `size`.
+  `items` (each `{ value, label, disabled? }`), `value`, `onChange`, `name`, `label` or
+  `ariaLabel`, `size`.
 - **Anatomy.** A joined row of options in one boundary; the selected option has an
   `accent-tint` fill, `accent-text` label and an inset `accent-fill` bar along its
   bottom edge.
@@ -1206,8 +1212,9 @@ with named values; there are no colour-named variants.
 
 #### Radio
 
-- **Purpose and props.** Choose one option from a short, visible set. Props: `name`,
-  `label`, `checked`, `onChange`.
+- **Purpose and props.** Choose one option from a short, visible set. `Radio` takes `name`,
+  `label`, `checked`, `onChange`. `RadioGroup` takes `legend`, `options`, `value`, `onChange`,
+  `error` and renders the fieldset.
 - **Anatomy.** A circular mark of `space(4)` diameter and a label; the checked mark has a
   centre dot of half the diameter.
 - **States.** Unchecked, checked, hover, focus, disabled, error.
@@ -1218,7 +1225,7 @@ with named values; there are no colour-named variants.
 #### Slider
 
 - **Purpose and props.** Choose one number in a range. Props: `label`, `min`, `max`, `step`,
-  `value`, `onChange`, `showValue`, `showRangeLabels`, `showThumbValue`.
+  `value`, `onChange`, `showValue`, `showRangeLabels`, `showThumbValue`, `unit`, `disabled`.
 - **Anatomy.** Label and value above; a track of `space(1)` thickness with the filled part
   in `accent-fill`; a thumb of `space(5)` diameter; optional min and max labels below and a
   value bubble above the thumb.
@@ -1231,7 +1238,7 @@ with named values; there are no colour-named variants.
 #### RangeSlider
 
 - **Purpose and props.** Choose a span. Props: `label`, `min`, `max`, `value` (a pair),
-  `thumbLabels`, `onChange`.
+  `thumbLabels`, `onChange`, `unit`, `disabled`.
 - **Anatomy.** As `Slider` with two thumbs; the span between them is filled. Thumbs cannot
   cross.
 - **States.** As `Slider`, per thumb.
@@ -1242,8 +1249,9 @@ with named values; there are no colour-named variants.
 #### PromptBar
 
 - **Purpose and props.** Free-text question entry for the assistant view. Props: `value`,
-  `onChange`, `onSubmit`, `variant`, `pinned`, `loading`, `ariaLabel`, `placeholder`,
-  `hint`, `aboveContent`, `belowContent`.
+  `onChange`, `onSubmit`, `onStop`, `variant` (`default` is a raised card, `plain` drops the
+  card), `pinned`, `loading`, `disabled`, `ariaLabel`, `placeholder`, `hint`, `aboveContent`,
+  `belowContent`, and `ref` for the textarea.
 - **Anatomy.** A multi-line field that grows to a maximum of six lines, a submit button, and
   slots above (suggestions) and below (hint text). *Pinned* sticks it to the bottom of the
   canvas above the strip.
