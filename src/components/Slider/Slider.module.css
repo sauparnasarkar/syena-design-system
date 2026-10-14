@@ -1,0 +1,75 @@
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--syn-space-3);
+}
+
+.track {
+  position: relative;
+  padding-top: var(--syn-space-5);
+}
+
+.input {
+  display: block;
+  width: 100%;
+  height: var(--syn-space-1);
+  margin: var(--syn-space-3) 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--syn-radius-pill);
+  appearance: none;
+  cursor: pointer;
+}
+
+.input:disabled {
+  cursor: default;
+  opacity: var(--syn-opacity-dim);
+}
+
+.input::-webkit-slider-thumb {
+  width: var(--syn-space-5);
+  height: var(--syn-space-5);
+  border: var(--syn-layout-border-hairline) solid var(--syn-color-border-emphasis);
+  border-radius: var(--syn-radius-pill);
+  background: var(--syn-color-surface-raised);
+  appearance: none;
+}
+
+.input::-moz-range-thumb {
+  width: var(--syn-space-5);
+  height: var(--syn-space-5);
+  border: var(--syn-layout-border-hairline) solid var(--syn-color-border-emphasis);
+  border-radius: var(--syn-radius-pill);
+  background: var(--syn-color-surface-raised);
+}
+
+.input:hover::-webkit-slider-thumb,
+.input:active::-webkit-slider-thumb {
+  border-color: var(--syn-color-accent-fill);
+}
+
+.input:hover::-moz-range-thumb,
+.input:active::-moz-range-thumb {
+  border-color: var(--syn-color-accent-fill);
+}
+
+.bubble {
+  position: absolute;
+  top: 0;
+  padding: 0 var(--syn-space-2);
+  border-radius: var(--syn-radius-control);
+  background: var(--syn-color-surface-inverse);
+  color: var(--syn-color-text-inverse);
+  font: var(--syn-type-figure-sm-weight) var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-family-figure);
+  font-feature-settings: var(--syn-figure-feature-settings);
+  pointer-events: none;
+}
+
+.range {
+  display: flex;
+  justify-content: space-between;
+  color: var(--syn-color-text-muted);
+  font: var(--syn-type-caption-weight) var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-family-figure);
+  font-feature-settings: var(--syn-figure-feature-settings);
+}
