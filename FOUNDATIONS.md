@@ -1446,8 +1446,19 @@ with named values; there are no colour-named variants.
 
 - **Purpose and props.** A themed chart on the plotting library. Props: `series`, `xTitle`,
   `yTitle`, `y2Title`, `y2TickFormat`, `ariaLabel`, `showLegend`, `height`,
-  `stackedAreaMode`, `barmode`, `orientation`, `referenceX`, `annotations`, `yRange`,
-  `animationFrame`, `outlineLocations`.
+  `stackedAreaMode`, `barmode`, `orientation`, `projectionFrom`, `referenceX`, `annotations`,
+  `yRange`. A series has a `kind` (`line`, `bar`, `area` or `marker`), and optionally `projected`,
+  `band`, `axis`, `slot`, `signed` and `signLabels`, and `colorValues`, `colorDomain`, `colorLabel`
+  and `formatColorValue`.
+- **Series kinds.** `marker` draws points that are not joined, for a relationship between two
+  measures. `barmode: 'percent'` stacks bars to the full height so each shows shares of its total
+  (the axis title says so). Bars can be coloured by a second value (`colorValues`) on the
+  sequential ramp, with the ramp and its two ends in the legend and the value in the tooltip and
+  the table. Bars can be coloured by sign (`signed`): `change` uses the falling and rising colours
+  (`data-change-decrease`, `data-change-increase`), `diverging` the cool and warm ends of the
+  diverging ramp. A signed series is never carried by colour alone: the legend names the two signs
+  with a down and an up glyph, the tooltip and the table write each value with its sign and the
+  true minus.
 - **Anatomy and states.** As §6.1: plot area on `data-surface`, axes, legend, tooltip,
   annotations, uncertainty and the source footer.
 - **Accessibility.** `ariaLabel` is required; see §6.1 for the text alternative and the

@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
-import { anomaly, composition, compositionNames, emitters, observed, scenarios } from '../../specimens/data';
-import { Chart, chartTable, type ChartSeries } from './Chart';
+import { anomaly, composition, countryObserved, compositionNames, emitters, observed, scenarios } from '../../specimens/data';
+import { Chart, chartTable, signedText, type ChartSeries } from './Chart';
 
 const panel = (width = 'min(100%, 56rem)') => (Story: () => ReactElement) => (
   <div style={{ padding: 'var(--syn-space-4)', width }}>
@@ -181,6 +181,51 @@ export const BarsColouredByASecondValue: Story = {
     // The values are in the table form too.
     const { columns } = chartTable([{ name: 'Emissions in 2024', kind: 'bar', x: ['a'], y: [1], colorValues: [5], colorLabel: 'Reduction' }]);
     await expect(columns.map((c) => c.header)).toEqual(['Period', 'Emissions in 2024', 'Emissions in 2024: Reduction']);
+  },
+};
+
+const yoy = countryObserved.slice(1).map((p, i) => ({ year: p.year, change: ((p.value - countryObserved[i].value) / countryObserved[i].value) * 100 }));
+
+export const SignedBarsColourRisesAndFallsAndSayThemInWords: Story = {
+  args: {
+    series: [{ name: 'Year-on-year change', kind: 'bar', signed: 'change', x: yoy.map((d) => d.year), y: yoy.map((d) => Number(d.change.toFixed(1))) }],
+    yTitle: 'Change on the year before (%)', ariaLabel: 'Year-on-year change in annual emissions for the example country from 1991 to 2024: rises to about 2010, falls after. Illustrative values.',
+  },
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    const canvas = within(canvasElement);
+    await waitFor(() => expect(canvasElement.querySelectorAll('.barlayer .point')).toHaveLength(yoy.length));
+    const probe = (css: string) => { const p = document.createElement('span'); p.style.color = css; canvasElement.appendChild(p); const c = getComputedStyle(p).color; p.remove(); return c; };
+    const fall = probe('var(--syn-data-change-decrease)');
+    const rise = probe('var(--syn-data-change-increase)');
+    const bars = [...canvasElement.querySelectorAll<SVGPathElement>('.barlayer .point path')].map((b) => getComputedStyle(b).fill);
+    // A change that rounds to zero has no bar, so only bars with a height are checked.
+    yoy.forEach((d, i) => { const v = Number(d.change.toFixed(1)); if (v !== 0) expect(bars[i]).toBe(v < 0 ? fall : rise); });
+    await expect(bars).toContain(fall);
+    await expect(bars).toContain(rise);
+    // The two signs are named in the legend with a glyph, so colour is not the only carrier.
+    await expect(canvas.getByText('Falls')).toBeInTheDocument();
+    await expect(canvas.getByText('Rises')).toBeInTheDocument();
+    // And the values are written with their sign and the true minus in the table form.
+    const { rows } = chartTable([{ name: 'a', kind: 'bar', signed: 'change', x: ['x', 'y', 'z'], y: [2.5, -1.25, 0] }]);
+    await expect(rows.map((r) => r.s0)).toEqual(['+2.5', '\u22121.25', '0']);
+    await expect(signedText(-3)).toBe('\u22123');
+  },
+};
+
+export const SignedBarsCanUseTheDivergingRamp: Story = {
+  args: {
+    series: [{ name: 'Anomaly', kind: 'bar', signed: 'diverging', signLabels: ['Below the baseline', 'Above the baseline'], x: anomaly.map((a) => a.year), y: anomaly.map((a) => Number(a.value.toFixed(2))) }],
+    yTitle: '°C against the 1991 to 2020 baseline', ariaLabel: 'Yearly temperature anomaly from 2004 to 2024 against the 1991 to 2020 baseline. Illustrative values.',
+  },
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    const canvas = within(canvasElement);
+    await waitFor(() => expect(canvasElement.querySelectorAll('.barlayer .point')).toHaveLength(anomaly.length));
+    await expect(canvas.getByText('Below the baseline')).toBeInTheDocument();
+    await expect(canvas.getByText('Above the baseline')).toBeInTheDocument();
+    const fills = new Set([...canvasElement.querySelectorAll<SVGPathElement>('.barlayer .point path')].map((b) => getComputedStyle(b).fill));
+    await expect(fills.size).toBe(2);
   },
 };
 

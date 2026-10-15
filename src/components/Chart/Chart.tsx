@@ -2,6 +2,7 @@ import type { Annotations, Data, Layout, Shape } from 'plotly.js';
 import { useMemo, useState } from 'react';
 import { blendStops } from '../../charts/map/heat';
 import { projectionDash, seriesColour } from '../../charts/palette';
+import { Icon } from '../Icon/Icon';
 import { PlotlyChart } from '../../charts/PlotlyChart';
 import { useChartTokens, type ChartTokens } from '../../charts/tokens';
 import { useWidth } from '../../hooks/useWidth';
@@ -19,6 +20,10 @@ export interface ChartSeries {
   axis?: 'y' | 'y2';
   /** An interval around the line, drawn as a filled band at the band opacity. */
   band?: { low: number[]; high: number[]; label: string };
+  /** Colours bars by their sign: `change` uses the falling and rising colours (a fall is good for emissions); `diverging` uses the cool and warm ends of the diverging ramp. The sign is always also in the tooltip, the table and the legend's glyphs. */
+  signed?: 'change' | 'diverging';
+  /** The legend's words for the two signs. */
+  signLabels?: [string, string];
   /** Colours each bar by a second value on the sequential ramp, in the order of the bars. The legend shows the ramp and its two ends. */
   colorValues?: number[];
   /** The range the ramp covers. The range of `colorValues` by default. */
@@ -63,8 +68,15 @@ export function chartTable(series: ChartSeries[], xTitle = 'Period') {
     ...(s.colorValues ? [{ key: `c${i}`, header: `${s.name}: ${s.colorLabel ?? 'colour value'}`, numeric: true as const }] : []),
   ])];
   const rows = xs.map((x) => Object.fromEntries([['x', x], ...series.flatMap((s, i) => [[`s${i}`, s.y[s.x.indexOf(x)] ?? ''], ...(s.colorValues ? [[`c${i}`, s.colorValues[s.x.indexOf(x)] ?? '']] : [])])]));
+  // A signed series is written with its sign, so the table does not rely on colour either.
+  series.forEach((s, i) => { if (s.signed) rows.forEach((r) => { const v = r[`s${i}`]; if (typeof v === 'number') r[`s${i}`] = signedText(v); }); });
   return { columns, rows };
 }
+
+/** A value with its sign, written with the true minus. */
+export const signedText = (v: number, format: (n: number) => string = (n) => n.toLocaleString('en-GB')) => (v === 0 ? format(0) : `${v < 0 ? '\u2212' : '+'}${format(Math.abs(v))}`);
+
+const signColours = (t: ChartTokens, mode: 'change' | 'diverging') => (mode === 'change' ? { negative: t.decrease, positive: t.increase } : { negative: t.diverging[1], positive: t.diverging[5] });
 
 /** The range a series' ramp covers. */
 const colourRange = (s: ChartSeries): [number, number] => s.colorDomain ?? (s.colorValues && s.colorValues.length ? [Math.min(...s.colorValues), Math.max(...s.colorValues)] : [0, 1]);
@@ -83,10 +95,12 @@ function buildTraces(t: ChartTokens, series: ChartSeries[], hidden: Set<number>,
     }
     if (s.kind === 'bar') {
       const [lo, hi] = colourRange(s);
-      const fills = s.colorValues ? s.colorValues.map((v) => blendStops(t.sequential, (v - lo) / Math.max(1e-9, hi - lo))) : colour;
+      const sign = s.signed ? signColours(t, s.signed) : null;
+      const fills = sign ? s.y.map((v) => (v < 0 ? sign.negative : sign.positive)) : s.colorValues ? s.colorValues.map((v) => blendStops(t.sequential, (v - lo) / Math.max(1e-9, hi - lo))) : colour;
       const format = s.formatColorValue ?? ((v: number) => v.toLocaleString('en-GB'));
       traces.push({
         type: 'bar', name, orientation: horizontal ? 'h' : 'v', x: horizontal ? s.y : s.x, y: horizontal ? s.x : s.y, marker: { color: fills },
+        ...(sign ? { customdata: s.y.map((v) => signedText(v)), hovertemplate: `%{${horizontal ? 'y' : 'x'}}: %{customdata}<extra>${name}</extra>` } : {}),
         ...(s.colorValues ? { customdata: s.colorValues.map(format), hovertemplate: `%{${horizontal ? 'y' : 'x'}}: %{${horizontal ? 'x' : 'y'}}<br>${s.colorLabel ?? 'Colour value'}: %{customdata}<extra>${name}</extra>` } : {}),
         ...axis,
       } as Data);
@@ -103,6 +117,10 @@ function buildTraces(t: ChartTokens, series: ChartSeries[], hidden: Set<number>,
 }
 
 function KeyMark({ series, colour, t }: { series: ChartSeries; colour: string; t: ChartTokens }) {
+  if (series.signed) {
+    const c = signColours(t, series.signed);
+    return <span className={styles.swatch} style={{ background: `linear-gradient(to right, ${c.negative} 50%, ${c.positive} 50%)` }} aria-hidden="true" />;
+  }
   if (series.kind === 'bar' || series.kind === 'area') return <span className={styles.swatch} style={{ background: colour }} aria-hidden="true" />;
   if (series.kind === 'marker') return <span className={styles.dot} style={{ background: colour }} aria-hidden="true" />;
   return (
@@ -204,6 +222,14 @@ export function Chart(props: ChartProps) {
               </button>
             </li>
           ))}
+          {series.filter((s) => s.signed).map((s) => {
+            const c = signColours(t, s.signed!);
+            const [fall, rise] = s.signLabels ?? ['Falls', 'Rises'];
+            return [
+              <li key={`neg-${s.name}`} className={styles.bandKey}><span className={styles.swatch} style={{ background: c.negative }} aria-hidden="true" /><Icon name="down" size="small" /><span>{fall}</span></li>,
+              <li key={`pos-${s.name}`} className={styles.bandKey}><span className={styles.swatch} style={{ background: c.positive }} aria-hidden="true" /><Icon name="up" size="small" /><span>{rise}</span></li>,
+            ];
+          })}
           {sharedBandLabel ? (
             <li className={styles.bandKey}><span className={styles.swatch} style={{ background: t.textMuted, opacity: t.bandOpacity }} aria-hidden="true" /><span>{bandSeries[0].band!.label}, in each path’s colour</span></li>
           ) : bandSeries.map((s) => (

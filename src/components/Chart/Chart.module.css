@@ -45,6 +45,10 @@
   border-radius: var(--syn-radius-control);
 }
 
+.bandKey svg {
+  flex: none;
+}
+
 .dot {
   display: inline-block;
   width: var(--syn-space-3);
