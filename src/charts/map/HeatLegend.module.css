@@ -1,0 +1,67 @@
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--syn-space-2);
+  width: 100%;
+  color: var(--syn-data-text);
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+}
+
+.label {
+  color: var(--syn-data-text-muted);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--syn-space-3) var(--syn-space-5);
+}
+
+.scale {
+  position: relative;
+  flex: 1 1 var(--syn-layout-field-min);
+  min-width: 0;
+  /* Room at both ends for the first and last tick labels, which are centred on their ticks. */
+  padding-inline: var(--syn-space-5);
+  padding-block-end: var(--syn-space-5);
+}
+
+.bar {
+  display: block;
+  height: var(--syn-space-3);
+  border-radius: var(--syn-radius-control);
+  background: linear-gradient(in oklab to right, var(--syn-data-heat-1), var(--syn-data-heat-2), var(--syn-data-heat-3), var(--syn-data-heat-4), var(--syn-data-heat-5), var(--syn-data-heat-6), var(--syn-data-heat-7));
+}
+
+.ticks {
+  position: absolute;
+  inset-block-start: calc(var(--syn-space-3) + var(--syn-space-1));
+  inset-inline: var(--syn-space-5);
+  height: var(--syn-space-5);
+}
+
+.ticks li {
+  position: absolute;
+  transform: translateX(-50%);
+  color: var(--syn-data-text-muted);
+  font-family: var(--syn-family-figure);
+  font-feature-settings: var(--syn-figure-feature-settings);
+  white-space: nowrap;
+}
+
+.nodata {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--syn-space-2);
+  color: var(--syn-data-text-muted);
+}
+
+/* Outlined, so the quiet fill still reads against the panel at 3:1. */
+.swatch {
+  width: var(--syn-space-5);
+  height: var(--syn-space-3);
+  border: var(--syn-layout-border-hairline) solid var(--syn-data-text-muted);
+  border-radius: var(--syn-radius-control);
+  background: var(--syn-data-no-data);
+}

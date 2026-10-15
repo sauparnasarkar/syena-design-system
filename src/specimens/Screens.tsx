@@ -46,6 +46,7 @@ export function Overview() {
             <span>Lower</span>
             <span className={p.ramp} aria-hidden="true">{[1, 2, 3, 4, 5, 6, 7].map((n) => <span key={n} style={{ background: `var(--syn-data-seq-${n})` }} />)}</span>
             <span>Higher</span>
+            <span className={p.noData}><span className={p.noDataSwatch} aria-hidden="true" />No data</span>
           </div>
         </ChartCard>
         <ChartCard title="Global temperature anomaly" support="°C relative to the 1991 to 2020 baseline." footer={FOOT}>

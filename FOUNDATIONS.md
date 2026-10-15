@@ -39,8 +39,9 @@ Observed values and modelled values never share a visual treatment.
 - Ranges are drawn as bands whose opacity encodes confidence; the band is always
   accompanied by a legend entry that names the interval ("66% range", "5th to 95th
   percentile").
-- Missing data is its own state. It is rendered with the no-data treatment (§3.6), never
-  as zero and never as an interpolated line across a gap.
+- Missing data is its own state. It is rendered with the no-data treatment (§3.6: one flat, quiet grey
+  on maps, grids and bars, named in words in tables), never as zero and never as an interpolated
+  line across a gap.
 - A figure that is estimated, revised or provisional says so next to the value.
 
 ### 1.3 Analytical density
@@ -672,7 +673,7 @@ the ground, at the ground's hue:
 | `data-text-muted` | 4.5:1 | Axis titles, legends, source lines |
 | `data-annotation` | `√(7 · 21)` : 1, a neutral at the ground's hue | Reference lines, callout leaders and labels. Never a hue a series can have |
 | `data-other` | 4.5:1 | The remainder bucket of a part-to-whole chart |
-| `data-no-data` | 3:1 | Missing values; always drawn with a hatch, never as a solid |
+| `data-no-data` | `√(√3 · 3)` : 1, about 2.3:1; a grey tinted slightly toward the ground's hue, never a hue of its own | Missing values: a flat, quiet grey on every map and grid, with the words "No data" in the table view and the hover read-out. Its legend swatch is outlined, so the swatch keeps 3:1 against the ground |
 | `data-gridline` | √3 : 1 | Gridlines; informational contrast only |
 | `data-uncertainty` | 7:1 colour at α = τ⁻⁸ | Fill of uncertainty bands when a band is not tied to a series; series bands use the series colour at the same α |
 
@@ -727,6 +728,20 @@ linearly from the lightest step that still meets 3:1 on the ground (`data-seq-1`
 chroma is `C_cap / τ`, clamped to the gamut. Lightness is monotonic, so order survives any
 colour-vision deficiency and greyscale printing.
 
+**Heat** (`data-heat-1` … `data-heat-7`). For magnitudes drawn as heat on maps: pale yellow for low
+through deep red for high, laid over a log scale whose ticks are the powers of ten (0.01 … 10,000
+for annual emissions in MtCO₂), so each tick is one step and the colour between ticks is
+interpolated. Lightness falls linearly from the lightest sequential step to the lightest red that
+stays clearly apart from the ground (the geometric mean of the 3:1 graphics floor and the 4.5:1
+text floor, then moved lighter only as far as needed to stay 2 JND from the no-data grey under every
+colour-vision view); chroma rises as the colour deepens, and the hue turns from yellow (100°)
+to red (27°). **This ramp is the one place the climate-semantics rule (§1.5) is not applied:** it
+passes through the amber and red zones because it orders magnitude and carries no good or bad
+meaning, and no other token may use those hues. Country borders are drawn in the ground
+colour, so they stay visible exactly when a step reaches 3:1 against the ground, which every step
+does (checked below). Lightness is monotonic, so order survives any colour-vision deficiency and
+greyscale printing.
+
 **Diverging** (`data-div-neg-3` … `data-div-pos-3`, with `data-div-mid`). For signed values
 around a stated baseline. The cool side (below baseline) uses the accent hue. The warm side
 (above baseline) uses the hue at distance `D` from the negative signal: the warmest hue the
@@ -756,7 +771,7 @@ every colour-vision view. Change marks are always paired with a sign or arrow gl
 UI boundaries, icons and chart marks. Primary text and chart text aim higher (7:1).
 
 <!-- generated:contrast-count -->
-night: 96 required pairs; tidewater: 96 required pairs.
+night: 105 required pairs; tidewater: 105 required pairs.
 <!-- /generated:contrast-count -->
 
 The table shows each pair family at its worst surface in each theme:
@@ -779,7 +794,8 @@ The table shows each pair family at its worst surface in each theme:
 | data-text | 7:1 | 7.03 | 7.01 | pass |
 | data-text-muted | 4.5:1 | 4.54 | 4.51 | pass |
 | data-annotation | 4.5:1 | 12.14 | 12.19 | pass |
-| data-no-data | 3:1 | 3.03 | 3.03 | pass |
+| data-no-data | 2.2795070569547775:1 | 2.30 | 2.28 | pass |
+| text on data-no-data (data-ink-light) | 4.5:1 | 7.62 | 7.25 | pass |
 | text on data-seq-1 (data-ink-light or data-ink-dark) | 4.5:1 | 5.81 | 5.46 | pass |
 | text on data-seq-2 (data-ink-light or data-ink-dark) | 4.5:1 | 4.50 | 4.65 | pass |
 | text on data-seq-3 (data-ink-light or data-ink-dark) | 4.5:1 | 5.78 | 6.00 | pass |
@@ -797,6 +813,14 @@ The table shows each pair family at its worst surface in each theme:
 | data-other | 3:1 | 4.51 | 4.51 | pass |
 | data-cat-* | 3:1 | 3.55 | 3.16 | pass |
 | data-seq-* | 3:1 | 3.02 | 3.03 | pass |
+| data-heat-1 on data-surface (and the borders drawn in it) | 3:1 | 13.70 | 12.91 | pass |
+| data-heat-2 on data-surface (and the borders drawn in it) | 3:1 | 11.32 | 10.79 | pass |
+| data-heat-3 on data-surface (and the borders drawn in it) | 3:1 | 9.22 | 8.86 | pass |
+| data-heat-4 on data-surface (and the borders drawn in it) | 3:1 | 7.48 | 7.24 | pass |
+| data-heat-5 on data-surface (and the borders drawn in it) | 3:1 | 5.98 | 5.85 | pass |
+| data-heat-6 on data-surface (and the borders drawn in it) | 3:1 | 4.70 | 4.67 | pass |
+| data-heat-7 on data-surface (and the borders drawn in it) | 3:1 | 3.68 | 3.68 | pass |
+| the deepest heat step | 3.6742346141747673:1 | 3.68 | 3.68 | pass |
 | data-div-* | 3:1 | 4.54 | 4.52 | pass |
 | data-change-decrease | 3:1 | 11.19 | 10.69 | pass |
 | data-change-increase | 3:1 | 3.78 | 3.52 | pass |
@@ -850,6 +874,8 @@ distance between the two outer colours:
 | Measure | night | tidewater | Required |
 |---|---|---|---|
 | Sequential, smallest step between neighbours | 0.057 | 0.049 | 0.04 |
+| Heat, smallest step between neighbours | 0.051 | 0.046 | 0.04 |
+| Heat, closest step to the no-data colour | 0.067 | 0.062 | 0.04 |
 | Diverging, smallest step between neighbours | 0.091 | 0.094 | 0.04 |
 | Diverging, outer cool vs outer warm, worst view | 0.094 | 0.119 | 0.08 |
 <!-- /generated:seqdiv-table -->
@@ -1443,20 +1469,46 @@ with named values; there are no colour-named variants.
 
 #### Globe
 
-- **Purpose and props.** A rotating globe coloured by a country-level value. Props:
-  `isoCodes`, `locationNames`, `years`, `values`, `yearIndex`, `colorRange`, `colorScale`,
-  `zLog`, `noDataColor`, `hoverUnit`, `legendTitle`, `noDataLabel`, `ariaLabel`, `autoRotate`,
-  `allowSpinWithReducedMotion`, `rotationPeriodMs`, `blendMs`, `showLabels`, `maxSize`,
-  `fullWidth`, `transparent`, `title`, `caption`.
-- **Anatomy.** The globe on `data-surface`; a legend bar using the sequential or
-  diverging ramp; a hover read-out with name, value and unit; year caption.
-- **States.** Rotating, paused (on hover and focus, or when motion is reduced), loading,
-  no data (hatched, with the no-data label).
-- **Tokens.** `data-seq-*`, `data-div-*`, `data-no-data`, `data-text`.
-- **Accessibility.** Rotation stops under reduced motion unless explicitly allowed; the same
-  values are available as a table; the legend states the unit and baseline.
+- **Purpose and props.** A globe coloured by a country-level value on the heat scale (§3.6).
+  Props: `values` (by alpha-3 code), `valueLabel` (what the value is and its unit), `ariaLabel`,
+  `domain` (default 0.01 to 10,000, on a log axis), `unit`, `formatValue`, `autoRotate`, `center`,
+  `size`. A year is the parent's: it passes the values for the year in view.
+- **Anatomy.** The globe on `data-surface`, country borders in the same colour; a hover
+  read-out (country, value and unit, or *No data*); controls below it (zoom in, zoom out, *Reset
+  view*, *Table view*) and a one-line keyboard hint; the heat legend: a bar with a tick at every
+  power of ten and the outlined no-data swatch. Missing values are one flat `data-no-data`.
+- **States.** Turning (until the pointer or focus is on it, a control or key has been used, or
+  motion is reduced), paused, zoomed, table view (the globe is replaced by the table of values).
+- **Behaviour.** Arrow keys turn, `+` and `−` zoom, `0` or Home resets; dragging turns. Zoom
+  stops at 1× and 6×, and the zoom buttons are disabled at the stops. The controls are drawn in
+  the data panel's colours, since the panel is dark in both themes.
+- **Tokens.** `data-heat-*`, `data-no-data`, `data-surface`, `data-gridline`, `data-text`,
+  `data-text-muted`. The canvas takes every colour from these tokens, re-read when the theme
+  changes.
+- **Accessibility.** The canvas is an image with a name and a description pointing at the table of
+  values (largest first), which is also the table view; rotation stops under reduced motion; the
+  controls are buttons with names, reachable by keyboard; the hint is visible text.
 
----
+#### Choropleth
+
+- **Purpose and props.** A flat world map coloured by the same heat scale. Props: `values`,
+  `valueLabel`, `ariaLabel`, `domain`, `unit`, `formatValue`, `outline` (countries to outline, for
+  example the ones selected; changing it never resets the zoom).
+- **Anatomy, states, behaviour and accessibility.** As the globe: a natural-earth projection
+  fitted to the width, zoom to 8×, drag or arrow keys to pan within the map, the same controls,
+  hint, legend, no-data treatment and table view.
+- **Tokens.** As the globe, plus `data-text` for the outline.
+
+#### YearControl
+
+- **Purpose and props.** A year slider with a play and pause button, for the year shown by a map or a page.
+  Props: `min`, `max`, `value`, `onChange`, `playing` or `defaultPlaying`, `onPlayingChange`,
+  `intervalMs`, `label`, `step`.
+- **Behaviour.** Playing steps forward one `step` every `intervalMs`, stops on the last year and
+  never starts by itself; pressing play on the last year starts again from the first; choosing a
+  year by hand stops it.
+- **Accessibility.** The slider is a labelled range input; the button is a toggle that names the
+  action and has `aria-pressed`.
 
 ### 5.6 Hooks and helpers
 
@@ -1554,8 +1606,8 @@ belongs to the data).
   particular thing (observed temperature, the world total) keeps its colour across a view.
 - Markers appear on hover, on keyboard focus, and permanently when the spacing between
   points is large enough.
-- Missing values leave a gap in lines and are drawn as hatched `data-no-data` in bars and
-  maps; they are never zero and never interpolated.
+- Missing values leave a gap in lines and are drawn as flat `data-no-data` in bars, maps and
+  grids; they are never zero and never interpolated.
 
 <!-- generated:chart-table -->
 | Quantity | Formula | Value |

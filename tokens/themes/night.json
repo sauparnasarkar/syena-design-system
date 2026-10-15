@@ -194,7 +194,7 @@
     },
     "no-data": {
       "$type": "color",
-      "$value": "#636363"
+      "$value": "#475264"
     },
     "other": {
       "$type": "color",
@@ -262,6 +262,36 @@
       "7": {
         "$type": "color",
         "$value": "#d9dbff"
+      }
+    },
+    "heat": {
+      "1": {
+        "$type": "color",
+        "$value": "#ece19a"
+      },
+      "2": {
+        "$type": "color",
+        "$value": "#e7c97f"
+      },
+      "3": {
+        "$type": "color",
+        "$value": "#e2b067"
+      },
+      "4": {
+        "$type": "color",
+        "$value": "#dd9753"
+      },
+      "5": {
+        "$type": "color",
+        "$value": "#d57e46"
+      },
+      "6": {
+        "$type": "color",
+        "$value": "#cc633f"
+      },
+      "7": {
+        "$type": "color",
+        "$value": "#c04840"
       }
     },
     "div": {

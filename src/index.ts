@@ -45,3 +45,5 @@ export { Chart, chartTable, type ChartProps, type ChartSeries, type SeriesKind }
 export { ChartCard, type ChartCardProps, type ChartCardState } from './components/ChartCard/ChartCard';
 export { Progress, type ProgressProps } from './components/Progress/Progress';
 export { Globe, type GlobeProps } from './components/Globe/Globe';
+export { Choropleth, type ChoroplethProps } from './components/Choropleth/Choropleth';
+export { YearControl, type YearControlProps } from './components/YearControl/YearControl';

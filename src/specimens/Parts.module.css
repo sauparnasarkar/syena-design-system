@@ -284,6 +284,7 @@
 
 .heatLegend {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--syn-space-2);
   composes: caption from './Type.module.css';
@@ -329,4 +330,20 @@
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/* The no-data swatch is outlined, so the quiet fill keeps 3:1 against the panel. */
+.noData {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--syn-space-2);
+  margin-inline-start: var(--syn-space-3);
+}
+
+.noDataSwatch {
+  width: var(--syn-space-5);
+  height: var(--syn-space-3);
+  border: var(--syn-layout-border-hairline) solid var(--syn-data-text-muted);
+  border-radius: var(--syn-radius-control);
+  background: var(--syn-data-no-data);
 }

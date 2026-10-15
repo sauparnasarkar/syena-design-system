@@ -1,0 +1,132 @@
+import type { ReactElement } from 'react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { illustrativeEmissions } from '../../specimens/countryValues';
+import { Choropleth } from './Choropleth';
+
+const frame = (width = 'min(100%, 56rem)') => (Story: () => ReactElement) => <div style={{ padding: 'var(--syn-space-4)', width, background: 'var(--syn-data-surface)' }}><Story /></div>;
+
+const meta: Meta<typeof Choropleth> = {
+  title: 'Data/Choropleth',
+  component: Choropleth,
+  args: {
+    values: illustrativeEmissions,
+    valueLabel: 'CO₂ emissions in 2024, MtCO₂ (illustrative)',
+    unit: 'MtCO₂',
+    ariaLabel: 'World map of annual CO₂ emissions by country in 2024, illustrative values on a log scale from 0.01 to 10,000 MtCO₂. A few countries are deep red and most are pale yellow to orange; some have no data.',
+  },
+  decorators: [frame()],
+};
+export default meta;
+type Story = StoryObj<typeof Choropleth>;
+
+const channels = (css: string) => {
+  const probe = document.createElement('span');
+  probe.style.color = css;
+  document.body.appendChild(probe);
+  const [r, g, b] = getComputedStyle(probe).color.match(/\d+/g)!.map(Number);
+  probe.remove();
+  return [r, g, b];
+};
+const pixelsNear = (canvas: HTMLCanvasElement, css: string, tolerance = 4) => {
+  const [r, g, b] = channels(css);
+  const d = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data;
+  let n = 0;
+  for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 0 && Math.abs(d[i] - r) <= tolerance && Math.abs(d[i + 1] - g) <= tolerance && Math.abs(d[i + 2] - b) <= tolerance) n += 1;
+  return n;
+};
+const map = (el: HTMLElement) => within(el).getByRole('img', { name: /World map of annual CO₂ emissions/ }) as HTMLCanvasElement;
+// The map has been painted when it holds heat colours; counting the whole scale works at any width, where a few small no-data countries may not.
+const heatPixels = (canvas: HTMLCanvasElement) => [1, 2, 3, 4, 5, 6, 7].reduce((n, i) => n + pixelsNear(canvas, `var(--syn-data-heat-${i})`, 6), 0);
+const drawn = (el: HTMLElement) => waitFor(() => expect(heatPixels(map(el))).toBeGreaterThan(50), { timeout: 8000 });
+
+export const Drawn: Story = {
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    const canvas = map(canvasElement);
+    // The no-data grey, the panel and several heat steps all appear.
+    await expect(pixelsNear(canvas, 'var(--syn-data-no-data)')).toBeGreaterThan(20);
+    const heat = [1, 2, 3, 4, 5, 6, 7].map((i) => pixelsNear(canvas, `var(--syn-data-heat-${i})`, 40));
+    await expect(heat.filter((n) => n > 0).length).toBeGreaterThanOrEqual(3);
+    await expect(canvas.width / canvas.height).toBeGreaterThan(1.7);
+  },
+};
+
+export const LegendHasATickAtEveryPowerOfTen: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    for (const tick of ['0.01', '0.1', '1', '10', '100', '1,000', '10,000']) await expect(canvas.getByText(tick, { selector: 'li' })).toBeInTheDocument();
+    await expect(canvas.getByText('No data')).toBeInTheDocument();
+  },
+};
+
+export const TextAlternativeListsEveryValue: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const table = canvas.getByRole('table', { name: /World map of annual CO₂ emissions/ });
+    await expect(within(table).getAllByRole('row')).toHaveLength(Object.keys(illustrativeEmissions).length + 1);
+    await expect(map(canvasElement)).toHaveAccessibleDescription(/World map of annual CO₂ emissions/);
+  },
+};
+
+export const ControlsZoomResetAndTable: Story = {
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    const canvas = within(canvasElement);
+    const image = () => map(canvasElement).toDataURL();
+    const start = image();
+    const zoomOut = canvas.getByRole('button', { name: 'Zoom out map' });
+    await expect(zoomOut).toBeDisabled();
+    await userEvent.click(canvas.getByRole('button', { name: 'Zoom in map' }));
+    await waitFor(() => expect(image()).not.toBe(start));
+    await expect(zoomOut).toBeEnabled();
+    await userEvent.click(canvas.getByRole('button', { name: 'Reset view' }));
+    await waitFor(() => expect(image()).toBe(start));
+    const toggle = canvas.getByRole('button', { name: 'Table view' });
+    await userEvent.click(toggle);
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(canvas.getByRole('table')).toBeVisible();
+    await userEvent.click(toggle);
+    await expect(canvasElement.querySelector('canvas')).toBeVisible();
+  },
+};
+
+export const KeyboardMovesAndZoomsWithAVisibleHint: Story = {
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    await expect(within(canvasElement).getByText(/Arrow keys move the map/)).toBeVisible();
+    const element = map(canvasElement);
+    const image = () => element.toDataURL();
+    const start = image();
+    element.focus();
+    // At full view nothing can be moved; after zooming in the arrow keys move the map, and 0 returns.
+    await userEvent.keyboard('+');
+    await waitFor(() => expect(image()).not.toBe(start));
+    const zoomed = image();
+    await userEvent.keyboard('{ArrowLeft}');
+    await waitFor(() => expect(image()).not.toBe(zoomed));
+    await userEvent.keyboard('0');
+    await waitFor(() => expect(image()).toBe(start));
+  },
+};
+
+export const OutlineMarksSelectedCountriesWithoutResettingTheView: Story = {
+  args: { outline: ['BRA', 'IND'] },
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    // The outline is drawn in the panel's text colour.
+    await waitFor(() => expect(pixelsNear(map(canvasElement), 'var(--syn-data-text)', 6)).toBeGreaterThan(30));
+  },
+};
+
+export const NarrowKeepsTheMapAndLegend: Story = {
+  decorators: [frame('min(100%, 20rem)')],
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth);
+    await expect(within(canvasElement).getByText('10,000', { selector: 'li' })).toBeInTheDocument();
+  },
+};
+
+export const Tidewater: Story = { globals: { theme: 'tidewater' } };
+export const Night: Story = { globals: { theme: 'night' } };

@@ -169,12 +169,6 @@ export function HeatGrid({ label, width: w }: { label: string; width: number }) 
   const roomy = cellW >= 72;
   return (
     <svg className={styles.chart} width={w} height={h} viewBox={`0 0 ${w} ${h}`} role="img" aria-label={label}>
-      <defs>
-        <pattern id="no-data-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-          <rect width="6" height="6" style={{ fill: 'var(--syn-data-surface)' }} />
-          <line x1="0" y1="0" x2="0" y2="6" strokeWidth="2" style={{ stroke: 'var(--syn-data-no-data)' }} />
-        </pattern>
-      </defs>
       {heatDecades.map((d, c) => (
         <text key={d} className={styles.tick} x={left + c * cellW + cellW / 2} y={14} textAnchor="middle">{d}</text>
       ))}
@@ -186,10 +180,10 @@ export function HeatGrid({ label, width: w }: { label: string; width: number }) 
             const step = v === null ? 0 : Math.min(7, Math.max(1, Math.ceil(v * 7 / 0.8)));
             return (
               <g key={d}>
-                <rect x={left + c * cellW + 2} y={top + ri * cellH + 2} width={cellW - 4} height={cellH - 4} rx="2" style={{ fill: v === null ? 'url(#no-data-hatch)' : `var(--syn-data-seq-${step})` }}>
+                <rect x={left + c * cellW + 2} y={top + ri * cellH + 2} width={cellW - 4} height={cellH - 4} rx="2" style={{ fill: v === null ? 'var(--syn-data-no-data)' : `var(--syn-data-seq-${step})` }}>
                   {v === null ? <title>No data</title> : null}
                 </rect>
-                <text className={styles.cellValue} x={left + c * cellW + cellW / 2} y={top + ri * cellH + cellH / 2} textAnchor="middle" dominantBaseline="middle" style={{ fill: v === null ? 'var(--syn-data-text)' : step === 1 ? 'var(--syn-data-ink-light)' : 'var(--syn-data-ink-dark)' }}>{v === null ? (roomy ? 'No data' : '–') : fmt(v, 2)}</text>
+                <text className={styles.cellValue} x={left + c * cellW + cellW / 2} y={top + ri * cellH + cellH / 2} textAnchor="middle" dominantBaseline="middle" style={{ fill: v === null ? 'var(--syn-data-ink-light)' : step === 1 ? 'var(--syn-data-ink-light)' : 'var(--syn-data-ink-dark)' }}>{v === null ? (roomy ? 'No data' : '–') : fmt(v, 2)}</text>
               </g>
             );
           })}

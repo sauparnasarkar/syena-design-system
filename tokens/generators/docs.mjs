@@ -133,6 +133,8 @@ export function colourBlocks(themes) {
   ]);
   const seqDivRows = [
     ['Sequential, smallest step between neighbours', Math.min(...night.palette.seqSteps).toFixed(3), Math.min(...tide.palette.seqSteps).toFixed(3), (2 * night.palette.jnd).toFixed(2)],
+    ['Heat, smallest step between neighbours', Math.min(...night.palette.heatSteps).toFixed(3), Math.min(...tide.palette.heatSteps).toFixed(3), (2 * night.palette.jnd).toFixed(2)],
+    ['Heat, closest step to the no-data colour', night.palette.heatVsNoData.toFixed(3), tide.palette.heatVsNoData.toFixed(3), (2 * night.palette.jnd).toFixed(2)],
     ['Diverging, smallest step between neighbours', Math.min(...night.palette.divSteps).toFixed(3), Math.min(...tide.palette.divSteps).toFixed(3), (2 * night.palette.jnd).toFixed(2)],
     ['Diverging, outer cool vs outer warm, worst view', Math.min(...Object.values(night.palette.divAcross)).toFixed(3), Math.min(...Object.values(tide.palette.divAcross)).toFixed(3), (4 * night.palette.jnd).toFixed(2)],
   ];
