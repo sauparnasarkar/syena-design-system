@@ -1,0 +1,63 @@
+.accordion {
+  display: flex;
+  flex-direction: column;
+  border-top: var(--syn-layout-border-hairline) solid var(--syn-color-border-subtle);
+}
+
+.item {
+  border-bottom: var(--syn-layout-border-hairline) solid var(--syn-color-border-subtle);
+}
+
+.heading {
+  margin: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--syn-space-3);
+  width: 100%;
+  min-height: var(--syn-layout-control-height);
+  padding: var(--syn-space-1) var(--syn-space-2);
+  color: var(--syn-color-text-primary);
+  font: 500 var(--syn-type-text-md-size) / var(--syn-type-text-md-line) var(--syn-type-text-md-family);
+  text-align: start;
+}
+
+.header:hover:not(:disabled) {
+  background: var(--syn-color-surface-sunken);
+}
+
+.header:disabled {
+  color: var(--syn-color-text-disabled);
+  cursor: default;
+}
+
+.turned {
+  transform: scaleY(-1);
+}
+
+/* The panel's height animates between zero and its content; closed panels are out of the tab order and the tree. */
+.wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition: grid-template-rows var(--syn-motion-base) var(--syn-easing-emphasis), visibility var(--syn-motion-base);
+}
+
+.wrapOpen {
+  grid-template-rows: 1fr;
+  visibility: visible;
+}
+
+.panel {
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 var(--syn-space-2);
+  color: var(--syn-color-text-secondary);
+}
+
+.wrapOpen .panel {
+  padding-bottom: var(--syn-space-3);
+}

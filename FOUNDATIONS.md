@@ -1268,7 +1268,9 @@ with named values; there are no colour-named variants.
 
 #### Card
 
-- **Purpose and props.** A container for a module. Props: `header`, `withBorder`, `padding`.
+- **Purpose and props.** A container for a module. Props: `header`, `withBorder`, `padding`
+  (`none`, `compact`, `default`, `roomy`: spacing steps 3, 4 and 5, or none), `as` (`div`,
+  `section` or `article`).
 - **Anatomy.** Surface with optional header (`CardHeader`) and body.
 - **States.** Static. Not interactive; use `Tile` for interactive surfaces.
 - **Tokens.** `surface-raised`, `border-default`, `radius-card`, padding `space(4)` by
@@ -1278,8 +1280,8 @@ with named values; there are no colour-named variants.
 
 #### CardHeader
 
-- **Purpose and props.** Title block for a card. Props: `title`, `supportText`, plus a
-  heading level.
+- **Purpose and props.** Title block for a card. Props: `title`, `supportText`, `headingLevel`
+  (3 by default), `actions`, `divider`.
 - **Anatomy.** Title in `title-sm`, support text in `text-sm` and `text-muted` beneath, an
   actions slot at the end.
 - **Tokens.** `text-primary`, `text-muted`, `border-subtle` (optional divider).
@@ -1288,7 +1290,8 @@ with named values; there are no colour-named variants.
 #### Tile
 
 - **Purpose and props.** An interactive card, such as a suggested question. Props:
-  `interactive`, `role`, `tabIndex`, `onClick`, `onKeyDown`.
+  `interactive` with either `href` (a link) or `onClick` (a button). An interactive tile is
+  always a real link or button, so `role`, `tabIndex` and `onKeyDown` are not needed.
 - **Anatomy.** As `Card`; interactive tiles show a trailing arrow.
 - **States.** Default, hover (`surface-sunken` wash and `border-emphasis`), focus,
   pressed.
@@ -1298,8 +1301,8 @@ with named values; there are no colour-named variants.
 
 #### Accordion
 
-- **Purpose and props.** Reveal supporting detail. Props: `items`, `openIds`,
-  `onOpenChange`, `multiple`.
+- **Purpose and props.** Reveal supporting detail. Props: `items` (each `{ id, title, content,
+  disabled? }`), `openIds` (or `defaultOpenIds`), `onOpenChange`, `multiple`, `headingLevel`.
 - **Anatomy.** A stack of rows; each has a header button with a rotating chevron and a
   panel. Rows are separated by `border-subtle`.
 - **States.** Closed, open, hover, focus.
@@ -1320,7 +1323,7 @@ with named values; there are no colour-named variants.
 #### InlineAlert
 
 - **Purpose and props.** A message inside the flow. Props: `variant` (`default`, `warning`,
-  `error`), `title`, and content.
+  `error`), `title`, `onDismiss` (adds a close button) and content.
 - **Anatomy.** Icon, optional title in semibold, message in `text-md`; tinted background
   and a `space(1)` bar at the start edge in the signal fill.
 - **States.** Static; dismissible alerts add a close button.
@@ -1330,7 +1333,7 @@ with named values; there are no colour-named variants.
 
 #### Spinner
 
-- **Purpose and props.** Indeterminate loading. Props: `label`.
+- **Purpose and props.** Indeterminate loading. Props: `label`, `showLabel`.
 - **Anatomy.** A ring of `space(5)` diameter with a quarter-arc in `accent-fill` over a
   `border-default` track; rotates once per `motion-slow` times four.
 - **States.** Spinning; under reduced motion a static partial ring with the label shown.
@@ -1339,8 +1342,8 @@ with named values; there are no colour-named variants.
 
 #### Progress
 
-- **Purpose and props.** Determinate progress. Props: `value` (0 to 1 or 0 to 100 as
-  documented), `label`.
+- **Purpose and props.** Determinate progress. Props: `value` (from 0 to `max`), `max` (100 by
+  default, so `value` reads as a percentage), `label`, `showValue`.
 - **Anatomy.** Label, a track of `space(2)` thickness and a fill in `accent-fill`;
   the value is printed as a figure.
 - **Tokens.** `border-default`, `accent-fill`, `type-figure-sm`.

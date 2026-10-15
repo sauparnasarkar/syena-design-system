@@ -1,0 +1,50 @@
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--syn-space-3);
+  padding: var(--syn-space-3) var(--syn-space-4);
+  border-inline-start: var(--syn-space-1) solid;
+  border-radius: var(--syn-radius-control);
+  color: var(--syn-color-text-secondary);
+  font: var(--syn-type-text-md-weight) var(--syn-type-text-md-size) / var(--syn-type-text-md-line) var(--syn-type-text-md-family);
+}
+
+.message {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.default {
+  border-inline-start-color: var(--syn-color-signal-info-fill);
+  background: var(--syn-color-signal-info-tint);
+}
+
+.warning {
+  border-inline-start-color: var(--syn-color-signal-caution-fill);
+  background: var(--syn-color-signal-caution-tint);
+}
+
+.error {
+  border-inline-start-color: var(--syn-color-signal-negative-fill);
+  background: var(--syn-color-signal-negative-tint);
+}
+
+.default .icon,
+.default .title {
+  color: var(--syn-color-signal-info-text);
+}
+
+.warning .icon,
+.warning .title {
+  color: var(--syn-color-signal-caution-text);
+}
+
+.error .icon,
+.error .title {
+  color: var(--syn-color-signal-negative-text);
+}
