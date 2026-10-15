@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expectHintBalanced, expectLegendFits } from '../../charts/map/legendChecks';
 import { illustrativeEmissions } from '../../specimens/countryValues';
 import { Choropleth } from './Choropleth';
 
@@ -55,6 +56,7 @@ export const Drawn: Story = {
 export const LegendHasATickAtEveryPowerOfTen: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    await waitFor(() => expectLegendFits(canvasElement, { all: true }));
     for (const tick of ['0.01', '0.1', '1', '10', '100', '1,000', '10,000']) await expect(canvas.getByText(tick, { selector: 'li' })).toBeInTheDocument();
     await expect(canvas.getByText('No data')).toBeInTheDocument();
   },
@@ -124,7 +126,9 @@ export const NarrowKeepsTheMapAndLegend: Story = {
   play: async ({ canvasElement }) => {
     await drawn(canvasElement);
     await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth);
-    await expect(within(canvasElement).getByText('10,000', { selector: 'li' })).toBeInTheDocument();
+    // At phone width the labels are thinned (both ends kept), stay inside the bar and never touch; the hint is two even lines.
+    await waitFor(() => expectLegendFits(canvasElement, { all: false }));
+    await waitFor(() => expectHintBalanced(canvasElement));
   },
 };
 

@@ -22,8 +22,6 @@
   position: relative;
   flex: 1 1 var(--syn-layout-field-min);
   min-width: 0;
-  /* Room at both ends for the first and last tick labels, which are centred on their ticks. */
-  padding-inline: var(--syn-space-5);
   padding-block-end: var(--syn-space-5);
 }
 
@@ -37,8 +35,9 @@
 .ticks {
   position: absolute;
   inset-block-start: calc(var(--syn-space-3) + var(--syn-space-1));
-  inset-inline: var(--syn-space-5);
+  inset-inline: 0;
   height: var(--syn-space-5);
+  column-gap: var(--syn-space-2);
 }
 
 .ticks li {
@@ -48,6 +47,19 @@
   font-family: var(--syn-family-figure);
   font-feature-settings: var(--syn-figure-feature-settings);
   white-space: nowrap;
+}
+
+.ticks li.first {
+  transform: none;
+}
+
+.ticks li.last {
+  transform: translateX(-100%);
+}
+
+/* Laid out so it can be measured, but not shown. */
+.ticks li.thinned {
+  visibility: hidden;
 }
 
 .nodata {
