@@ -69,6 +69,8 @@ export const Structure: Story = {
 };
 
 export const ColumnsFillTheWidth: Story = {
+  // Few enough columns to fit at every width, so the last one is always drawn.
+  args: { columns: [columns[0], columns[4], columns[5]] },
   play: async ({ canvasElement }) => {
     await ready(canvasElement);
     // No empty band to the right of the last column: rows reach the edge of the header and the container.
@@ -76,10 +78,13 @@ export const ColumnsFillTheWidth: Story = {
       const root = canvasElement.querySelector('.ag-root') as HTMLElement;
       const lastHeader = [...canvasElement.querySelectorAll('.ag-header-cell')].pop() as HTMLElement;
       expect(Math.abs(lastHeader.getBoundingClientRect().right - root.getBoundingClientRect().right)).toBeLessThanOrEqual(2);
-    });
-    const lastCell = canvasElement.querySelector('.ag-grid-scrolling-rows .ag-row [col-id="change"]') as HTMLElement;
+    }, { timeout: 10000 });
     const root = canvasElement.querySelector('.ag-root') as HTMLElement;
-    await expect(Math.abs(lastCell.getBoundingClientRect().right - root.getBoundingClientRect().right)).toBeLessThanOrEqual(2);
+    await waitFor(() => {
+      const lastCell = canvasElement.querySelector('.ag-grid-scrolling-rows .ag-row [col-id="change"]') as HTMLElement;
+      expect(lastCell).not.toBeNull();
+      expect(Math.abs(lastCell.getBoundingClientRect().right - root.getBoundingClientRect().right)).toBeLessThanOrEqual(2);
+    }, { timeout: 10000 });
   },
 };
 
@@ -101,10 +106,15 @@ export const GridIsAsTallAsItsRows: Story = {
     await ready(canvasElement);
     const rowsEls = [...canvasElement.querySelectorAll('.ag-grid-scrolling-rows .ag-row')];
     await expect(rowsEls).toHaveLength(rows.length);
-    const last = rowsEls.reduce((m, r) => Math.max(m, r.getBoundingClientRect().bottom), 0);
     const root = canvasElement.querySelector('.ag-root-wrapper') as HTMLElement;
-    // No empty strip under the last row (the frame's own border is allowed).
-    await expect(root.getBoundingClientRect().bottom - last).toBeLessThanOrEqual(3);
+    const bar = canvasElement.querySelector('.ag-body-horizontal-scroll') as HTMLElement | null;
+    const reserved = bar && bar.offsetHeight > 0 ? bar.offsetHeight : 0;
+    // No empty strip under the last row beyond the scrollbar's own height (and the frame's border). The grid
+    // measures its rows after the first paint, so give it a moment to settle.
+    await waitFor(() => {
+      const last = rowsEls.reduce((m, r) => Math.max(m, r.getBoundingClientRect().bottom), 0);
+      expect(root.getBoundingClientRect().bottom - last).toBeLessThanOrEqual(reserved + 3);
+    }, { timeout: 10000 });
   },
 };
 
@@ -204,7 +214,7 @@ export const NarrowScrollsInsideItsRegionAndKeepsTheFirstColumn: Story = {
     await waitFor(() => expect(viewport.scrollWidth).toBeGreaterThan(viewport.clientWidth));
     await expect(canvasElement.querySelector('.ag-cell-last-left-pinned')).not.toBeNull();
     // The check above only means something where scrollbars take space, so the test browser must show them.
-    await expect((canvasElement.querySelector('.ag-body-horizontal-scroll') as HTMLElement).offsetHeight).toBeGreaterThan(0);
+    await waitFor(() => expect((canvasElement.querySelector('.ag-body-horizontal-scroll') as HTMLElement).offsetHeight).toBeGreaterThan(0), { timeout: 4000 });
     await expectNothingClipped(canvasElement);
   },
 };
