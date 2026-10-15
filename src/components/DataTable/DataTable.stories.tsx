@@ -102,6 +102,7 @@ export const LabelColumnIsNotTruncatedWhileNumbersHaveSlack: Story = {
 };
 
 export const GridIsAsTallAsItsRows: Story = {
+  tags: ['both-scrollbar-modes'],
   play: async ({ canvasElement }) => {
     await ready(canvasElement);
     const rowsEls = [...canvasElement.querySelectorAll('.ag-grid-scrolling-rows .ag-row')];
@@ -162,6 +163,7 @@ const splitWords = (root: Element) => {
 };
 
 export const NoWordIsEverSplit: Story = {
+  tags: ['both-scrollbar-modes'],
   decorators: [frame('min(100%, 320px)')],
   play: async ({ canvasElement }) => {
     await ready(canvasElement);
@@ -173,6 +175,8 @@ export const NoWordIsEverSplit: Story = {
     await expect(pinned.getBoundingClientRect().width).toBeGreaterThanOrEqual(longest);
     // When two number columns cannot fit beside the label, one shows and the rest scroll: the page itself does not.
     await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth);
+    // Nothing is covered by the scrollbar or cut off, at 320 as at 390.
+    await expectNothingClipped(canvasElement);
   },
 };
 
@@ -189,6 +193,7 @@ export const HeaderUnitSitsOnItsOwnLine: Story = {
 };
 
 export const NoStripWhenNothingScrolls: Story = {
+  tags: ['both-scrollbar-modes'],
   play: async ({ canvasElement }) => {
     await ready(canvasElement);
     // Columns that fit have no horizontal scrollbar, so no height is kept for one below the rows.
@@ -235,6 +240,7 @@ export const Loading: Story = {
 };
 
 export const PhoneWidthFillsAndKeepsTwoNumberColumnsBesideTheLabel: Story = {
+  tags: ['both-scrollbar-modes'],
   decorators: [frame('min(100%, 390px)')],
   play: async ({ canvasElement }) => {
     await ready(canvasElement);
@@ -262,6 +268,7 @@ export const PhoneWidthFillsAndKeepsTwoNumberColumnsBesideTheLabel: Story = {
 };
 
 export const NarrowScrollsInsideItsRegionAndKeepsTheFirstColumn: Story = {
+  tags: ['both-scrollbar-modes'],
   decorators: [frame('min(100%, 390px)')],
   play: async ({ canvasElement }) => {
     await ready(canvasElement);

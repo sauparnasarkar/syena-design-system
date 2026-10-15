@@ -18,6 +18,17 @@ export default defineConfig({
         },
       },
       {
+        // The layout checks that a scrollbar can cover run again in a browser whose scrollbars float over the content and
+        // are drawn by the grid itself (the default headless browser), since the grid lays them out differently there.
+        extends: true,
+        optimizeDeps: { include: ['plotly.js-basic-dist-min'] },
+        plugins: [storybookTest({ configDir: '.storybook', tags: { include: ['both-scrollbar-modes'], exclude: [], skip: [] } })],
+        test: {
+          name: 'storybook-overlay',
+          browser: { enabled: true, headless: true, provider: playwright(), instances: [{ browser: 'chromium' }] },
+        },
+      },
+      {
         test: { name: 'unit', environment: 'node', include: ['tests/unit/**/*.test.ts'] },
       },
     ],

@@ -55,18 +55,13 @@ export function ThemedGrid<Row>({ rowData, columnDefs, defaultColDef, ariaLabel,
     const header = el.querySelector<HTMLElement>('.ag-header')?.offsetHeight ?? 0;
     let bottom = 0;
     api.forEachNodeAfterFilterAndSort((node) => { bottom = Math.max(bottom, (node.rowTop ?? 0) + (node.rowHeight ?? 0)); });
-    // The bar's height is kept only where a scrollbar takes real space (permanent scrollbars) and the grid
-    // scrolls sideways. Overlay scrollbars float over the rows and take none, and a grid that does not
-    // scroll has no bar, so nothing is kept for either.
-    const probe = document.createElement('div');
-    probe.style.cssText = 'position:absolute;visibility:hidden;width:50px;height:50px;overflow:scroll';
-    el.appendChild(probe);
-    const nativeThickness = probe.offsetHeight - probe.clientHeight;
-    probe.remove();
+    // When the grid scrolls sideways, the scrollbar's own height is reserved below the rows: measured from the bar
+    // element, exactly, whether the browser lays it out in the flow or the grid floats it over the last row. A grid
+    // that does not scroll has no bar (the data table switches it off), so nothing is kept.
     const bar = el.querySelector<HTMLElement>('.ag-body-horizontal-scroll');
     const viewport = el.querySelector<HTMLElement>('.ag-body-horizontal-scroll-viewport');
     const scrolls = !!viewport && viewport.scrollWidth > viewport.clientWidth;
-    const barHeight = bar && nativeThickness > 0 && scrolls && bar.offsetHeight > 0 ? bar.offsetHeight : 0;
+    const barHeight = bar && scrolls && getComputedStyle(bar).display !== 'none' ? bar.offsetHeight : 0;
     const root = el.querySelector<HTMLElement>('.ag-root-wrapper');
     const frame = root ? root.offsetHeight - (root.clientHeight || root.offsetHeight) : 0;
     if (header > 0) setFitted(header + bottom + barHeight + frame);
