@@ -34,7 +34,11 @@ const expectNothingClipped = async (el: HTMLElement) => {
     const root = (el.querySelector('.ag-root') as HTMLElement).getBoundingClientRect();
     const rowsEls = [...el.querySelectorAll('.ag-grid-scrolling-rows .ag-row')];
     expect(rowsEls.length).toBeGreaterThan(0);
-    expect(Math.max(...rowsEls.map((r) => r.getBoundingClientRect().bottom))).toBeLessThanOrEqual(root.bottom + 1);
+    const last = Math.max(...rowsEls.map((r) => r.getBoundingClientRect().bottom));
+    expect(last).toBeLessThanOrEqual(root.bottom + 1);
+    // A horizontal scrollbar with height sits below the rows and never covers the last one.
+    const bar = el.querySelector('.ag-body-horizontal-scroll') as HTMLElement | null;
+    if (bar && bar.offsetHeight > 0) expect(last).toBeLessThanOrEqual(bar.getBoundingClientRect().top + 1);
     for (const cell of el.querySelectorAll('.ag-grid-pinned-left-cells .ag-cell')) {
       const text = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT).nextNode()!;
       const range = document.createRange(); range.selectNodeContents(text);
@@ -199,6 +203,8 @@ export const NarrowScrollsInsideItsRegionAndKeepsTheFirstColumn: Story = {
     const viewport = canvasElement.querySelector('.ag-body-horizontal-scroll-viewport') as HTMLElement;
     await waitFor(() => expect(viewport.scrollWidth).toBeGreaterThan(viewport.clientWidth));
     await expect(canvasElement.querySelector('.ag-cell-last-left-pinned')).not.toBeNull();
+    // The check above only means something where scrollbars take space, so the test browser must show them.
+    await expect((canvasElement.querySelector('.ag-body-horizontal-scroll') as HTMLElement).offsetHeight).toBeGreaterThan(0);
     await expectNothingClipped(canvasElement);
   },
 };
