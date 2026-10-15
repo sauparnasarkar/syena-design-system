@@ -173,7 +173,7 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
         onTableViewChange={setTableView}
         hint="Arrow keys turn the globe, + and − zoom, 0 resets."
       />
-      <div className={tableView ? styles.tableView : styles.hidden}>
+      <div className={tableView ? styles.tableView : styles.hidden} {...(tableView ? { role: 'region', 'aria-label': 'Table of values', tabIndex: 0 } : {})}>
         <table id={tableId}>
           <caption>{ariaLabel}</caption>
           <thead><tr><th scope="col">Country</th><th scope="col">{valueLabel}</th></tr></thead>
