@@ -123,6 +123,8 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
   const noData = atContrast({ hue: gc.h, chroma: 0, background: ground, target: 3, direction: 'lighter' });
   const other = atContrast({ hue: gc.h, chroma: gc.c / 2, background: ground, target: 4.5, direction: 'lighter' });
   const unc = atContrast({ hue: gc.h, chroma: gc.c, background: ground, target: 7, direction: 'lighter' });
+  // Annotations are neutral, never a hue a series can have: the contrast midway (geometric mean) between data text and the maximum.
+  const annotation = atContrast({ hue: gc.h, chroma: gc.c, background: ground, target: Math.sqrt(7 * 21), direction: 'lighter' });
   const dataInkDark = ok(L0 * rho ** -11, gc.c, gc.h);
   const dataInkLight = ok(L0, gc.c / rho, gc.h);
   const uncertaintyAlpha = rho ** -8;
@@ -251,7 +253,7 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
       gridline: GEN(hex(gridline)),
       'ink-dark': GEN(hex(dataInkDark)),
       'ink-light': GEN(hex(dataInkLight)),
-      annotation: GEN(hex(ok(lch(hex(dataText)).l, Ccap / rho ** 2, hb))),
+      annotation: GEN(hex(annotation)),
       uncertainty: GEN(hex8(unc, Number(uncertaintyAlpha.toFixed(3)))),
       'no-data': GEN(hex(noData)),
       other: GEN(hex(other)),
@@ -277,7 +279,7 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
   surfaces.forEach((s, i) => { check(`border-emphasis on surface-${surfaceNames[i]}`, borderEmphasis, s, 3); check(`focus-ring on surface-${surfaceNames[i]}`, focusRing, s, 3); });
   check('data-text on data-surface', dataText, ground, 7);
   check('data-text-muted on data-surface', dataTextMuted, ground, 4.5);
-  check('data-annotation on data-surface', ok(lch(hex(dataText)).l, Ccap / rho ** 2, hb), ground, 4.5);
+  check('data-annotation on data-surface', annotation, ground, 4.5);
   check('data-no-data on data-surface', noData, ground, 3);
   const bestInk = (mark) => (contrast(dataInkLight, mark) >= contrast(dataInkDark, mark) ? dataInkLight : dataInkDark);
   sequential.forEach((c, i) => check(`text on data-seq-${i + 1} (data-ink-light or data-ink-dark)`, bestInk(c), c, 4.5));

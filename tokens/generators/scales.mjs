@@ -79,15 +79,17 @@ export function computeScales(inputs, metrics) {
   const type = {};
   for (const [name, def] of Object.entries(inputs.type.roles)) {
     const k = def.step;
+    // A role may fix its own leading, for reading text that needs more air than the scale gives.
+    const lh = def.leading ? whole((sizePx(k) * def.leading) / g) * g : lineHeightPx(k);
     type[name] = {
       step: k,
       family: def.family,
       weight: def.weight,
       sizePx: sizePx(k),
       sizeRem: rem(sizePx(k), r),
-      lineHeightPx: lineHeightPx(k),
-      lineHeightRem: rem(lineHeightPx(k), r),
-      leadingFactor: round(leadingFactor(k), 4),
+      lineHeightPx: lh,
+      lineHeightRem: rem(lh, r),
+      leadingFactor: def.leading ?? round(leadingFactor(k), 4),
       trackingEm: round(tracking(k) + (name === 'overline' ? 6 * kappa : 0), 4),
     };
   }

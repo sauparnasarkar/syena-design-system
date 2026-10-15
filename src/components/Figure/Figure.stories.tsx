@@ -60,3 +60,53 @@ export const Tidewater: Story = {
     </div>
   ),
 };
+
+export const UnitSitsOnTheNumbersBaselineAtEverySize: Story = {
+  render: () => (
+    <div style={{ display: 'grid', gap: 'var(--syn-space-4)', padding: 'var(--syn-space-5)', color: 'var(--syn-color-text-primary)' }}>
+      <Figure size="sm" value={40} unit="%" />
+      <Figure size="md" value={40} unit="%" />
+      <Figure size="lg" value={37.4} decimals={1} unit="GtCO₂ a year" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    // Put a zero-size inline-block in each part: its bottom edge sits on the baseline of the text beside it.
+    const baseline = (el: Element) => {
+      const marker = document.createElement('span');
+      marker.style.cssText = 'display:inline-block;width:0;height:0';
+      el.appendChild(marker);
+      const bottom = marker.getBoundingClientRect().bottom;
+      marker.remove();
+      return bottom;
+    };
+    for (const figure of canvasElement.querySelectorAll<HTMLElement>('div > span')) {
+      const [number, unit] = figure.children;
+      await expect(Math.abs(baseline(number) - baseline(unit))).toBeLessThanOrEqual(0.5);
+      // At most a thin gap: half a spacing step.
+      const gap = unit.getBoundingClientRect().left - number.getBoundingClientRect().right;
+      await expect(gap).toBeLessThanOrEqual(parseFloat(getComputedStyle(unit).marginInlineStart) + 1);
+      // The unit is smaller than the number.
+      await expect(parseFloat(getComputedStyle(unit).fontSize)).toBeLessThan(parseFloat(getComputedStyle(number).fontSize) + 1);
+    }
+  },
+};
+
+export const UnitsInBothThemes: Story = {
+  globals: { theme: 'tidewater' },
+  render: () => (
+    <div style={{ display: 'grid', gap: 'var(--syn-space-3)', padding: 'var(--syn-space-5)', color: 'var(--syn-color-text-primary)' }}>
+      <Figure size="sm" value={40} unit="%" /><Figure size="md" value={4.7} decimals={1} unit="tCO₂" /><Figure size="lg" value={422.8} decimals={1} unit="ppm" />
+    </div>
+  ),
+};
+
+export const UnitTracksAsItsOwnTextStep: Story = {
+  render: () => <div style={{ padding: 'var(--syn-space-5)', color: 'var(--syn-color-text-primary)' }}><Figure size="lg" value={37.4} decimals={1} unit="GtCO₂ a year" /></div>,
+  play: async ({ canvasElement }) => {
+    const [number, unit] = canvasElement.querySelector('div > span')!.children;
+    const em = (el: Element) => parseFloat(getComputedStyle(el).letterSpacing) / parseFloat(getComputedStyle(el).fontSize);
+    // The number keeps its tight display tracking; the unit takes the tracking of its own, smaller step.
+    await expect(em(number)).toBeLessThan(-0.05);
+    await expect(Math.abs(em(unit) - -0.0125)).toBeLessThan(0.001);
+  },
+};

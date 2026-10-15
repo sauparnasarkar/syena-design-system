@@ -246,7 +246,7 @@ labels and units far more often than next to Poppins digits.
 | `caption` | -2 | ui | 400 | 12 px | 0.75 | 20 px | 1.632 | 0.025 |
 | `text-sm` | -1.5 | ui | 400 | 12 px | 0.75 | 20 px | 1.594 | 0.0187 |
 | `text-md` | -1 | ui | 400 | 13 px | 0.8125 | 20 px | 1.560 | 0.0125 |
-| `text-lg` | 0 | ui | 400 | 16 px | 1 | 24 px | 1.500 | 0 |
+| `text-lg` | 0 | ui | 400 | 16 px | 1 | 26 px | 1.625 | 0 |
 | `title-sm` | 1 | ui | 600 | 19 px | 1.1875 | 28 px | 1.450 | -0.0125 |
 | `title-md` | 2 | ui | 600 | 23 px | 1.4375 | 32 px | 1.408 | -0.025 |
 | `title-lg` | 3 | ui | 600 | 28 px | 1.75 | 38 px | 1.374 | -0.0375 |
@@ -261,7 +261,8 @@ and tracking. Role usage:
 
 - `display`: page title on landing and report covers only.
 - `title-lg`, `title-md`, `title-sm`: section, card and sub-section headings.
-- `text-lg`: long-form prose and lead paragraphs.
+- `text-lg`: long-form prose and lead paragraphs. It fixes its own leading at 1.625 (26 px at
+  16 px), looser than the scale gives, because lines of prose are long and need the air.
 - `text-md`: default interface text, control labels, table cells.
 - `text-sm`: dense table cells, secondary notes, tooltips.
 - `caption`: source lines, axis titles, fine print.
@@ -660,7 +661,7 @@ the ground, at the ground's hue:
 |---|---|---|
 | `data-text` | 7:1 | Chart titles, tick labels that carry values |
 | `data-text-muted` | 4.5:1 | Axis titles, legends, source lines |
-| `data-annotation` | at least 4.5:1; the lightness of `data-text` at the accent hue and chroma `C_cap / τ²` | Reference lines, callout leaders and labels |
+| `data-annotation` | `√(7 · 21)` : 1, a neutral at the ground's hue | Reference lines, callout leaders and labels. Never a hue a series can have |
 | `data-other` | 4.5:1 | The remainder bucket of a part-to-whole chart |
 | `data-no-data` | 3:1 | Missing values; always drawn with a hatch, never as a solid |
 | `data-gridline` | √3 : 1 | Gridlines; informational contrast only |
@@ -768,7 +769,7 @@ The table shows each pair family at its worst surface in each theme:
 | focus-ring | 3:1 | 3.72 | 4.07 | pass |
 | data-text | 7:1 | 7.03 | 7.01 | pass |
 | data-text-muted | 4.5:1 | 4.54 | 4.51 | pass |
-| data-annotation | 4.5:1 | 7.27 | 7.17 | pass |
+| data-annotation | 4.5:1 | 12.14 | 12.19 | pass |
 | data-no-data | 3:1 | 3.03 | 3.03 | pass |
 | text on data-seq-1 (data-ink-light or data-ink-dark) | 4.5:1 | 5.81 | 5.46 | pass |
 | text on data-seq-2 (data-ink-light or data-ink-dark) | 4.5:1 | 4.50 | 4.65 | pass |
@@ -1384,7 +1385,8 @@ with named values; there are no colour-named variants.
 - **Purpose and props.** A simple, static table for short lists. Props: `columns`, `rows`,
   `size`, `striped`, `rowBorders`, `withBorder`, `caption`.
 - **Anatomy and states.** As the table specification in §6.2; `Table` is the lightweight
-  variant without sorting or virtualisation.
+  variant without sorting or virtualisation. The caption is shown above the table, outside
+  its scrolling region, and names both. `groups` adds a group header row.
 - **Accessibility.** Native `table` with `caption`, `th scope`; numeric columns right-aligned
   and set in the figure face.
 
@@ -1392,7 +1394,10 @@ with named values; there are no colour-named variants.
 
 - **Purpose and props.** A sortable, scrollable data grid built on the grid library. Props:
   `columns`, `rows`.
-- **Anatomy and states.** As §6.2, including the grid theme derived from tokens.
+- **Anatomy and states.** As §6.2, including the grid theme derived from tokens. The first
+  column is pinned and the others share the remaining width, so the last column meets the
+  right edge of the header and of the container. Props also include `caption`, `loading`,
+  `emptyMessage`, `emptyAction` and `onRowSelected`.
 - **Accessibility.** Grid semantics supplied by the library; header and cell focus styled
   with `focus-ring`; a visible text alternative describes sorting.
 
@@ -1717,6 +1722,22 @@ The header row is sticky at the top of the table's scroll region on `surface-sun
 - The table scrolls inside its own region (a labelled, focusable scroll container) so the
   page never scrolls in two directions; at 320 px width the first column stays visible.
 - Copy: selecting cells and copying yields tab-separated values with headers and units.
+
+#### Narrow widths
+
+Below `bp-compact` a table does not shrink its columns or let the page scroll sideways. It follows
+one of two forms, chosen by the number of columns:
+
+1. *Scrolling region* (more than three columns of figures). The caption is outside the
+   scrolling area, above it, so it never scrolls away or clips. The scrolling area is a
+   labelled, focusable region named by the caption. The first column is fixed at the start
+   edge. A scroll shadow built from `color-shadow` at the dim opacity shows on each edge that has
+   more content beyond it, and goes once the edge is reached.
+2. *Stacked rows* (three columns or fewer). Each row becomes a block: the first column as its
+   heading, the rest as label and value pairs, with the label in `text-muted`.
+
+In both forms, columns are never narrower than `space-10`, and the grid and the static table
+fill the width available so no empty band remains to the right of the last column.
 
 #### Grid theme mapping
 

@@ -1,0 +1,134 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-radius: var(--syn-radius-card);
+  background: var(--syn-color-surface-raised);
+}
+
+.bordered {
+  border: var(--syn-layout-border-hairline) solid var(--syn-color-border-default);
+}
+
+/* The caption is outside the scrolling area, so it never scrolls away or clips. */
+.caption {
+  padding: var(--syn-space-3) var(--syn-space-4);
+  color: var(--syn-color-text-muted);
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+}
+
+/* Edge shadows appear where more content lies beyond the edge: the first pair of gradients scrolls
+   with the content and hides the shadow once the edge is reached. */
+.scroll {
+  overflow-x: auto;
+  border-radius: var(--syn-radius-card);
+  background:
+    linear-gradient(to right, var(--syn-color-surface-raised), var(--syn-color-surface-raised)) local,
+    linear-gradient(to left, var(--syn-color-surface-raised), var(--syn-color-surface-raised)) local,
+    linear-gradient(to right, color-mix(in srgb, var(--syn-color-shadow) calc(var(--syn-opacity-dim) * 100%), transparent), transparent) scroll,
+    linear-gradient(to left, color-mix(in srgb, var(--syn-color-shadow) calc(var(--syn-opacity-dim) * 100%), transparent), transparent) scroll;
+  background-repeat: no-repeat;
+  background-position: left center, right center, left center, right center;
+  background-size: var(--syn-space-4) 100%, var(--syn-space-4) 100%, var(--syn-space-4) 100%, var(--syn-space-4) 100%;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: var(--syn-color-text-secondary);
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+}
+
+.table th,
+.table td {
+  height: var(--syn-layout-control-height);
+  padding: 0 var(--syn-space-4);
+  white-space: nowrap;
+  text-align: start;
+}
+
+.small th,
+.small td {
+  height: var(--syn-layout-control-height-sm);
+}
+
+.table thead td {
+  height: auto;
+  padding: 0;
+  background: var(--syn-color-surface-sunken);
+}
+
+.table thead th {
+  height: auto;
+  padding-block: var(--syn-space-2);
+  border-bottom: var(--syn-layout-border-hairline) solid var(--syn-color-border-default);
+  background: var(--syn-color-surface-sunken);
+  color: var(--syn-color-text-muted);
+  font-weight: 600;
+  vertical-align: bottom;
+}
+
+.table .group {
+  /* The rule under a group is inset at both ends, so neighbouring groups read as separate spans. */
+  border-bottom: 0;
+  background:
+    linear-gradient(var(--syn-color-border-default), var(--syn-color-border-default)) center bottom / calc(100% - var(--syn-space-4)) var(--syn-layout-border-hairline) no-repeat,
+    var(--syn-color-surface-sunken);
+  font: 600 var(--syn-type-overline-size) / var(--syn-type-overline-line) var(--syn-type-overline-family);
+  letter-spacing: var(--syn-type-overline-tracking);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.unit {
+  display: block;
+  font: var(--syn-type-caption-weight) var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-type-caption-family);
+}
+
+/* The first column stays in view when the table scrolls sideways. */
+.table tbody th,
+.table thead tr:last-child th:first-child,
+.table thead tr:first-child:not(:last-child) th:first-child {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: var(--syn-layer-base);
+}
+
+.table tbody th {
+  background: var(--syn-color-surface-raised);
+  color: var(--syn-color-text-primary);
+  font-weight: 500;
+  border-inline-end: var(--syn-layout-border-hairline) solid var(--syn-color-border-subtle);
+}
+
+.table .numeric {
+  text-align: end;
+  font-family: var(--syn-family-figure);
+  font-feature-settings: var(--syn-figure-feature-settings);
+}
+
+.rowBorders tbody th,
+.rowBorders tbody td {
+  border-bottom: var(--syn-layout-border-hairline) solid var(--syn-color-border-subtle);
+}
+
+.rowBorders tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.striped tbody tr:nth-child(even) > * {
+  background: var(--syn-color-surface-sunken);
+}
+
+.table tbody tr:hover > * {
+  background: var(--syn-color-surface-sunken);
+}
+
+.table .selected > * {
+  background: var(--syn-color-accent-tint);
+}
+
+.table .selected > th {
+  box-shadow: inset var(--syn-layout-focus-ring-width) 0 0 var(--syn-color-accent-fill);
+}

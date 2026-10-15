@@ -1,4 +1,6 @@
 .card {
+  /* Cards in a row keep the height of their own content. */
+  align-self: start;
   display: flex;
   flex-direction: column;
   gap: var(--syn-space-3);

@@ -1,16 +1,32 @@
 .figure {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--syn-space-2);
+  display: inline;
   font-feature-settings: var(--syn-figure-feature-settings);
   white-space: nowrap;
 }
 
+/* The unit is set inline with the number, in the same face, so the two share one baseline. It is
+   one type step smaller than its number and at most a thin gap away from it. */
 .unit {
-  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
-  letter-spacing: var(--syn-type-text-sm-tracking);
-  font-feature-settings: normal;
+  margin-inline-start: calc(var(--syn-space-1) / 2);
   color: var(--syn-color-text-muted);
+  font-family: var(--syn-family-figure);
+  font-weight: var(--syn-type-text-md-weight);
+  font-feature-settings: var(--syn-figure-feature-settings);
+}
+
+.sm .unit {
+  font-size: var(--syn-type-text-md-size);
+  letter-spacing: var(--syn-type-text-md-tracking);
+}
+
+.md .unit {
+  font-size: var(--syn-type-text-lg-size);
+  letter-spacing: var(--syn-type-text-lg-tracking);
+}
+
+.lg .unit {
+  font-size: var(--syn-type-title-sm-size);
+  letter-spacing: var(--syn-type-title-sm-tracking);
 }
 
 .srOnly {

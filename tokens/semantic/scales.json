@@ -145,7 +145,7 @@
       },
       "line": {
         "$type": "dimension",
-        "$value": "1.5rem"
+        "$value": "1.625rem"
       },
       "tracking": {
         "$type": "dimension",

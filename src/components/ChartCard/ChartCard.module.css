@@ -1,0 +1,77 @@
+.card {
+  align-self: start;
+}
+
+.panel {
+  padding: var(--syn-space-3);
+  border-radius: var(--syn-radius-card);
+  background: var(--syn-data-surface);
+  color: var(--syn-data-text);
+}
+
+.tableView {
+  min-width: 0;
+}
+
+.skeleton {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--syn-space-3);
+  height: calc(5 * var(--syn-layout-control-height));
+}
+
+.bar {
+  flex: 1;
+  border-radius: var(--syn-radius-control);
+  background: var(--syn-data-gridline);
+}
+
+.message {
+  padding: var(--syn-space-6) var(--syn-space-3);
+  color: var(--syn-data-text);
+  font: var(--syn-type-text-md-weight) var(--syn-type-text-md-size) / var(--syn-type-text-md-line) var(--syn-type-text-md-family);
+  text-align: center;
+}
+
+.retry {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--syn-space-3);
+}
+
+.footer {
+  color: var(--syn-color-text-muted);
+  font: var(--syn-type-caption-weight) var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-type-caption-family);
+}
+
+.stale {
+  color: var(--syn-color-signal-caution-text);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--syn-layer-modal);
+  display: grid;
+  place-items: center;
+  padding: var(--syn-space-4);
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--syn-color-shadow) 55%, transparent);
+}
+
+.dialog {
+  position: relative;
+  width: min(100%, var(--syn-layout-content-max));
+  max-height: 100%;
+  overflow-y: auto;
+  border-radius: var(--syn-radius-card);
+  box-shadow: var(--syn-elevation-3);
+}
+
+.dialog:focus {
+  outline: none;
+}
