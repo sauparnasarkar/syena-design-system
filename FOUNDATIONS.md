@@ -1529,6 +1529,21 @@ with named values; there are no colour-named variants.
 - **Tokens.** `data-cat-*`, `data-other`, `data-seq-*`, `data-ink-light`, `data-ink-dark`,
   `data-surface`, `data-text`, `data-text-muted`.
 
+#### Sparkline
+
+- **Purpose and props.** A line with no axes, for a trend inside a figure or a strip of key
+  figures. Props: `values` (a `null` leaves a gap: the line breaks and is never joined across
+  it), `ariaLabel` (required), `surface` (`card` or `panel`), `size` (`sm` is `space-6` tall,
+  `md` is `space-7`), `showEnd`, `filled`.
+- **Anatomy.** The line stretches to the width of its container with a constant stroke
+  (`focus-ring-width`); a flat series sits in the middle; the last value is marked by a round dot
+  (a zero-length round stroke, so it stays round at any width); `filled` shades under the line at
+  the band opacity.
+- **Tokens.** On a card, `accent-text` (reads at 3:1 or better on every surface); on the dark
+  data panel, `data-cat-1`. `opacity-band` for the fill.
+- **Accessibility.** An image with a name that says what is plotted, the period and the reading.
+  A sparkline is never the only place a number appears.
+
 ### 5.6 Hooks and helpers
 
 - **`useIsMobile`.** True below `bp-compact`. Updates on resize and orientation change;

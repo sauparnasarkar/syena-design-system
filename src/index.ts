@@ -48,3 +48,4 @@ export { Globe, type GlobeProps } from './components/Globe/Globe';
 export { Choropleth, type ChoroplethProps } from './components/Choropleth/Choropleth';
 export { YearControl, type YearControlProps } from './components/YearControl/YearControl';
 export { Treemap, type TreemapProps, type TreemapItem } from './components/Treemap/Treemap';
+export { Sparkline, type SparklineProps } from './components/Sparkline/Sparkline';
