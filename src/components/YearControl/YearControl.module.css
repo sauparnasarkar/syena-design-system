@@ -1,0 +1,11 @@
+.control {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--syn-space-3);
+  min-width: 0;
+}
+
+.control > :last-child {
+  flex: 1 1 var(--syn-layout-field-min);
+  min-width: 0;
+}

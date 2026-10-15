@@ -43,4 +43,28 @@ describe('token build', () => {
     expect(ts).toContain('export const themes');
     expect(ts).toContain('export const breakpointPx');
   });
+
+  it('validates the heat scale in both themes: borders visible, the deepest step apart from the ground, steps ordered', () => {
+    const matrix = JSON.parse(readFileSync('src/generated/reports/contrast-matrix.json', 'utf8')) as Array<{ pair: string; pass: boolean; theme: string; ratio: number; target: number }>;
+    for (const theme of ['night', 'tidewater']) {
+      const heat = matrix.filter((m) => m.theme === theme && m.pair.startsWith('data-heat-'));
+      expect(heat).toHaveLength(7);
+      for (const m of heat) expect(m.ratio).toBeGreaterThanOrEqual(3);
+      const deepest = matrix.find((m) => m.theme === theme && m.pair.startsWith('the deepest heat step'));
+      expect(deepest?.pass).toBe(true);
+      // Lighter first: contrast against the dark ground falls as the scale deepens.
+      const ratios = heat.map((m) => m.ratio);
+      expect(ratios).toEqual([...ratios].sort((a, b) => b - a));
+    }
+  });
+
+  it('names the no-data colour as quieter than the 3:1 floor but never a hue', () => {
+    const matrix = JSON.parse(readFileSync('src/generated/reports/contrast-matrix.json', 'utf8')) as Array<{ pair: string; pass: boolean; theme: string; ratio: number }>;
+    for (const theme of ['night', 'tidewater']) {
+      const noData = matrix.find((m) => m.theme === theme && m.pair === 'data-no-data on data-surface')!;
+      expect(noData.ratio).toBeGreaterThan(1.8);
+      expect(noData.ratio).toBeLessThan(3);
+      expect(matrix.find((m) => m.theme === theme && m.pair === 'text on data-no-data (data-ink-light)')?.pass).toBe(true);
+    }
+  });
 });

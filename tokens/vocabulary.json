@@ -17,7 +17,7 @@
       "numbers": true,
       "elements": [
         "surface", "text", "text-muted", "gridline", "ink-dark", "ink-light", "annotation", "uncertainty", "no-data", "other",
-        "cat", "seq", "div", "neg", "pos", "mid", "change", "decrease", "increase"
+        "cat", "seq", "heat", "div", "neg", "pos", "mid", "change", "decrease", "increase"
       ]
     },
     "type": {

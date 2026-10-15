@@ -120,7 +120,8 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
   const dataText = atContrast({ hue: gc.h, chroma: gc.c, background: ground, target: 7, direction: 'lighter' });
   const dataTextMuted = atContrast({ hue: gc.h, chroma: gc.c, background: ground, target: 4.5, direction: 'lighter' });
   const gridline = atContrast({ hue: gc.h, chroma: gc.c, background: ground, target: Math.sqrt(3), direction: 'lighter' });
-  const noData = atContrast({ hue: gc.h, chroma: 0, background: ground, target: 3, direction: 'lighter' });
+  // Missing data is quieter than data: between the gridline (√3) and the 3:1 floor, never a hue. Its legend swatch is outlined.
+  const noData = atContrast({ hue: gc.h, chroma: 0, background: ground, target: Math.sqrt(Math.sqrt(3) * 3), direction: 'lighter' });
   const other = atContrast({ hue: gc.h, chroma: gc.c / 2, background: ground, target: 4.5, direction: 'lighter' });
   const unc = atContrast({ hue: gc.h, chroma: gc.c, background: ground, target: 7, direction: 'lighter' });
   // Annotations are neutral, never a hue a series can have: the contrast midway (geometric mean) between data text and the maximum.
@@ -192,6 +193,26 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
   };
   const sequential = Array.from({ length: n }, (_, t) => labelled(lLow + ((lHigh - lLow) * t) / (n - 1), Ccap / rho, hb + (60 * t) / (n - 1)));
 
+  // Heat ramp, for magnitudes drawn as heat (maps): pale yellow for low through deep red for high. It is
+  // the one place a signal-adjacent hue carries no good or bad meaning, since the scale only orders magnitude.
+  // Lightness falls linearly from the lightest sequential step to the lightest red that is still clearly apart
+  // from the ground (the geometric mean of the 3:1 graphics floor and the 4.5:1 text floor); chroma rises as it
+  // deepens; hue turns from the start hue to the end hue.
+  const heatN = colourInputs.heatSteps;
+  let heatTop = atContrast({ hue: colourInputs.heatHueTo, chroma: Ccap, background: ground, target: Math.sqrt(3 * 4.5), direction: 'lighter' });
+  // Under protanopia a deep red darkens toward the no-data grey, so the deepest step is moved lighter, a little at a time,
+  // until it is at least 2 JND from the no-data colour in every colour-vision view.
+  for (let k = 0; k < 200 && minViewDistance(heatTop, noData) < 2.1 * colourInputs.jnd; k += 1) {
+    heatTop = ok(lch(heatTop).l + 0.002, Ccap, colourInputs.heatHueTo);
+  }
+  const heatL0 = L0 * rho ** -0.5;
+  const heatL1 = lch(heatTop).l;
+  const heat = Array.from({ length: heatN }, (_, t) => ok(
+    heatL0 + ((heatL1 - heatL0) * t) / (heatN - 1),
+    Ccap * rho ** (-(heatN - 1 - t) / 2),
+    colourInputs.heatHueFrom + ((colourInputs.heatHueTo - colourInputs.heatHueFrom) * t) / (heatN - 1),
+  ));
+
   // Diverging ramp: cool side from the brand hue, warm side from the nearest hue outside the
   // reserved zone of the negative signal.
   const hw = (hn + D) % 360;
@@ -259,6 +280,7 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
       other: GEN(hex(other)),
       cat: Object.fromEntries(categorical.map((c, i) => [String(i + 1), GEN(hex(c))])),
       seq: Object.fromEntries(sequential.map((c, i) => [String(i + 1), GEN(hex(c))])),
+      heat: Object.fromEntries(heat.map((c, i) => [String(i + 1), GEN(hex(c))])),
       div: Object.fromEntries(Object.entries(diverging).map(([i, c]) => [i < 0 ? `neg-${-i}` : i > 0 ? `pos-${i}` : 'mid', GEN(hex(c))])),
       change: { decrease: GEN(hex(change.decrease)), increase: GEN(hex(change.increase)) },
     },
@@ -280,7 +302,8 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
   check('data-text on data-surface', dataText, ground, 7);
   check('data-text-muted on data-surface', dataTextMuted, ground, 4.5);
   check('data-annotation on data-surface', annotation, ground, 4.5);
-  check('data-no-data on data-surface', noData, ground, 3);
+  check('data-no-data on data-surface', noData, ground, Math.sqrt(Math.sqrt(3) * 3));
+  check('text on data-no-data (data-ink-light)', dataInkLight, noData, 4.5);
   const bestInk = (mark) => (contrast(dataInkLight, mark) >= contrast(dataInkDark, mark) ? dataInkLight : dataInkDark);
   sequential.forEach((c, i) => check(`text on data-seq-${i + 1} (data-ink-light or data-ink-dark)`, bestInk(c), c, 4.5));
   Object.entries(diverging).forEach(([i, c]) => check(`text on data-div-${i} (data-ink-light or data-ink-dark)`, bestInk(c), c, 4.5));
@@ -288,6 +311,9 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
   check('data-gridline on data-surface', gridline, ground, 1.7, 'informational');
   categorical.forEach((c, i) => check(`data-cat-${i + 1} on data-surface`, c, ground, 3));
   sequential.forEach((c, i) => check(`data-seq-${i + 1} on data-surface`, c, ground, 3));
+  // Country borders are drawn in the ground colour, so they stay visible exactly when the step reaches 3:1 against it.
+  heat.forEach((c, i) => check(`data-heat-${i + 1} on data-surface (and the borders drawn in it)`, c, ground, 3));
+  check('the deepest heat step on data-surface', heat[heatN - 1], ground, Math.sqrt(3 * 4.5));
   Object.entries(diverging).forEach(([i, c]) => check(`data-div-${i} on data-surface`, c, ground, 3));
   check('data-change-decrease on data-surface', change.decrease, ground, 3);
   check('data-change-increase on data-surface', change.increase, ground, 3);
@@ -320,6 +346,9 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
   lineSet.forEach((c, i) => check(`data-cat-${i + 1} as a thin dashed line on data-surface`, line(c), ground, 3));
   const thresholds = { normal: 3 * jnd, protanopia: 2 * jnd, deuteranopia: 2 * jnd, tritanopia: 2 * jnd };
   const changeByView = Object.fromEntries(viewNames.map((v) => [v, distance(change.decrease, change.increase, v)]));
+  const heatSteps = heat.slice(1).map((c, i) => minViewDistance(c, heat[i]));
+  const heatVsNoData = Math.min(...heat.map((c) => minViewDistance(c, noData)));
+  const heatMonotone = heat.every((c, i) => i === 0 || lch(c).l < lch(heat[i - 1]).l);
   const seqSteps = sequential.slice(1).map((c, i) => minViewDistance(c, sequential[i]));
   const divSteps = Object.keys(diverging).map(Number).sort((a, b) => a - b).slice(1).map((k) => minViewDistance(diverging[k], diverging[k - 1]));
   const divAcross = {};
@@ -339,7 +368,7 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
     palette: {
       categorical: categorical.map((c) => hex(c)), pairs, minByView, thresholds, linePairs, lineMinByView, hues, hueSeparation, duty,
       change: { decrease: hex(change.decrease), increase: hex(change.increase), byView: changeByView },
-      seqSteps, divSteps, divAcross, jnd,
+      seqSteps, heatSteps, heatVsNoData, heatMonotone, divSteps, divAcross, jnd,
     },
   };
 }

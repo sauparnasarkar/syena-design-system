@@ -84,6 +84,9 @@ for (const t of themes) {
   }
   const J = t.palette.jnd;
   if (Math.min(...t.palette.seqSteps) < 2 * J) failures.push(`${t.meta.name}: sequential ramp has neighbours closer than 2 JND`);
+  if (Math.min(...t.palette.heatSteps) < 2 * J) failures.push(`${t.meta.name}: heat ramp has neighbours closer than 2 JND`);
+  if (t.palette.heatVsNoData < 2 * J) failures.push(`${t.meta.name}: a heat step is within 2 JND of the no-data colour`);
+  if (!t.palette.heatMonotone) failures.push(`${t.meta.name}: heat ramp lightness is not monotonic`);
   if (Math.min(...t.palette.divSteps) < 2 * J) failures.push(`${t.meta.name}: diverging ramp has neighbours closer than 2 JND`);
   for (const [v, d] of Object.entries(t.palette.divAcross)) if (d < 4 * J) failures.push(`${t.meta.name}: diverging ends ${v} distance ${d.toFixed(3)} < 4 JND`);
 }

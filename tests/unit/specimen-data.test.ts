@@ -27,3 +27,17 @@ describe('country series', () => {
     expect(anomaly[anomaly.length - 1].value).toBeLessThan(0.9);
   });
 });
+
+describe('illustrative country values', () => {
+  it('are plausible against a world total and span the log scale', async () => {
+    const { illustrativeEmissions, worldTotalMt } = await import('../../src/specimens/countryValues');
+    const values = Object.values(illustrativeEmissions);
+    // Below the 37 GtCO₂ world total used elsewhere, with no country more than about a third of it.
+    expect(worldTotalMt).toBeLessThan(37400);
+    expect(Math.max(...values) / 37400).toBeLessThan(0.35);
+    // Spread across at least five decades of the 0.01 to 10,000 scale, and every value inside it.
+    expect(Math.max(...values) / Math.min(...values)).toBeGreaterThan(1e4);
+    expect(Math.min(...values)).toBeGreaterThanOrEqual(0.01);
+    expect(Math.max(...values)).toBeLessThanOrEqual(10000);
+  });
+});
