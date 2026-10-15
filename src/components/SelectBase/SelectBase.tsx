@@ -126,6 +126,11 @@ export function SelectBase(props: SelectBaseProps) {
     if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(event.key)) { event.preventDefault(); if (!open) openList(); }
   };
 
+  // The count, with the limit worded so it is not read as a position in the list.
+  const summary = multiple && props.maxSelected != null
+    ? `${selected.length} selected${atLimit ? ', limit reached' : `, up to ${props.maxSelected}`}`
+    : `${selected.length} selected`;
+
   const chosen = options.filter((o) => selected.includes(o.value));
   const text = chosen.length === 0 ? placeholder : chosen.length <= 2 || !multiple ? chosen.map((o) => o.label).join(', ') : `${chosen[0].label} and ${chosen.length - 1} more`;
 
@@ -183,13 +188,13 @@ export function SelectBase(props: SelectBaseProps) {
           </ul>
           {multiple ? (
             <div className={styles.footer}>
-              <span>{props.maxSelected != null ? `${selected.length} of ${props.maxSelected} selected${atLimit ? '. Limit reached' : ''}` : `${selected.length} selected`}</span>
+              <span>{summary}</span>
               <button type="button" className={styles.clear} disabled={selected.length === 0} onClick={() => props.onChange([])}>Clear</button>
             </div>
           ) : null}
         </div>
       ) : null}
-      {multiple ? <span className={controls.srOnly} role="status" aria-live="polite">{`${selected.length} selected`}</span> : null}
+      {multiple ? <span className={controls.srOnly} role="status" aria-live="polite">{summary}</span> : null}
       {error ? <span id={ids.error} className={controls.message}><Icon name="warning" size="small" />{error}</span> : null}
     </div>
   );
