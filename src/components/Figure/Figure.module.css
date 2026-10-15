@@ -12,7 +12,6 @@
   font-family: var(--syn-family-figure);
   font-weight: var(--syn-type-text-md-weight);
   font-feature-settings: var(--syn-figure-feature-settings);
-  line-height: 1;
 }
 
 .sm .unit {

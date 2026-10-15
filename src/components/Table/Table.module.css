@@ -56,7 +56,6 @@
 .table thead td {
   height: auto;
   padding: 0;
-  border-bottom: var(--syn-layout-border-hairline) solid var(--syn-color-border-default);
   background: var(--syn-color-surface-sunken);
 }
 

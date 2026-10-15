@@ -47,6 +47,7 @@ export default meta;
 type Story = StoryObj<typeof AppShell>;
 
 export const Wide: Story = {
+  tags: ['desktop-only'],
   render: () => <Example compact={false} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -74,7 +75,7 @@ export const Wide: Story = {
   },
 };
 
-export const WideTidewater: Story = { render: () => <Example compact={false} />, globals: { theme: 'tidewater' } };
+export const WideTidewater: Story = { tags: ['desktop-only'], render: () => <Example compact={false} />, globals: { theme: 'tidewater' } };
 
 export const CompactDrawerAndSheet: Story = {
   render: () => <Example compact />,

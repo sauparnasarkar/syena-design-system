@@ -101,7 +101,7 @@ export function DataTable<Row extends Record<string, unknown>>({ columns, rows, 
       if (isPinned[i]) {
         const w = Math.min(fit[i], room);
         // A pinned label that does not fit its content wraps to further lines instead of truncating.
-        return { ...base, pinned: 'left' as const, width: w, ...(w < fit[i] ? { wrapText: true, autoHeight: true, wrapHeaderText: true, autoHeaderHeight: true } : {}) };
+        return { ...base, pinned: 'left' as const, width: w, ...(w < fit[i] ? { wrapText: true, autoHeight: true, wrapHeaderText: true, autoHeaderHeight: true, cellStyle: { lineHeight: 'var(--syn-type-text-sm-line)', paddingBlock: 'var(--syn-space-2)' } } : {}) };
       }
       return { ...base, flex: fit[i], minWidth: fit[i] };
     });

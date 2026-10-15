@@ -154,6 +154,23 @@ export const PhoneWidthFillsAndKeepsTwoNumberColumnsBesideTheLabel: Story = {
     const view = (canvasElement.querySelector('.ag-grid-viewport') as HTMLElement).getBoundingClientRect();
     const seen = [...canvasElement.querySelectorAll('.ag-header-cell:not(.ag-column-first)')].filter((h) => { const r = h.getBoundingClientRect(); return r.left >= view.left - 1 && r.right <= view.right + 1; });
     await expect(seen.length).toBeGreaterThanOrEqual(2);
+    // Wrapped labels use the text step's line height, and nothing overflows its row.
+    const lineHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--syn-type-text-sm-line')) * parseFloat(getComputedStyle(document.documentElement).fontSize);
+    let wrapped = 0;
+    for (const cell of canvasElement.querySelectorAll('.ag-grid-pinned-left-cells .ag-cell')) {
+      const text = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT).nextNode()!;
+      const range = document.createRange(); range.selectNodeContents(text);
+      const tops = [...new Set([...range.getClientRects()].map((r) => Math.round(r.top)))].sort((a, b) => a - b);
+      if (tops.length > 1) { wrapped += 1; await expect(Math.abs(tops[1] - tops[0] - lineHeight)).toBeLessThanOrEqual(1); }
+      const row = cell.closest('.ag-row') as HTMLElement;
+      // Row heights settle after the first paint, as the wrapped labels are measured.
+      await waitFor(() => {
+        const box = range.getBoundingClientRect();
+        expect(box.top).toBeGreaterThanOrEqual(row.getBoundingClientRect().top - 1);
+        expect(box.bottom).toBeLessThanOrEqual(row.getBoundingClientRect().bottom + 1);
+      });
+    }
+    await expect(wrapped).toBeGreaterThan(0);
     await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth);
   },
 };
