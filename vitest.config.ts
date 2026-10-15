@@ -11,6 +11,7 @@ export default defineConfig({
         plugins: [storybookTest({ configDir: '.storybook' })],
         test: {
           name: 'storybook',
+          setupFiles: ['.storybook/vitest.setup.ts'],
           browser: { enabled: true, headless: true, // Permanent scrollbars, as on Linux and in browsers set to always show them, so layout that a scrollbar
           // would cover is tested where it can fail. Headless mode hides them by default.
           provider: playwright({ launchOptions: { args: ['--disable-features=OverlayScrollbar'], ignoreDefaultArgs: ['--hide-scrollbars'] } }), instances: [{ browser: 'chromium' }] },
