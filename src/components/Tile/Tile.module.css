@@ -1,0 +1,33 @@
+.tile {
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  color: var(--syn-color-text-primary);
+  font: var(--syn-type-text-md-weight) var(--syn-type-text-md-size) / var(--syn-type-text-md-line) var(--syn-type-text-md-family);
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--syn-motion-fast) var(--syn-easing-balanced);
+}
+
+.tile:hover {
+  border-color: var(--syn-color-border-emphasis);
+  background: var(--syn-color-surface-sunken);
+}
+
+.tile:active {
+  border-color: var(--syn-color-accent-fill);
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+}
+
+.arrow {
+  color: var(--syn-color-text-muted);
+}
+
+.tile:hover .arrow {
+  color: var(--syn-color-accent-text);
+}

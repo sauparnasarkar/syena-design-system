@@ -1,0 +1,31 @@
+.progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--syn-space-1);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--syn-space-3);
+}
+
+.label {
+  color: var(--syn-color-text-muted);
+  font: var(--syn-type-caption-weight) var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-type-caption-family);
+}
+
+.track {
+  height: var(--syn-space-2);
+  overflow: hidden;
+  border-radius: var(--syn-radius-pill);
+  background: var(--syn-color-border-default);
+}
+
+.fill {
+  height: 100%;
+  border-radius: var(--syn-radius-pill);
+  background: var(--syn-color-accent-fill);
+  transition: width var(--syn-motion-base) var(--syn-easing-balanced);
+}

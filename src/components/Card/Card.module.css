@@ -1,0 +1,29 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--syn-space-3);
+  min-width: 0;
+  border-radius: var(--syn-radius-card);
+  background: var(--syn-color-surface-raised);
+  color: var(--syn-color-text-secondary);
+}
+
+.bordered {
+  border: var(--syn-layout-border-hairline) solid var(--syn-color-border-default);
+}
+
+.padNone {
+  padding: 0;
+}
+
+.padCompact {
+  padding: var(--syn-space-3);
+}
+
+.padDefault {
+  padding: var(--syn-space-4);
+}
+
+.padRoomy {
+  padding: var(--syn-space-5);
+}
