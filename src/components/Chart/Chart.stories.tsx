@@ -162,6 +162,28 @@ export const PercentStackedBarsShowSharesOfEachTotal: Story = {
   },
 };
 
+export const BarsColouredByASecondValue: Story = {
+  args: {
+    series: [{ name: 'Emissions in 2024', kind: 'bar', x: emitters.map((e) => e.name), y: emitters.map((e) => e.value), colorValues: emitters.map((_, i) => 6 + i * 3), colorLabel: 'Reduction under the scenario, %', formatColorValue: (v: number) => `${v}%`, slot: 1 }],
+    yTitle: 'GtCO₂ in 2024', showLegend: true, ariaLabel: 'Emissions in 2024 for eight countries, each bar coloured by its reduction under a scenario. Illustrative values.',
+  },
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    const canvas = within(canvasElement);
+    await waitFor(() => expect(canvasElement.querySelectorAll('.barlayer .point')).toHaveLength(emitters.length));
+    // Bars with larger values are drawn in different colours, one step of the ramp apart at the ends.
+    const fills = [...canvasElement.querySelectorAll<SVGPathElement>('.barlayer .point path')].map((b) => getComputedStyle(b).fill);
+    await expect(new Set(fills).size).toBe(emitters.length);
+    // The ramp names what the colour measures and labels both ends.
+    await expect(canvas.getAllByText('Reduction under the scenario, %').length).toBeGreaterThan(0);
+    await expect(canvas.getByText('6%')).toBeInTheDocument();
+    await expect(canvas.getByText('27%')).toBeInTheDocument();
+    // The values are in the table form too.
+    const { columns } = chartTable([{ name: 'Emissions in 2024', kind: 'bar', x: ['a'], y: [1], colorValues: [5], colorLabel: 'Reduction' }]);
+    await expect(columns.map((c) => c.header)).toEqual(['Period', 'Emissions in 2024', 'Emissions in 2024: Reduction']);
+  },
+};
+
 export const SecondAxis: Story = {
   args: { series: [{ name: 'Emissions', x: years, y: observed.map((p) => p.value) }, { name: 'Anomaly', axis: 'y2', x: anomaly.map((a) => a.year), y: anomaly.map((a) => a.value) }], y2Title: '°C', ariaLabel: 'Emissions with temperature anomaly on a second axis.' },
   play: async ({ canvasElement }) => { await drawn(canvasElement); await expect(svgText(canvasElement)).toContain('°C'); },

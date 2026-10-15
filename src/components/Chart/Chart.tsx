@@ -1,5 +1,6 @@
 import type { Annotations, Data, Layout, Shape } from 'plotly.js';
 import { useMemo, useState } from 'react';
+import { blendStops } from '../../charts/map/heat';
 import { projectionDash, seriesColour } from '../../charts/palette';
 import { PlotlyChart } from '../../charts/PlotlyChart';
 import { useChartTokens, type ChartTokens } from '../../charts/tokens';
@@ -18,6 +19,13 @@ export interface ChartSeries {
   axis?: 'y' | 'y2';
   /** An interval around the line, drawn as a filled band at the band opacity. */
   band?: { low: number[]; high: number[]; label: string };
+  /** Colours each bar by a second value on the sequential ramp, in the order of the bars. The legend shows the ramp and its two ends. */
+  colorValues?: number[];
+  /** The range the ramp covers. The range of `colorValues` by default. */
+  colorDomain?: [number, number];
+  /** What the colour measures, with its unit: the ramp's title and the tooltip and table label. */
+  colorLabel?: string;
+  formatColorValue?: (value: number) => string;
   /** The categorical slot (1 to 8) when a series must keep its colour across views. Slots are assigned in order otherwise. */
   slot?: number;
 }
@@ -50,10 +58,16 @@ const LABEL_ROW = 16;
 /** The values behind a chart, as table columns and rows, for "View as table". */
 export function chartTable(series: ChartSeries[], xTitle = 'Period') {
   const xs = [...new Set(series.flatMap((s) => s.x))];
-  const columns = [{ key: 'x', header: xTitle }, ...series.map((s, i) => ({ key: `s${i}`, header: s.projected ? `${s.name} (projection)` : s.name, numeric: true as const }))];
-  const rows = xs.map((x) => Object.fromEntries([['x', x], ...series.map((s, i) => [`s${i}`, s.y[s.x.indexOf(x)] ?? '']) ]));
+  const columns = [{ key: 'x', header: xTitle }, ...series.flatMap((s, i) => [
+    { key: `s${i}`, header: s.projected ? `${s.name} (projection)` : s.name, numeric: true as const },
+    ...(s.colorValues ? [{ key: `c${i}`, header: `${s.name}: ${s.colorLabel ?? 'colour value'}`, numeric: true as const }] : []),
+  ])];
+  const rows = xs.map((x) => Object.fromEntries([['x', x], ...series.flatMap((s, i) => [[`s${i}`, s.y[s.x.indexOf(x)] ?? ''], ...(s.colorValues ? [[`c${i}`, s.colorValues[s.x.indexOf(x)] ?? '']] : [])])]));
   return { columns, rows };
 }
+
+/** The range a series' ramp covers. */
+const colourRange = (s: ChartSeries): [number, number] => s.colorDomain ?? (s.colorValues && s.colorValues.length ? [Math.min(...s.colorValues), Math.max(...s.colorValues)] : [0, 1]);
 
 function buildTraces(t: ChartTokens, series: ChartSeries[], hidden: Set<number>, props: Pick<ChartProps, 'orientation' | 'stackedAreaMode'>): Data[] {
   const traces: Data[] = [];
@@ -68,7 +82,14 @@ function buildTraces(t: ChartTokens, series: ChartSeries[], hidden: Set<number>,
       traces.push({ type: 'scatter', mode: 'lines', name: s.band.label, x: xs, y: [...s.band.high, ...[...s.band.low].reverse()], fill: 'toself', fillcolor: colour, opacity: t.bandOpacity, line: { width: 0 }, hoverinfo: 'skip', showlegend: false, ...axis });
     }
     if (s.kind === 'bar') {
-      traces.push({ type: 'bar', name, orientation: horizontal ? 'h' : 'v', x: horizontal ? s.y : s.x, y: horizontal ? s.x : s.y, marker: { color: colour }, ...axis } as Data);
+      const [lo, hi] = colourRange(s);
+      const fills = s.colorValues ? s.colorValues.map((v) => blendStops(t.sequential, (v - lo) / Math.max(1e-9, hi - lo))) : colour;
+      const format = s.formatColorValue ?? ((v: number) => v.toLocaleString('en-GB'));
+      traces.push({
+        type: 'bar', name, orientation: horizontal ? 'h' : 'v', x: horizontal ? s.y : s.x, y: horizontal ? s.x : s.y, marker: { color: fills },
+        ...(s.colorValues ? { customdata: s.colorValues.map(format), hovertemplate: `%{${horizontal ? 'y' : 'x'}}: %{${horizontal ? 'x' : 'y'}}<br>${s.colorLabel ?? 'Colour value'}: %{customdata}<extra>${name}</extra>` } : {}),
+        ...axis,
+      } as Data);
     } else if (s.kind === 'area') {
       traces.push({ type: 'scatter', mode: 'lines', name, x: s.x, y: s.y, stackgroup: 'area', ...(props.stackedAreaMode === 'percent' ? { groupnorm: 'percent' as const } : {}), line: { color: colour, width: 0 }, fillcolor: colour, ...axis } as Data);
     } else if (s.kind === 'marker') {
@@ -166,6 +187,7 @@ export function Chart(props: ChartProps) {
     return { layout, traces: buildTraces(t, series, hidden, { orientation, stackedAreaMode }) };
   }, [t, series, hidden, width, xTitle, yTitle, y2Title, y2TickFormat, barmode, orientation, projectionFrom, referenceX, annotations, yRange, stackedAreaMode]);
 
+  const ramped = series.filter((s, i) => s.colorValues && !hidden.has(i));
   const bandSeries = series.filter((s) => s.band);
   // One range gets a swatch in its path's colour. Several ranges with the same name share one neutral
   // swatch whose label says each takes its own path's colour, instead of one path's colour for all.
@@ -190,6 +212,16 @@ export function Chart(props: ChartProps) {
         </ul>
       ) : null}
       {spec ? <PlotlyChart data={spec.traces} layout={spec.layout} ariaLabel={ariaLabel} height={height} /> : null}
+      {ramped.map((s) => {
+        const [lo, hi] = colourRange(s);
+        const format = s.formatColorValue ?? ((v: number) => v.toLocaleString('en-GB'));
+        return (
+          <div key={`ramp-${s.name}`} className={styles.ramp}>
+            <span>{s.colorLabel ?? 'Colour value'}</span>
+            <div className={styles.rampRow}><span>{format(lo)}</span><span className={styles.bar} aria-hidden="true" /><span>{format(hi)}</span></div>
+          </div>
+        );
+      })}
     </div>
   );
 }
