@@ -224,6 +224,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--syn-layout-module-min)), 1fr));
   gap: var(--syn-layout-gutter);
+  align-items: start;
 }
 
 .rowWide {

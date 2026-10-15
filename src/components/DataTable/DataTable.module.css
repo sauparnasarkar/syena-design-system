@@ -1,0 +1,21 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--syn-space-2);
+  min-width: 0;
+}
+
+.caption {
+  color: var(--syn-color-text-muted);
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+}
+
+.empty {
+  padding: var(--syn-space-4);
+  color: var(--syn-color-text-secondary);
+}
+
+.action {
+  display: flex;
+  justify-content: center;
+}

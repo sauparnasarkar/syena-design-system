@@ -23,6 +23,10 @@ export interface ThemedGridProps<Row> {
   columnDefs: ColDef<Row>[];
   /** The accessible name of the table: what it holds and the period. */
   ariaLabel: string;
+  /** Names the table by a visible caption elsewhere, instead of `ariaLabel`. */
+  ariaLabelledBy?: string;
+  loading?: boolean;
+  onRowSelected?: (row: Row) => void;
   height: number;
   onReady?: (api: GridApi<Row>) => void;
   defaultColDef?: ColDef<Row>;
@@ -31,11 +35,11 @@ export interface ThemedGridProps<Row> {
 }
 
 /** A data grid themed from tokens. The data table component builds on this. */
-export function ThemedGrid<Row>({ rowData, columnDefs, defaultColDef, ariaLabel, height, onReady, noRowsOverlayComponent }: ThemedGridProps<Row>) {
+export function ThemedGrid<Row>({ rowData, columnDefs, defaultColDef, ariaLabel, ariaLabelledBy, loading, onRowSelected, height, onReady, noRowsOverlayComponent }: ThemedGridProps<Row>) {
   const theme = useGridTheme();
   if (!theme) return null;
   return (
-    <div role="region" aria-label={ariaLabel} style={{ height }}>
+    <div role="region" aria-label={ariaLabelledBy ? undefined : ariaLabel} aria-labelledby={ariaLabelledBy} style={{ height }}>
       <AgGridReact<Row>
         theme={theme}
         rowData={rowData}
@@ -43,6 +47,8 @@ export function ThemedGrid<Row>({ rowData, columnDefs, defaultColDef, ariaLabel,
         defaultColDef={defaultColDef}
         rowSelection={{ mode: 'singleRow', checkboxes: false, enableClickSelection: true }}
         noRowsOverlayComponent={noRowsOverlayComponent}
+        loading={loading}
+        onRowSelected={(e) => { if (e.node.isSelected() && e.data) onRowSelected?.(e.data); }}
         onGridReady={(e: GridReadyEvent<Row>) => onReady?.(e.api)}
       />
     </div>

@@ -65,5 +65,9 @@ changing the formulas and inputs, never by editing generated values.
 | [Lucide](https://lucide.dev) (`lucide-react`) | ISC. Icons derived from Feather are also under the MIT licence (Cole Bemis, 2013-present). The licence notices ship with the package. | Icon glyphs, wrapped by the `Icon` component and imported one at a time so unused icons are dropped from bundles |
 | Poppins (`@fontsource/poppins`) | SIL Open Font License 1.1 | Interface typeface |
 | Inter (`@fontsource-variable/inter`) | SIL Open Font License 1.1 | Figure typeface |
+| [d3-geo](https://github.com/d3/d3-geo) | ISC | Orthographic projection and path drawing for `Globe` |
+| [topojson-client](https://github.com/topojson/topojson-client) | ISC | Decoding the country shapes for `Globe` |
+| [world-atlas](https://github.com/topojson/world-atlas) | ISC. Derived from Natural Earth, which is in the public domain. | Country shapes for `Globe` |
+| [iso-3166-1](https://github.com/ZooTools/iso-3166-1) | MIT | Matching country codes to shape identifiers for `Globe` |
 
 Components wrap third-party icons; consumers import `Icon`, not the icon package.

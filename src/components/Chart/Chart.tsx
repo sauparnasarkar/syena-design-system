@@ -1,0 +1,170 @@
+import type { Annotations, Data, Layout, Shape } from 'plotly.js';
+import { useMemo, useState } from 'react';
+import { projectionDash, seriesColour } from '../../charts/palette';
+import { PlotlyChart } from '../../charts/PlotlyChart';
+import { useChartTokens, type ChartTokens } from '../../charts/tokens';
+import { useWidth } from '../../hooks/useWidth';
+import styles from './Chart.module.css';
+
+export type SeriesKind = 'line' | 'bar' | 'area';
+
+export interface ChartSeries {
+  name: string;
+  x: Array<number | string>;
+  y: number[];
+  kind?: SeriesKind;
+  /** Drawn dashed, with its band, and marked as a projection in the tooltip. */
+  projected?: boolean;
+  axis?: 'y' | 'y2';
+  /** An interval around the line, drawn as a filled band at the band opacity. */
+  band?: { low: number[]; high: number[]; label: string };
+  /** The categorical slot (1 to 8) when a series must keep its colour across views. Slots are assigned in order otherwise. */
+  slot?: number;
+}
+
+export interface ChartProps {
+  series: ChartSeries[];
+  xTitle?: string;
+  yTitle: string;
+  y2Title?: string;
+  y2TickFormat?: string;
+  /** What is plotted, the unit, the period and the headline reading, in one sentence. Required. */
+  ariaLabel: string;
+  showLegend?: boolean;
+  height?: number;
+  /** How area series combine. */
+  stackedAreaMode?: 'stack' | 'percent';
+  barmode?: 'group' | 'stack' | 'relative';
+  orientation?: 'v' | 'h';
+  /** Where a projection begins: the region from here on is shaded and labelled. */
+  projectionFrom?: number;
+  /** A reference line, for example a milestone year. */
+  referenceX?: { x: number; label: string };
+  annotations?: Array<{ x: number | string; y: number; text: string }>;
+  yRange?: [number, number];
+}
+
+const LABEL_ROW = 16;
+
+/** The values behind a chart, as table columns and rows, for "View as table". */
+export function chartTable(series: ChartSeries[], xTitle = 'Period') {
+  const xs = [...new Set(series.flatMap((s) => s.x))];
+  const columns = [{ key: 'x', header: xTitle }, ...series.map((s, i) => ({ key: `s${i}`, header: s.projected ? `${s.name} (projection)` : s.name, numeric: true as const }))];
+  const rows = xs.map((x) => Object.fromEntries([['x', x], ...series.map((s, i) => [`s${i}`, s.y[s.x.indexOf(x)] ?? '']) ]));
+  return { columns, rows };
+}
+
+function buildTraces(t: ChartTokens, series: ChartSeries[], hidden: Set<number>, props: Pick<ChartProps, 'orientation' | 'stackedAreaMode'>): Data[] {
+  const traces: Data[] = [];
+  series.forEach((s, i) => {
+    if (hidden.has(i)) return;
+    const colour = seriesColour(t, s.slot ?? i + 1);
+    const horizontal = props.orientation === 'h';
+    const name = s.projected ? `${s.name} (projection)` : s.name;
+    const axis = s.axis === 'y2' ? { yaxis: 'y2' as const } : {};
+    if (s.band) {
+      const xs = [...s.x, ...[...s.x].reverse()];
+      traces.push({ type: 'scatter', mode: 'lines', name: s.band.label, x: xs, y: [...s.band.high, ...[...s.band.low].reverse()], fill: 'toself', fillcolor: colour, opacity: t.bandOpacity, line: { width: 0 }, hoverinfo: 'skip', showlegend: false, ...axis });
+    }
+    if (s.kind === 'bar') {
+      traces.push({ type: 'bar', name, orientation: horizontal ? 'h' : 'v', x: horizontal ? s.y : s.x, y: horizontal ? s.x : s.y, marker: { color: colour }, ...axis } as Data);
+    } else if (s.kind === 'area') {
+      traces.push({ type: 'scatter', mode: 'lines', name, x: s.x, y: s.y, stackgroup: 'area', ...(props.stackedAreaMode === 'percent' ? { groupnorm: 'percent' as const } : {}), line: { color: colour, width: 0 }, fillcolor: colour, ...axis } as Data);
+    } else {
+      traces.push({ type: 'scatter', mode: 'lines', name, x: s.x, y: s.y, line: { color: colour, ...(s.projected ? { dash: projectionDash(t) } : {}) }, ...axis } as Data);
+    }
+  });
+  return traces;
+}
+
+function KeyMark({ series, colour, t }: { series: ChartSeries; colour: string; t: ChartTokens }) {
+  if (series.kind === 'bar' || series.kind === 'area') return <span className={styles.swatch} style={{ background: colour }} aria-hidden="true" />;
+  return (
+    <svg className={styles.line} viewBox="0 0 20 12" aria-hidden="true">
+      <line x1="0" x2="20" y1="6" y2="6" strokeWidth={t.strokeWidth} strokeDasharray={series.projected ? `${3 * t.strokeWidth} ${2 * t.strokeWidth}` : undefined} style={{ stroke: colour }} />
+    </svg>
+  );
+}
+
+/** A themed chart: observed series solid, projections dashed with a band, a legend of toggle buttons, direct labels when there is room. */
+export function Chart(props: ChartProps) {
+  const { series, xTitle, yTitle, y2Title, y2TickFormat, ariaLabel, showLegend = true, height = 320, barmode, orientation, stackedAreaMode, projectionFrom, referenceX, annotations, yRange } = props;
+  const t = useChartTokens();
+  const [hidden, setHidden] = useState<Set<number>>(new Set());
+  const [ref, width] = useWidth<HTMLDivElement>();
+
+  const toggle = (i: number) => setHidden((prev) => {
+    const next = new Set(prev);
+    if (next.has(i)) next.delete(i); else if (series.length - next.size > 1) next.add(i);
+    return next;
+  });
+
+  const spec = useMemo(() => {
+    if (!t) return null;
+    const visible = series.filter((_, i) => !hidden.has(i));
+    const lines = visible.filter((s) => (s.kind ?? 'line') === 'line');
+    // End labels name lines directly, when there are few and the chart is wide enough; otherwise the legend carries identity.
+    const direct = lines.length > 0 && lines.length <= 4 && width >= 520 && orientation !== 'h';
+    const labelWidth = direct ? Math.max(...lines.map((s) => s.name.length)) * 0.6 * t.smallSize + t.space.s4 : 0;
+    const xs = series.flatMap((s) => s.x).filter((x): x is number => typeof x === 'number');
+    const x0 = Math.min(...xs); const x1 = Math.max(...xs);
+    const plotWidth = Math.max(1, width - t.space.s5 - t.space.s4 - labelWidth);
+    const px = (x: number) => ((x - x0) / Math.max(1, x1 - x0)) * plotWidth;
+
+    // Labels above the plot: a label that would overlap an earlier one moves down a row.
+    const notes: Array<{ x: number; text: string }> = [];
+    if (projectionFrom !== undefined) notes.push({ x: projectionFrom, text: 'Projection' });
+    if (referenceX) notes.push({ x: referenceX.x, text: referenceX.label });
+    const placed: Array<{ a: number; b: number; row: number }> = [];
+    const rows = notes.map((n) => {
+      const box = { a: px(n.x) - t.space.s2, b: px(n.x) + n.text.length * 0.6 * t.captionSize + t.space.s2, row: 0 };
+      while (placed.some((p) => p.row === box.row && p.a < box.b && box.a < p.b)) box.row += 1;
+      placed.push(box);
+      return box.row;
+    });
+    const topRows = notes.length ? Math.max(...rows) + 1 : 0;
+
+    const shapes: Partial<Shape>[] = [];
+    const notations: Partial<Annotations>[] = [];
+    if (projectionFrom !== undefined) shapes.push({ type: 'rect', xref: 'x', yref: 'paper', x0: projectionFrom, x1, y0: 0, y1: 1, fillcolor: t.uncertainty, opacity: t.projectionOpacity, line: { width: 0 }, layer: 'below' });
+    if (referenceX) shapes.push({ type: 'line', xref: 'x', yref: 'paper', x0: referenceX.x, x1: referenceX.x, y0: 0, y1: 1 });
+    notes.forEach((n, i) => notations.push({ x: n.x, xref: 'x', y: 1, yref: 'paper', text: n.text, xanchor: 'left', yanchor: 'bottom', xshift: t.space.s2, yshift: rows[i] * LABEL_ROW, showarrow: false }));
+    (annotations ?? []).forEach((a) => notations.push({ x: a.x, y: a.y, text: a.text, showarrow: true, ax: 0, ay: -t.space.s5, arrowwidth: t.strokeWidth }));
+    if (direct) {
+      const ends = lines.map((s) => ({ s, y: s.y[s.y.length - 1], x: s.x[s.x.length - 1] })).sort((a, b) => a.y - b.y);
+      ends.forEach((e) => notations.push({ x: e.x, y: e.y, xref: 'x', yref: e.s.axis === 'y2' ? 'y2' : 'y', text: e.s.name, xanchor: 'left', xshift: t.space.s2, showarrow: false, font: { color: t.text, size: t.smallSize, family: t.familyUi } }));
+    }
+
+    const layout: Partial<Layout> = {
+      showlegend: false,
+      barmode: barmode ?? (series.some((s) => s.kind === 'area') ? undefined : 'group'),
+      margin: { t: t.space.s3 + topRows * LABEL_ROW + (topRows ? t.space.s2 : 0), r: t.space.s4 + labelWidth, l: t.space.s5, b: t.space.s5 },
+      xaxis: { title: xTitle ? { text: xTitle } : undefined },
+      yaxis: { title: { text: yTitle }, ...(yRange ? { range: yRange } : {}) },
+      ...(y2Title ? { yaxis2: { title: { text: y2Title }, overlaying: 'y', side: 'right', tickformat: y2TickFormat, showgrid: false } } : {}),
+      shapes, annotations: notations,
+      hovermode: orientation === 'h' ? 'closest' : 'x unified',
+    };
+    return { layout, traces: buildTraces(t, series, hidden, { orientation, stackedAreaMode }) };
+  }, [t, series, hidden, width, xTitle, yTitle, y2Title, y2TickFormat, barmode, orientation, projectionFrom, referenceX, annotations, yRange, stackedAreaMode]);
+
+  const hasBand = series.some((s) => s.band);
+  return (
+    <div ref={ref} className={styles.chart}>
+      {showLegend && t ? (
+        <ul className={styles.legend} aria-label="Legend">
+          {series.map((s, i) => (
+            <li key={`${s.name}-${i}`}>
+              <button type="button" className={[styles.key, hidden.has(i) ? styles.off : ''].join(' ')} aria-pressed={!hidden.has(i)} onClick={() => toggle(i)}>
+                <KeyMark series={s} colour={seriesColour(t, s.slot ?? i + 1)} t={t} />
+                <span>{s.projected ? `${s.name} (projection)` : s.name}</span>
+              </button>
+            </li>
+          ))}
+          {hasBand ? <li className={styles.bandKey}><span className={styles.swatch} style={{ background: seriesColour(t, 1), opacity: t.bandOpacity }} aria-hidden="true" /><span>{series.find((s) => s.band)!.band!.label}</span></li> : null}
+        </ul>
+      ) : null}
+      {spec ? <PlotlyChart data={spec.traces} layout={spec.layout} ariaLabel={ariaLabel} height={height} /> : null}
+    </div>
+  );
+}
