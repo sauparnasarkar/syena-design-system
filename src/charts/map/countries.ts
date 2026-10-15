@@ -14,5 +14,8 @@ const alpha3ByNumeric = new Map(iso.all().map((c) => [c.numeric.padStart(3, '0')
 /** The ISO 3166-1 alpha-3 code of a shape, if it has one. */
 export const alpha3Of = (f: Feature) => alpha3ByNumeric.get(String(f.id).padStart(3, '0'));
 
-/** The shapes that have an alpha-3 code, with the code. */
-export const coded = shapes.features.flatMap((f) => { const code = alpha3Of(f); return code ? [{ code, name: f.properties.name, shape: f as Feature<Geometry, { name: string }> }] : []; });
+/** Antarctica is left off the maps: it has no country-level values and only takes room at the foot of the world. */
+const left = new Set(['ATA']);
+
+/** The shapes that have an alpha-3 code, with the code, without Antarctica. */
+export const coded = shapes.features.flatMap((f) => { const code = alpha3Of(f); return code && !left.has(code) ? [{ code, name: f.properties.name, shape: f as Feature<Geometry, { name: string }> }] : []; });

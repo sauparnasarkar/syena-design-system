@@ -120,8 +120,9 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
   const dataText = atContrast({ hue: gc.h, chroma: gc.c, background: ground, target: 7, direction: 'lighter' });
   const dataTextMuted = atContrast({ hue: gc.h, chroma: gc.c, background: ground, target: 4.5, direction: 'lighter' });
   const gridline = atContrast({ hue: gc.h, chroma: gc.c, background: ground, target: Math.sqrt(3), direction: 'lighter' });
-  // Missing data is quieter than data: between the gridline (√3) and the 3:1 floor, never a hue. Its legend swatch is outlined.
-  const noData = atContrast({ hue: gc.h, chroma: 0, background: ground, target: Math.sqrt(Math.sqrt(3) * 3), direction: 'lighter' });
+  // Missing data is quieter than data: between the gridline (√3) and the 3:1 floor, tinted toward the ground's hue by a fraction of its chroma (never a
+  // hue of its own). Its legend swatch is outlined.
+  const noData = atContrast({ hue: gc.h, chroma: gc.c / rho ** 2, background: ground, target: Math.sqrt(Math.sqrt(3) * 3), direction: 'lighter' });
   const other = atContrast({ hue: gc.h, chroma: gc.c / 2, background: ground, target: 4.5, direction: 'lighter' });
   const unc = atContrast({ hue: gc.h, chroma: gc.c, background: ground, target: 7, direction: 'lighter' });
   // Annotations are neutral, never a hue a series can have: the contrast midway (geometric mean) between data text and the maximum.

@@ -29,7 +29,7 @@ const tokenNames = ['data-surface', 'data-text', 'data-text-muted', 'data-no-dat
 const defaultDomain: Domain = [0.01, 10000];
 const zoomMax = 8;
 const zoomStep = 1.5;
-const aspect = 0.52;
+const land = { type: 'FeatureCollection' as const, features: coded.map((c) => c.shape) };
 
 type View = { k: number; x: number; y: number };
 const home: View = { k: 1, x: 0, y: 0 };
@@ -47,11 +47,15 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
   const [hover, setHover] = useState<string | null>(null);
   const drag = useRef<{ x: number; y: number } | null>(null);
   const tableId = useId();
-  const height = Math.round(width * aspect);
 
   const rows = useMemo(() => coded.filter((r) => r.code in values).sort((a, b) => values[b.code] - values[a.code]), [values]);
   const stops = t ? heatNames.map((n) => t[n]) : [];
-  const projection = useMemo(() => geoNaturalEarth1().fitSize([Math.max(1, width), Math.max(1, height)], { type: 'Sphere' }), [width, height]);
+  // The projection is fitted to the width of the countries shown, so the map is exactly as tall as it needs to be.
+  const { projection, height } = useMemo(() => {
+    const p = geoNaturalEarth1().fitWidth(Math.max(1, width), land);
+    const [, [, bottom]] = geoPath(p).bounds(land);
+    return { projection: p, height: Math.max(1, Math.ceil(bottom)) };
+  }, [width]);
 
   // The map cannot be dragged off the canvas: at zoom k the pan stays within the extra size.
   const clamp = (v: View): View => ({ k: v.k, x: Math.min(0, Math.max(width - width * v.k, v.x)), y: Math.min(0, Math.max(height - height * v.k, v.y)) });

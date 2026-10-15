@@ -673,7 +673,7 @@ the ground, at the ground's hue:
 | `data-text-muted` | 4.5:1 | Axis titles, legends, source lines |
 | `data-annotation` | `√(7 · 21)` : 1, a neutral at the ground's hue | Reference lines, callout leaders and labels. Never a hue a series can have |
 | `data-other` | 4.5:1 | The remainder bucket of a part-to-whole chart |
-| `data-no-data` | `√(√3 · 3)` : 1, about 2.3:1; never a hue | Missing values: a flat, quiet grey on every map and grid, with the words "No data" in the table view and the hover read-out. Its legend swatch is outlined, so the swatch keeps 3:1 against the ground |
+| `data-no-data` | `√(√3 · 3)` : 1, about 2.3:1; a grey tinted slightly toward the ground's hue, never a hue of its own | Missing values: a flat, quiet grey on every map and grid, with the words "No data" in the table view and the hover read-out. Its legend swatch is outlined, so the swatch keeps 3:1 against the ground |
 | `data-gridline` | √3 : 1 | Gridlines; informational contrast only |
 | `data-uncertainty` | 7:1 colour at α = τ⁻⁸ | Fill of uncertainty bands when a band is not tied to a series; series bands use the series colour at the same α |
 
@@ -794,8 +794,8 @@ The table shows each pair family at its worst surface in each theme:
 | data-text | 7:1 | 7.03 | 7.01 | pass |
 | data-text-muted | 4.5:1 | 4.54 | 4.51 | pass |
 | data-annotation | 4.5:1 | 12.14 | 12.19 | pass |
-| data-no-data | 2.2795070569547775:1 | 2.29 | 2.30 | pass |
-| text on data-no-data (data-ink-light) | 4.5:1 | 7.66 | 7.20 | pass |
+| data-no-data | 2.2795070569547775:1 | 2.30 | 2.28 | pass |
+| text on data-no-data (data-ink-light) | 4.5:1 | 7.62 | 7.25 | pass |
 | text on data-seq-1 (data-ink-light or data-ink-dark) | 4.5:1 | 5.81 | 5.46 | pass |
 | text on data-seq-2 (data-ink-light or data-ink-dark) | 4.5:1 | 4.50 | 4.65 | pass |
 | text on data-seq-3 (data-ink-light or data-ink-dark) | 4.5:1 | 5.78 | 6.00 | pass |
@@ -814,13 +814,13 @@ The table shows each pair family at its worst surface in each theme:
 | data-cat-* | 3:1 | 3.55 | 3.16 | pass |
 | data-seq-* | 3:1 | 3.02 | 3.03 | pass |
 | data-heat-1 on data-surface (and the borders drawn in it) | 3:1 | 13.70 | 12.91 | pass |
-| data-heat-2 on data-surface (and the borders drawn in it) | 3:1 | 11.35 | 10.79 | pass |
-| data-heat-3 on data-surface (and the borders drawn in it) | 3:1 | 9.32 | 8.86 | pass |
-| data-heat-4 on data-surface (and the borders drawn in it) | 3:1 | 7.62 | 7.24 | pass |
-| data-heat-5 on data-surface (and the borders drawn in it) | 3:1 | 6.08 | 5.85 | pass |
-| data-heat-6 on data-surface (and the borders drawn in it) | 3:1 | 4.85 | 4.67 | pass |
-| data-heat-7 on data-surface (and the borders drawn in it) | 3:1 | 3.82 | 3.68 | pass |
-| the deepest heat step | 3.6742346141747673:1 | 3.82 | 3.68 | pass |
+| data-heat-2 on data-surface (and the borders drawn in it) | 3:1 | 11.32 | 10.79 | pass |
+| data-heat-3 on data-surface (and the borders drawn in it) | 3:1 | 9.22 | 8.86 | pass |
+| data-heat-4 on data-surface (and the borders drawn in it) | 3:1 | 7.48 | 7.24 | pass |
+| data-heat-5 on data-surface (and the borders drawn in it) | 3:1 | 5.98 | 5.85 | pass |
+| data-heat-6 on data-surface (and the borders drawn in it) | 3:1 | 4.70 | 4.67 | pass |
+| data-heat-7 on data-surface (and the borders drawn in it) | 3:1 | 3.68 | 3.68 | pass |
+| the deepest heat step | 3.6742346141747673:1 | 3.68 | 3.68 | pass |
 | data-div-* | 3:1 | 4.54 | 4.52 | pass |
 | data-change-decrease | 3:1 | 11.19 | 10.69 | pass |
 | data-change-increase | 3:1 | 3.78 | 3.52 | pass |
@@ -874,8 +874,8 @@ distance between the two outer colours:
 | Measure | night | tidewater | Required |
 |---|---|---|---|
 | Sequential, smallest step between neighbours | 0.057 | 0.049 | 0.04 |
-| Heat, smallest step between neighbours | 0.050 | 0.046 | 0.04 |
-| Heat, closest step to the no-data colour | 0.043 | 0.047 | 0.04 |
+| Heat, smallest step between neighbours | 0.051 | 0.046 | 0.04 |
+| Heat, closest step to the no-data colour | 0.067 | 0.062 | 0.04 |
 | Diverging, smallest step between neighbours | 0.091 | 0.094 | 0.04 |
 | Diverging, outer cool vs outer warm, worst view | 0.094 | 0.119 | 0.08 |
 <!-- /generated:seqdiv-table -->

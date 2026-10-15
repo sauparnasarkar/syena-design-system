@@ -36,13 +36,16 @@ const pixelsNear = (canvas: HTMLCanvasElement, css: string, tolerance = 4) => {
   return n;
 };
 const map = (el: HTMLElement) => within(el).getByRole('img', { name: /World map of annual CO₂ emissions/ }) as HTMLCanvasElement;
-const drawn = (el: HTMLElement) => waitFor(() => expect(pixelsNear(map(el), 'var(--syn-data-no-data)')).toBeGreaterThan(50), { timeout: 8000 });
+// The map has been painted when it holds heat colours; counting the whole scale works at any width, where a few small no-data countries may not.
+const heatPixels = (canvas: HTMLCanvasElement) => [1, 2, 3, 4, 5, 6, 7].reduce((n, i) => n + pixelsNear(canvas, `var(--syn-data-heat-${i})`, 6), 0);
+const drawn = (el: HTMLElement) => waitFor(() => expect(heatPixels(map(el))).toBeGreaterThan(50), { timeout: 8000 });
 
 export const Drawn: Story = {
   play: async ({ canvasElement }) => {
     await drawn(canvasElement);
     const canvas = map(canvasElement);
     // The no-data grey, the panel and several heat steps all appear.
+    await expect(pixelsNear(canvas, 'var(--syn-data-no-data)')).toBeGreaterThan(20);
     const heat = [1, 2, 3, 4, 5, 6, 7].map((i) => pixelsNear(canvas, `var(--syn-data-heat-${i})`, 40));
     await expect(heat.filter((n) => n > 0).length).toBeGreaterThanOrEqual(3);
     await expect(canvas.width / canvas.height).toBeGreaterThan(1.7);

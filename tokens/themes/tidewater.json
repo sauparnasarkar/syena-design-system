@@ -194,7 +194,7 @@
     },
     "no-data": {
       "$type": "color",
-      "$value": "#555555"
+      "$value": "#47575f"
     },
     "other": {
       "$type": "color",
