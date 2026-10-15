@@ -63,6 +63,8 @@ export function gridParams(t: GridTokens, px: (length: string) => number): GridP
     cellHorizontalPadding: px(t['space-4']),
     borderRadius: px(t['radius-control']),
     iconSize: px(t['icon-small']),
+    // Scrollbars and built-in controls follow the theme's colour scheme (set on the theme root)
+    browserColorScheme: 'inherit',
     // Focus
     focusShadow: { spread: px(t['layout-focus-ring-width']), color: t['color-focus-ring'] },
     // Menus, popups, dialogs, tooltips: surfaces, borders and the elevation tokens

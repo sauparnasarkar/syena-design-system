@@ -313,6 +313,72 @@
         "$type": "fontFamily",
         "$value": "{family.figure}"
       }
+    },
+    "figure-unit-sm": {
+      "size": {
+        "$type": "dimension",
+        "$value": "1rem"
+      },
+      "line": {
+        "$type": "dimension",
+        "$value": "1.5rem"
+      },
+      "tracking": {
+        "$type": "dimension",
+        "$value": "0em"
+      },
+      "weight": {
+        "$type": "fontWeight",
+        "$value": 400
+      },
+      "family": {
+        "$type": "fontFamily",
+        "$value": "{family.figure}"
+      }
+    },
+    "figure-unit-md": {
+      "size": {
+        "$type": "dimension",
+        "$value": "1.4375rem"
+      },
+      "line": {
+        "$type": "dimension",
+        "$value": "2rem"
+      },
+      "tracking": {
+        "$type": "dimension",
+        "$value": "0em"
+      },
+      "weight": {
+        "$type": "fontWeight",
+        "$value": 400
+      },
+      "family": {
+        "$type": "fontFamily",
+        "$value": "{family.figure}"
+      }
+    },
+    "figure-unit-lg": {
+      "size": {
+        "$type": "dimension",
+        "$value": "2.0625rem"
+      },
+      "line": {
+        "$type": "dimension",
+        "$value": "2.75rem"
+      },
+      "tracking": {
+        "$type": "dimension",
+        "$value": "0em"
+      },
+      "weight": {
+        "$type": "fontWeight",
+        "$value": 400
+      },
+      "family": {
+        "$type": "fontFamily",
+        "$value": "{family.figure}"
+      }
     }
   },
   "space": {

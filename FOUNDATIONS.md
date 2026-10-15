@@ -254,6 +254,9 @@ labels and units far more often than next to Poppins digits.
 | `figure-sm` | 1 | figure | 500 | 19 px | 1.1875 | 28 px | 1.450 | -0.0125 |
 | `figure-md` | 3 | figure | 500 | 28 px | 1.75 | 38 px | 1.374 | -0.0375 |
 | `figure-lg` | 5 | figure | 500 | 40 px | 2.5 | 52 px | 1.321 | -0.0625 |
+| `figure-unit-sm` | 0 | figure | 400 | 16 px | 1 | 24 px | 1.500 | 0 |
+| `figure-unit-md` | 2 | figure | 400 | 23 px | 1.4375 | 32 px | 1.408 | 0 |
+| `figure-unit-lg` | 4 | figure | 400 | 33 px | 2.0625 | 44 px | 1.345 | 0 |
 <!-- /generated:type-table -->
 
 At the floor, `caption`, `overline` and `text-sm` share a size and differ in weight, case
@@ -1377,7 +1380,7 @@ with named values; there are no colour-named variants.
 - **Purpose and props.** One headline figure with context. Props: `label`, `value`, `delta`,
   `deltaDirection`, `tone`, `card`.
 - **Anatomy.** Label (`caption`, `text-muted`); value (`figure-md`, `text-primary`) with its
-  unit in `text-sm`; delta line: a direction glyph, the signed change, and the comparison
+  unit in `figure-unit-md`; delta line: a direction glyph, the signed change, and the comparison
   period in `text-sm`. `card` wraps it in a card.
 - **Delta tone.** `tone` is `positive` or `negative`. When it is omitted it is derived from
   `deltaDirection` and the metric: emissions rising is negative, falling is positive. The delta is always shown with a sign or arrow glyph.
@@ -1476,8 +1479,11 @@ with named values; there are no colour-named variants.
   the `figure-*` roles), `value` (a number, or text already formatted), `unit`, `unitLabel` (the
   unit spelled for screen readers), `decimals`, `locale`, `tone`, `signed`. Negative values use
   the true minus character.
-- **Anatomy.** The value in the figure face with tabular, lining numerals; the unit in
-  `text-sm` baseline-aligned after it; a sign shown when `signed`.
+- **Anatomy.** The value in the figure face with tabular, lining numerals; the unit baseline-aligned
+  after it, in the figure face, one type step smaller than the value: `figure-unit-sm`,
+  `figure-unit-md` and `figure-unit-lg` sit at steps 0, 2 and 4, one below the steps 1, 3 and 5 of
+  the `figure-*` roles. Units carry no tracking of their own, so their letters never touch. A
+  sign is shown when `signed`.
 - **Accessibility.** Renders text, not an image; units are spelled so that screen readers
   read them.
 
@@ -1742,6 +1748,13 @@ one of two forms, chosen by the number of columns:
 2. *Stacked rows* (three columns or fewer). Each row becomes a block: the first column as its
    heading, the rest as label and value pairs, with the label in `text-muted`.
 
+In `DataTable` the label column is sized to its text, never narrower than its longest word and
+capped so the first two number columns show beside it; when they cannot both fit, one shows and
+the rest scroll. Labels and headers wrap at spaces only, never inside a word; a header's unit
+sits on its own line under the name. A grid whose columns fit has no horizontal scrollbar, and
+one that scrolls sideways keeps the scrollbar's height below the last row only where the browser
+shows scrollbars that take space.
+
 In both forms, columns are never narrower than `space-10`, and the grid and the static table
 fill the width available so no empty band remains to the right of the last column.
 
@@ -1758,6 +1771,7 @@ of §2.5, cell padding is a spacing step, and the icon size is the small icon.
 | `foregroundColor` | `color-text-secondary` |
 | `headerBackgroundColor`, `chromeBackgroundColor` | `color-surface-sunken` |
 | `headerTextColor` | `color-text-muted` |
+| `browserColorScheme` | `inherit`: the theme root sets `color-scheme`, so scrollbars and built-in controls follow the theme |
 | `headerFontWeight` | `type-title-sm-weight` |
 | `borderColor`, `rowBorder` | `color-border-subtle` |
 | `headerRowBorder`, `pinnedColumnBorder` | `color-border-default` |

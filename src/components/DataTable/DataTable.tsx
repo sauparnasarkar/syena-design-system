@@ -1,10 +1,11 @@
-import type { ColDef, GridApi } from 'ag-grid-community';
+import type { ColDef, GridApi, ICellRendererParams, IHeaderParams } from 'ag-grid-community';
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { numericColumn, ThemedGrid } from '../../grid/ThemedGrid';
 import { useWidth } from '../../hooks/useWidth';
 import { useResolvedTokens } from '../../theme/SynThemeProvider';
 import { toPx } from '../../theme/lengths';
 import { Button } from '../Button/Button';
+import { Icon } from '../Icon/Icon';
 import styles from './DataTable.module.css';
 
 export interface DataTableColumn<Row> {
@@ -45,6 +46,30 @@ const textWidth = (text: string, font: string) => {
   return Math.ceil(ruler.measureText(text).width);
 };
 
+/** A column header: its name, which wraps at spaces, and the unit on its own smaller line, as in `Table`. */
+function ColumnHeader({ displayName, unit, numeric, column, progressSort }: IHeaderParams & { unit?: string; numeric?: boolean }) {
+  const [sort, setSort] = useState(column.getSort() ?? null);
+  useEffect(() => {
+    const listener = () => setSort(column.getSort() ?? null);
+    column.addEventListener('sortChanged', listener);
+    return () => column.removeEventListener('sortChanged', listener);
+  }, [column]);
+  return (
+    <div role="presentation" className={[styles.header, numeric ? styles.numeric : ''].join(' ')} onClick={(event) => progressSort(event.shiftKey)}>
+      <span className={styles.headerText}>
+        <span>{displayName}</span>
+        {unit ? <span className={styles.unit}>{unit}</span> : null}
+      </span>
+      {sort ? <Icon name={sort === 'asc' ? 'up' : 'down'} size="small" /> : null}
+    </div>
+  );
+}
+
+/** A label that wraps: at spaces only, so no word is ever split. */
+function WrappedLabel({ valueFormatted, value }: ICellRendererParams) {
+  return <span className={styles.label}>{String(valueFormatted ?? value ?? '')}</span>;
+}
+
 const cellText = <Row extends Record<string, unknown>>(col: DataTableColumn<Row>, row: Row) => {
   const value = row[col.key];
   if (col.format) return col.format(value, row);
@@ -71,7 +96,7 @@ export function DataTable<Row extends Record<string, unknown>>({ columns, rows, 
     return () => { live = false; };
   }, [faceKey]);
 
-  const columnDefs = useMemo<ColDef<Row>[] | null>(() => {
+  const columnDefs = useMemo<{ defs: ColDef<Row>[]; scrolls: boolean } | null>(() => {
     if (!t || width === 0 || !fontsReady) return null;
     const pad = 2 * toPx(t['space-4']);
     const sortIcon = toPx(t['icon-small']) + toPx(t['space-2']);
@@ -79,32 +104,48 @@ export function DataTable<Row extends Record<string, unknown>>({ columns, rows, 
     const ui = `${size}px ${t['family-ui']}`;
     const figure = `500 ${size}px ${t['family-figure']}`;
     const minPx = toPx(t['space-8']);
-    // Content width: the widest of the header and every cell, plus padding, plus the sort icon on the header.
-    const fit = columns.map((col) => {
-      const header = textWidth(col.unit ? `${col.header} (${col.unit})` : col.header, `600 ${ui}`) + sortIcon;
-      const cells = rows.map((row) => textWidth(cellText(col, row), col.numeric ? figure : ui));
-      // A little slack, since the ruler and the grid round glyph advances differently.
-      return Math.max(minPx, Math.ceil(Math.max(header, ...cells) * 1.03) + pad + 2);
+    // A little slack, since the ruler and the grid round glyph advances differently.
+    const slack = (n: number) => Math.ceil(n * 1.03) + pad + 2;
+    const longestWord = (texts: string[], font: string) => Math.max(0, ...texts.flatMap((x) => x.split(/\s+/)).map((w) => textWidth(w, font)));
+    const headerFont = `600 ${ui}`;
+    const info = columns.map((col) => {
+      const texts = rows.map((row) => cellText(col, row));
+      const cellFont = col.numeric ? figure : ui;
+      // Whole text: the widest cell. Never narrower than the longest word anywhere in the column, header included.
+      const whole = Math.max(0, ...texts.map((x) => textWidth(x, cellFont)));
+      const word = Math.max(longestWord(texts, cellFont), longestWord([col.header, col.unit ?? ''], headerFont) + sortIcon);
+      return { whole: slack(Math.max(whole, word)), word: slack(word) };
     });
     const isPinned = columns.map((col, i) => col.pinned ?? i === 0);
-    const free = fit.filter((_, i) => !isPinned[i]);
-    // At least the first two of the other columns show beside the pinned one.
-    const room = Math.max(minPx, width - (free[0] ?? 0) - (free[1] ?? 0) - toPx(t['space-2']));
-    return columns.map((col, i) => {
+    const free = info.filter((_, i) => !isPinned[i]);
+    // Beside the pinned column the first two others are shown if they fit; if they cannot, one is shown and the rest scroll.
+    const room = width - (free[0]?.whole ?? 0) - (free[1]?.whole ?? 0) - toPx(t['space-2']);
+    let total = 0;
+    const defs = columns.map((col, i) => {
       const base = {
         field: col.key as never,
-        headerName: col.unit ? `${col.header} (${col.unit})` : col.header,
+        headerName: col.header,
+        headerComponent: ColumnHeader,
+        headerComponentParams: { unit: col.unit, numeric: !!col.numeric },
         sortable: col.sortable ?? true,
         ...(col.numeric ? numericColumn<Row>() : {}),
         valueFormatter: (p) => cellText(col, p.data as Row),
       } satisfies ColDef<Row>;
       if (isPinned[i]) {
-        const w = Math.min(fit[i], room);
-        // A pinned label that does not fit its content wraps to further lines instead of truncating.
-        return { ...base, pinned: 'left' as const, width: w, ...(w < fit[i] ? { wrapText: true, autoHeight: true, wrapHeaderText: true, autoHeaderHeight: true, cellStyle: { lineHeight: 'var(--syn-type-text-sm-line)', paddingBlock: 'var(--syn-space-2)' } } : {}) };
+        // The label column is as wide as its text up to what leaves room for two number columns, and never
+        // narrower than its longest word. A label that does not fit wraps at spaces, never inside a word.
+        const w = Math.max(Math.max(minPx, info[i].word), Math.min(info[i].whole, room));
+        total += w;
+        return {
+          ...base, pinned: 'left' as const, width: w,
+          ...(w < info[i].whole ? { wrapText: true, autoHeight: true, cellRenderer: WrappedLabel, cellStyle: { lineHeight: 'var(--syn-type-text-sm-line)', paddingBlock: 'var(--syn-space-2)' } } : {}),
+        };
       }
-      return { ...base, flex: fit[i], minWidth: fit[i] };
+      const min = Math.max(minPx, info[i].word);
+      total += info[i].whole;
+      return { ...base, flex: info[i].whole, minWidth: min };
     });
+    return { defs, scrolls: total > width };
   }, [columns, rows, t, width, fontsReady]);
 
   // Row heights follow the wrapped labels, so they are measured again whenever the columns change width,
@@ -132,7 +173,7 @@ export function DataTable<Row extends Record<string, unknown>>({ columns, rows, 
     <div ref={wrap} className={styles.wrap}>
       <p id={captionId} className={styles.caption}>{caption}</p>
       {columnDefs ? (
-        <ThemedGrid<Row> rowData={rows} columnDefs={columnDefs} ariaLabelledBy={captionId} ariaLabel={caption} fitRows={fits && rows.length > 0} height={rows.length === 0 ? rowHeight * 5 : rowHeight * (maxVisibleRows + 1)} loading={loading} onReady={setApi} noRowsOverlayComponent={empty} onRowSelected={onRowSelected} />
+        <ThemedGrid<Row> rowData={rows} columnDefs={columnDefs.defs} suppressHorizontalScroll={!columnDefs.scrolls} ariaLabelledBy={captionId} ariaLabel={caption} fitRows={fits && rows.length > 0} height={rows.length === 0 ? rowHeight * 5 : rowHeight * (maxVisibleRows + 1)} loading={loading} onReady={setApi} noRowsOverlayComponent={empty} onRowSelected={onRowSelected} />
       ) : null}
       {rows.length === 0 && emptyAction ? <div className={styles.action}><Button size="small" onClick={emptyAction.onClick}>{emptyAction.label}</Button></div> : null}
     </div>

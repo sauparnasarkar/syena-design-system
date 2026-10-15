@@ -90,7 +90,7 @@ export function computeScales(inputs, metrics) {
       lineHeightPx: lh,
       lineHeightRem: rem(lh, r),
       leadingFactor: def.leading ?? round(leadingFactor(k), 4),
-      trackingEm: round(tracking(k) + (name === 'overline' ? 6 * kappa : 0), 4),
+      trackingEm: def.tracking ?? round(tracking(k) + (name === 'overline' ? 6 * kappa : 0), 4),
     };
   }
 
