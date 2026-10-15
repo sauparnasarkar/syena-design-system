@@ -1064,8 +1064,11 @@ with named values; there are no colour-named variants.
 #### AnalysisBar and SourceStrip *(shell parts)*
 
 - **AnalysisBar.** Props: `title`, `purpose`, and the controls as children. Sticky at the top of
-  the content column; at compact widths it appears in the sheet and its title becomes a level
-  two heading, because the top bar holds the page heading.
+  the content column; at compact widths it appears in the sheet, where the page title is not
+  repeated: the sheet's own heading is `sheetTitle` (*Filters* by default, level two), because
+  the top bar holds the page heading. In the sheet each control fills the width. The
+  navigation drawer and the sheet each have a visible close control at the top; Escape and a
+  tap on the dimmed area close them too, and focus returns to the button that opened them.
 - **SourceStrip.** Props: `summary`, `compactSummary` (*Sources* by default), `sources`,
   `definitions`, `methodNotes`, and `open` / `defaultOpen` / `onOpenChange`. Sticky at the
   bottom; the disclosure button exposes `aria-expanded` and `aria-controls`, and Escape closes
@@ -1379,6 +1382,9 @@ with named values; there are no colour-named variants.
 - **Anatomy.** Label (`caption`, `text-muted`); value (`figure-md`, `text-primary`) with its
   unit in `text-sm`; delta line: a direction glyph, the signed change, and the comparison
   period in `text-sm`. `card` wraps it in a card.
+- **Zero change.** A change that shows as zero (after rounding to `deltaDecimals`) has no
+  direction: it is written without a sign, with a flat glyph, in the neutral tone and spoken as
+  "no change", whatever direction or tone were passed.
 - **Delta tone.** `tone` is `positive` or `negative`. When it is omitted it is derived from
   `deltaDirection` and the metric: emissions rising is negative, falling is positive. The delta is always shown with a sign or arrow glyph.
 - **States.** Static; loading shows placeholder bars with `aria-busy`.

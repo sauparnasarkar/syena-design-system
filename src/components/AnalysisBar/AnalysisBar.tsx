@@ -9,16 +9,18 @@ export interface AnalysisBarProps {
   purpose?: string;
   /** The controls that set context for every module: geography, period, metric, scenario. */
   children?: ReactNode;
+  /** The heading of the controls sheet at compact widths, where the top bar already holds the page title. */
+  sheetTitle?: string;
 }
 
-export function AnalysisBar({ title, purpose, children }: AnalysisBarProps) {
+export function AnalysisBar({ title, purpose, children, sheetTitle = 'Filters' }: AnalysisBarProps) {
   const shell = useShell();
   const compact = shell?.compact ?? false;
-  const Heading = compact ? 'h2' : 'h1';
+  // At compact widths the page title is in the top bar; the sheet names itself, so the title is not shown twice.
   return (
     <section aria-label="Analysis controls" className={[styles.bar, compact ? styles.sheet : ''].join(' ')} data-syn-sticky={compact ? undefined : 'top'}>
       <div className={styles.titleRow}>
-        <Heading className={styles.title}>{title}</Heading>
+        {compact ? <h2 className={styles.title}>{sheetTitle}</h2> : <h1 className={styles.title}>{title}</h1>}
         {purpose ? <p className={styles.purpose}>{purpose}</p> : null}
       </div>
       {children ? <div className={styles.controls}>{children}</div> : null}

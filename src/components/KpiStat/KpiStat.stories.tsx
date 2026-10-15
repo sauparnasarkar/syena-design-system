@@ -32,7 +32,28 @@ export const RisingCanBeGood: Story = {
   },
 };
 
-export const NeutralChange: Story = { args: { label: 'Share of world emissions', value: 1.2, decimals: 1, unit: '%', delta: 0, deltaDecimals: 1, deltaUnit: ' points', deltaDirection: 'up', tone: 'neutral', deltaNote: 'on 2023' } };
+export const ZeroChangeIsFlatAndNeutral: Story = {
+  // The direction passed in is ignored when the change shows as zero.
+  args: { label: 'Share of world emissions', value: 1.2, decimals: 1, unit: '%', delta: 0, deltaDecimals: 1, deltaUnit: ' points', deltaDirection: 'up', tone: 'negative', deltaNote: 'on 2023' },
+  play: async ({ canvasElement }) => {
+    const stat = within(canvasElement).getByRole('region', { name: 'Share of world emissions' });
+    // No arrow and no sign: a flat glyph and the plain figure, in the neutral colour, spoken as no change.
+    await expect(stat).toHaveTextContent('no change on 2023');
+    await expect(stat.textContent).not.toMatch(/[+−]0/);
+    await expect(stat.textContent).toContain('0.0');
+    await expect(stat.querySelectorAll('svg')).toHaveLength(1);
+    const delta = stat.querySelector('svg')!.parentElement as HTMLElement;
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--syn-color-text-secondary)';
+    canvasElement.appendChild(probe);
+    await expect(getComputedStyle(delta).color).toBe(getComputedStyle(probe).color);
+    probe.remove();
+  },
+};
+export const SmallRoundedChangeIsFlatToo: Story = {
+  args: { label: 'Share of world emissions', value: 1.2, decimals: 1, unit: '%', delta: 0.04, deltaDecimals: 1, deltaUnit: ' points', deltaDirection: 'up', tone: 'positive', deltaNote: 'on 2023' },
+  play: async ({ canvasElement }) => { await expect(within(canvasElement).getByRole('region')).toHaveTextContent('no change on 2023'); },
+};
 export const WithoutChange: Story = { args: { label: 'Atmospheric CO₂', value: 422.8, decimals: 1, unit: 'ppm', unitLabel: 'parts per million' } };
 
 export const Loading: Story = {

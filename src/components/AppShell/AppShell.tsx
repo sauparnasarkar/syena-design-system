@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { Button } from '../Button/Button';
 import { scrollToJumpTarget } from '../../lib/scrollToJumpTarget';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { ShellContext } from './ShellContext';
@@ -33,6 +34,9 @@ function Overlay({ label, side, onClose, children }: { label: string; side: 'sta
     <div className={styles.overlay}>
       <div className={styles.scrim} onClick={onClose} aria-hidden="true" />
       <div ref={panel} role="dialog" aria-modal="true" aria-label={label} tabIndex={-1} className={side === 'start' ? styles.drawer : styles.sheet}>
+        <div className={styles.overlayHeader}>
+          <Button variant="ghost" size="small" icon="close" aria-label={side === 'start' ? 'Close navigation' : 'Close analysis controls'} onClick={onClose} />
+        </div>
         {children}
       </div>
     </div>

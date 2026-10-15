@@ -1,15 +1,15 @@
 import { Kpi, Kpis, partStyles as p } from './Parts';
 import charts from './Charts.module.css';
-import { fmt } from './data';
 import { Fit } from './charts';
 
-const sample = [1111.11, 8888.88, 4072.5, 731.04, 15.2, 2260.77];
+// Evenly spaced, ordered ticks, written the way the tables write numbers: a thousands separator, no decimals.
+const ticks = [0, 2000, 4000, 6000, 8000, 10000];
 const rows = [['Country A', 1111.11], ['Country B', 8888.88], ['Country C', 4072.5], ['Country D', 731.04], ['Country E', 15.2], ['Country F', 1.11]] as const;
 
 const column = (face: 'ui' | 'figure') => (
   <table className={p.table}>
     <caption>{face === 'ui' ? 'UI face (proportional digits)' : 'Figure face (tabular digits)'}</caption>
-    <thead><tr><th scope="col">Country</th><th scope="col" className={p.num} style={face === 'ui' ? { fontFamily: 'var(--syn-family-ui)', fontFeatureSettings: 'normal' } : undefined}>GtCO₂</th></tr></thead>
+    <thead><tr><th scope="col">Country</th><th scope="col" className={p.num} style={face === 'ui' ? { fontFamily: 'var(--syn-family-ui)', fontFeatureSettings: 'normal' } : undefined}>MtCO₂</th></tr></thead>
     <tbody>
       {rows.map(([n, v]) => (
         <tr key={n}><th scope="row">{n}</th><td className={p.num} style={face === 'ui' ? { fontFamily: 'var(--syn-family-ui)', fontFeatureSettings: 'normal' } : undefined}>{v.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td></tr>
@@ -57,18 +57,19 @@ export function FigurePairing() {
         <h2 className={p.pairingTitle}>Chart axis</h2>
         <div className={p.panel}>
           <Fit>{(w) => {
-            const xs = (i: number) => 40 + (i * (w - 80)) / 5;
-            const shown: number[] = [];
-            for (const i of [0, 1, 2, 3, 4, 5]) if (!shown.length || xs(i) - xs(shown[shown.length - 1]) >= 84) shown.push(i);
+            const xs = (i: number) => 40 + (i * (w - 80)) / (ticks.length - 1);
+            // Every other tick is dropped when they would touch, so the ones left stay evenly spaced.
+            const stride = xs(1) - xs(0) >= 64 ? 1 : 2;
+            const shown = ticks.map((_, i) => i).filter((i) => i % stride === 0);
             return (
               <svg className={charts.chart} width={w} height={120} viewBox={`0 0 ${w} 120`} role="img" aria-label="A horizontal axis with tick labels set in the figure face">
                 {shown.map((i) => (
                   <g key={i}>
                     <line className={charts.grid} x1={xs(i)} x2={xs(i)} y1="10" y2="70" />
-                    <text className={charts.tick} x={xs(i)} y="90" textAnchor="middle">{fmt(sample[i], 2)}</text>
+                    <text className={charts.tick} x={xs(i)} y="90" textAnchor="middle">{ticks[i].toLocaleString('en-GB')}</text>
                   </g>
                 ))}
-                <text className={charts.axisTitle} x="40" y="112">GtCO₂ a year</text>
+                <text className={charts.axisTitle} x="40" y="112">MtCO₂ a year</text>
               </svg>
             );
           }}</Fit>

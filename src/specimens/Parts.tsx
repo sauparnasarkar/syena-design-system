@@ -2,8 +2,8 @@ import type { ReactNode } from 'react';
 import { Icon } from '../components/Icon/Icon';
 import styles from './Parts.module.css';
 
-export function Kpi({ label, value, unit, delta, note, direction, tone }: { label: string; value: string; unit: string; delta: string; note: string; direction: 'up' | 'down'; tone: 'positive' | 'negative' | 'neutral' }) {
-  const words = `${direction === 'up' ? 'up' : 'down'} ${delta.replace(/^[+−]/, '')} ${note}`;
+export function Kpi({ label, value, unit, delta, note, direction, tone }: { label: string; value: string; unit: string; delta: string; note: string; direction: 'up' | 'down' | 'flat'; tone: 'positive' | 'negative' | 'neutral' }) {
+  const words = direction === 'flat' ? `no change ${note}` : `${direction} ${delta.replace(/^[+−]/, '')} ${note}`;
   return (
     <section className={styles.kpi} aria-label={label}>
       <span className={styles.kpiLabel}>{label}</span>

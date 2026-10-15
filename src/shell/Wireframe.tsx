@@ -28,6 +28,11 @@ function Rail({ collapsed, overlay, productSlot }: { collapsed: boolean; overlay
       className={[styles.rail, collapsed ? styles.railCollapsed : styles.railExpanded, overlay ? styles.railOverlay : ''].join(' ')}
     >
       <Tag>Rail</Tag>
+      {overlay ? (
+        <button type="button" className={styles.closeButton} aria-label="Close navigation">
+          <span className={styles.glyph} aria-hidden="true" />
+        </button>
+      ) : null}
       {productSlot ? <div className={styles.slot}>Product switcher</div> : null}
       <div className={styles.mark} aria-hidden="true" />
       {destinations.map((g) => (
@@ -61,7 +66,8 @@ function AnalysisBar({ stacked }: { stacked?: boolean }) {
     <section aria-label="Analysis controls" className={[styles.analysis, stacked ? styles.analysisStacked : ''].join(' ')}>
       <Tag>Analysis bar</Tag>
       <div className={styles.titleRow}>
-        <h1 className={styles.title}>Country profile</h1>
+        {/* On a phone the top bar holds the page title, so the sheet does not repeat it. */}
+        {stacked ? <h2 className={styles.title}>Filters</h2> : <h1 className={styles.title}>Country profile</h1>}
         <p className={styles.purpose}>How one country&apos;s emissions have changed and where current policy leads.</p>
       </div>
       <div className={styles.controls}>
@@ -83,12 +89,21 @@ function Canvas() {
     <main className={styles.canvas}>
       <Tag>Canvas</Tag>
       <div className={styles.modules}>
-        {['Key figures', 'Trend', 'Composition', 'Comparison'].map((m, i) => (
-          <section key={m} className={[styles.module, i === 1 ? styles.moduleWide : ''].join(' ')} aria-label={m}>
+        {['Key figures', 'Trend'].map((m) => (
+          <section key={m} className={[styles.module, styles.moduleWide].join(' ')} aria-label={m}>
             <p className={styles.moduleLabel}>{m}</p>
             <div className={styles.moduleBody} />
           </section>
         ))}
+        {/* The last two share one row and fill it, so no empty track is left on the right. */}
+        <div className={[styles.moduleWide, styles.pair].join(' ')}>
+          {['Composition', 'Comparison'].map((m) => (
+            <section key={m} className={styles.module} aria-label={m}>
+              <p className={styles.moduleLabel}>{m}</p>
+              <div className={styles.moduleBody} />
+            </section>
+          ))}
+        </div>
       </div>
     </main>
   );

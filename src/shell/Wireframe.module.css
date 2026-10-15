@@ -146,6 +146,15 @@
   padding: var(--syn-space-3);
 }
 
+.analysisStacked .controls {
+  flex-direction: column;
+}
+
+.analysisStacked .control {
+  min-width: 0;
+  width: 100%;
+}
+
 .titleRow {
   display: flex;
   flex-wrap: wrap;
@@ -225,6 +234,25 @@
 
 .moduleWide {
   grid-column: 1 / -1;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--syn-layout-module-min)), 1fr));
+  gap: var(--syn-layout-gutter);
+}
+
+.closeButton {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--syn-layout-control-height);
+  height: var(--syn-layout-control-height);
+  border: var(--syn-layout-border-hairline) solid var(--syn-color-border-default);
+  border-radius: var(--syn-radius-control);
+  background: transparent;
+  color: var(--syn-color-text-secondary);
 }
 
 .moduleLabel {

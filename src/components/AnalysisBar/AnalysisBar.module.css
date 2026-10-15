@@ -16,6 +16,16 @@
   border-bottom: 0;
 }
 
+.sheet .controls {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.sheet .controls > * {
+  width: 100%;
+  min-width: 0;
+}
+
 .titleRow {
   display: flex;
   flex-wrap: wrap;

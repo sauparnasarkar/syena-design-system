@@ -44,7 +44,31 @@ export const composition = years.map((year, i) => {
 
 export const compositionNames = ['Carbon dioxide', 'Methane', 'Nitrous oxide', 'Other gases'];
 
-export const anomaly = Array.from({ length: 21 }, (_, i) => ({ year: 2004 + i, value: -0.5 + i * 0.075 + wave(i, 0.8) * 0.55 }));
+// Against the 1991 to 2020 baseline: close to zero in the middle of that period, about +0.6 by the latest year.
+export const anomaly = Array.from({ length: 21 }, (_, i) => ({ year: 2004 + i, value: -0.12 + i * 0.037 + wave(i, 0.8) * 0.12 }));
+
+// One country, in MtCO₂ a year. It passes through the indicator table's values (412, 468, 521 and 449) at 1990, 2000,
+// 2010 and 2024; between them it follows a smooth path with small wiggles that vanish at those years.
+const anchors: Array<[number, number]> = [[1990, 412], [2000, 468], [2010, 521], [2024, 449]];
+export const countryObserved = years.map((year, i) => {
+  const k = anchors.findIndex(([y]) => y >= year);
+  const [y1, v1] = anchors[Math.max(1, k)];
+  const [y0, v0] = anchors[Math.max(1, k) - 1];
+  const f = (year - y0) / (y1 - y0);
+  return { year, value: v0 + (v1 - v0) * f + Math.sin(f * Math.PI) * wave(i, 0.9) * 9 };
+});
+const countryLast = countryObserved[countryObserved.length - 1].value;
+
+/** A projection that ends at a given change on the latest year (for example −18% by 2050), with a widening 66% range. */
+export function countryScenario(changePercent: number, spread: number) {
+  const end = countryLast * (1 + changePercent / 100);
+  return futureYears.map((year, i) => {
+    const f = i / (futureYears.length - 1);
+    const value = countryLast + (end - countryLast) * (f * 0.7 + f * f * 0.3);
+    return { year, value, low: value - spread * Math.sqrt(i) * 1.6, high: value + spread * Math.sqrt(i) * 1.6 };
+  });
+}
+export const countryScenarios = [{ name: 'Current policies', points: countryScenario(-18, 4) }];
 
 export const heatRegions = ['Region 1', 'Region 2', 'Region 3', 'Region 4', 'Region 5', 'Region 6'];
 export const heatDecades = ['1990s', '2000s', '2010s', '2020s'];

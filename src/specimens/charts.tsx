@@ -42,13 +42,17 @@ function Axes({ W, H, top, xs, ys, yTicks, xTicks, yFormat = (v: number) => fmt(
 }
 
 /** Observed line, projected scenarios and bands. */
-export function TrendChart({ label, showScenarios = 1, neutralObserved = false, width: W, height: H = 300 }: { label: string; showScenarios?: 1 | 3; neutralObserved?: boolean; width: number; height?: number }) {
-  const shown = scenarios.slice(0, showScenarios);
+type Trend = { year: number; value: number; low?: number; high?: number };
+type Path = { name: string; points: Array<Required<Trend>> };
+
+export function TrendChart({ label, showScenarios = 1, neutralObserved = false, width: W, height: H = 300, observedData = observed, scenarioData = scenarios, yTicks = [10, 20, 30, 40], yStep = 5, yTitle = 'GtCO₂ a year' }: { label: string; showScenarios?: 1 | 3; neutralObserved?: boolean; width: number; height?: number; observedData?: Trend[]; scenarioData?: Path[]; yTicks?: number[]; yStep?: number; yTitle?: string }) {
+  const shown = scenarioData.slice(0, showScenarios);
+  const obs = observedData;
   // Direct labels need room on the right; narrow charts rely on the legend instead.
   const direct = W >= 520;
   const labelW = direct ? Math.max(...shown.map((s) => s.name.length)) * charWidth + 12 : 0;
   const right = pad.r + labelW;
-  const all = [...observed.map((p) => p.value), ...scenarios.flatMap((s) => s.points.flatMap((p) => [p.low, p.high]))];
+  const all = [...obs.map((p) => p.value), ...scenarioData.flatMap((s) => s.points.flatMap((p) => [p.low, p.high]))];
   const xs = scale(1990, 2050, pad.l, W - right);
 
   // Annotation labels sit in a band above the plot. A label that would overlap an earlier one moves down a row.
@@ -64,7 +68,7 @@ export function TrendChart({ label, showScenarios = 1, neutralObserved = false, 
     return box.row;
   });
   const top = 28 + Math.max(...rows) * rowStep;
-  const ys = scale(Math.floor(Math.min(...all) / 5) * 5, Math.ceil(Math.max(...all) / 5) * 5, H - pad.b, top);
+  const ys = scale(Math.floor(Math.min(...all) / yStep) * yStep, Math.ceil(Math.max(...all) / yStep) * yStep, H - pad.b, top);
 
   // End labels: one per path, kept inside the chart and at least a line apart.
   const ends = shown.map((s, i) => ({ s, i, y: ys(s.points[s.points.length - 1].value) }));
@@ -73,7 +77,7 @@ export function TrendChart({ label, showScenarios = 1, neutralObserved = false, 
 
   return (
     <svg className={styles.chart} width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label}>
-      <Axes W={W - labelW} H={H} top={top} xs={xs} ys={ys} yTicks={[10, 20, 30, 40]} xTicks={[1990, 2000, 2010, 2020, 2030, 2040, 2050]} yTitle="GtCO₂ a year" />
+      <Axes W={W - labelW} H={H} top={top} xs={xs} ys={ys} yTicks={yTicks} xTicks={[1990, 2000, 2010, 2020, 2030, 2040, 2050]} yFormat={(v) => v.toLocaleString('en-GB')} yTitle={yTitle} />
       <rect className={styles.projection} x={xs(2024)} y={top} width={W - right - xs(2024)} height={H - pad.b - top} />
       {notes.map((n, i) => (
         <text key={n.text} className={styles.annotation} x={n.x} y={14 + rows[i] * rowStep}>{n.text}</text>
@@ -82,16 +86,16 @@ export function TrendChart({ label, showScenarios = 1, neutralObserved = false, 
         <path key={s.name} className={styles.band} style={{ fill: `var(--syn-data-cat-${i + 1})` }}
           d={`${path(s.points.map((p) => [xs(p.year), ys(p.high)]))}L${[...s.points].reverse().map((p) => `${xs(p.year).toFixed(1)} ${ys(p.low).toFixed(1)}`).join('L')}Z`} />
       ))}
-      <path className={styles.line} style={{ stroke: neutralObserved ? 'var(--syn-data-text)' : 'var(--syn-data-cat-1)' }} d={path(observed.map((p) => [xs(p.year), ys(p.value)]))} />
+      <path className={styles.line} style={{ stroke: neutralObserved ? 'var(--syn-data-text)' : 'var(--syn-data-cat-1)' }} d={path(obs.map((p) => [xs(p.year), ys(p.value)]))} />
       {shown.map((s, i) => (
         <Fragment key={s.name}>
-          <path className={styles.dashed} style={{ stroke: `var(--syn-data-cat-${i + 1})` }} d={path([[xs(2024), ys(observed[observed.length - 1].value)], ...s.points.slice(1).map((p): [number, number] => [xs(p.year), ys(p.value)])])} />
+          <path className={styles.dashed} style={{ stroke: `var(--syn-data-cat-${i + 1})` }} d={path([[xs(2024), ys(obs[obs.length - 1].value)], ...s.points.slice(1).map((p): [number, number] => [xs(p.year), ys(p.value)])])} />
         </Fragment>
       ))}
       {direct && ends.map((e) => (
         <text key={e.s.name} className={styles.direct} x={W - right + 8} y={e.y} dominantBaseline="middle" style={{ fill: 'var(--syn-data-text)' }}>{e.s.name}</text>
       ))}
-      <circle cx={xs(2024)} cy={ys(observed[observed.length - 1].value)} r="3" style={{ fill: neutralObserved ? 'var(--syn-data-text)' : 'var(--syn-data-cat-1)' }} />
+      <circle cx={xs(2024)} cy={ys(obs[obs.length - 1].value)} r="3" style={{ fill: neutralObserved ? 'var(--syn-data-text)' : 'var(--syn-data-cat-1)' }} />
       <line className={styles.reference} x1={xs(2030)} x2={xs(2030)} y1={top} y2={H - pad.b} />
     </svg>
   );

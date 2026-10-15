@@ -88,6 +88,15 @@
   box-shadow: var(--syn-elevation-3);
 }
 
+.overlayHeader {
+  position: sticky;
+  top: 0;
+  z-index: var(--syn-layer-base);
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--syn-space-2) var(--syn-space-2) 0;
+}
+
 .drawer nav {
   position: static;
   width: 100%;
