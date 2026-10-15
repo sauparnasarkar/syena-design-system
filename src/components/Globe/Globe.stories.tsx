@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expectHintBalanced, expectLegendFits } from '../../charts/map/legendChecks';
 import { illustrativeEmissions } from '../../specimens/countryValues';
 import { Globe } from './Globe';
 
@@ -52,6 +53,7 @@ export const LegendHasATickAtEveryPowerOfTen: Story = {
   args: { autoRotate: false },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    await waitFor(() => expectLegendFits(canvasElement, { all: true }));
     for (const tick of ['0.01', '0.1', '1', '10', '100', '1,000', '10,000']) await expect(canvas.getByText(tick, { selector: 'li' })).toBeInTheDocument();
     await expect(canvas.getByText('No data')).toBeInTheDocument();
     await expect(canvas.getByText('CO₂ emissions in 2024, MtCO₂ (illustrative), log scale')).toBeInTheDocument();
@@ -133,6 +135,15 @@ export const TurnsUntilFocused: Story = {
     const still = snap();
     await new Promise((r) => setTimeout(r, 400));
     await expect(snap()).toBe(still);
+  },
+};
+
+export const NarrowThinsTheLegendAndBalancesTheHint: Story = {
+  args: { autoRotate: false, size: 260 },
+  decorators: [(Story) => <div style={{ width: 'min(100%, 20rem)' }}><Story /></div>],
+  play: async ({ canvasElement }) => {
+    await waitFor(() => expectLegendFits(canvasElement, { all: false }));
+    await waitFor(() => expectHintBalanced(canvasElement));
   },
 };
 

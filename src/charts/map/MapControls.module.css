@@ -17,6 +17,8 @@
   color: var(--syn-data-text-muted);
   font: var(--syn-type-caption-weight) var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-type-caption-family);
   text-align: center;
+  /* Two short lines of about the same length, never a single word alone on the last. */
+  text-wrap: balance;
 }
 
 .button {
