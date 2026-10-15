@@ -160,8 +160,10 @@ export function Chart(props: ChartProps) {
     return { layout, traces: buildTraces(t, series, hidden, { orientation, stackedAreaMode }) };
   }, [t, series, hidden, width, xTitle, yTitle, y2Title, y2TickFormat, barmode, orientation, projectionFrom, referenceX, annotations, yRange, stackedAreaMode]);
 
-  const bandSeries = series.find((s) => s.band);
-  const hasBand = !!bandSeries;
+  const bandSeries = series.filter((s) => s.band);
+  // One range gets a swatch in its path's colour. Several ranges with the same name share one neutral
+  // swatch whose label says each takes its own path's colour, instead of one path's colour for all.
+  const sharedBandLabel = bandSeries.length > 1 && new Set(bandSeries.map((s) => s.band!.label)).size === 1;
   return (
     <div ref={ref} className={styles.chart}>
       {showLegend && t ? (
@@ -174,7 +176,11 @@ export function Chart(props: ChartProps) {
               </button>
             </li>
           ))}
-          {hasBand ? <li className={styles.bandKey}><span className={styles.swatch} style={{ background: seriesColour(t, bandSeries!.slot ?? series.indexOf(bandSeries!) + 1), opacity: t.bandOpacity }} aria-hidden="true" /><span>{bandSeries!.band!.label}</span></li> : null}
+          {sharedBandLabel ? (
+            <li className={styles.bandKey}><span className={styles.swatch} style={{ background: t.textMuted, opacity: t.bandOpacity }} aria-hidden="true" /><span>{bandSeries[0].band!.label}, in each path’s colour</span></li>
+          ) : bandSeries.map((s) => (
+            <li key={`band-${s.name}`} className={styles.bandKey}><span className={styles.swatch} style={{ background: seriesColour(t, s.slot ?? series.indexOf(s) + 1), opacity: t.bandOpacity }} aria-hidden="true" /><span>{s.band!.label}</span></li>
+          ))}
         </ul>
       ) : null}
       {spec ? <PlotlyChart data={spec.traces} layout={spec.layout} ariaLabel={ariaLabel} height={height} /> : null}

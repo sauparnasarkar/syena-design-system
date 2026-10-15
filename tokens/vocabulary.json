@@ -23,7 +23,7 @@
     "type": {
       "elements": [
         "display", "title-lg", "title-md", "title-sm", "text-lg", "text-md", "text-sm",
-        "caption", "overline", "figure-lg", "figure-md", "figure-sm",
+        "caption", "overline", "figure-lg", "figure-md", "figure-sm", "figure-unit-lg", "figure-unit-md", "figure-unit-sm",
         "size", "line", "tracking", "weight", "family"
       ]
     },

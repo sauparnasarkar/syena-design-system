@@ -28,6 +28,7 @@ const expected = [
   'cellBatchEditTextColor',
   'cellEditingBorder',
   'cellEditingShadow',
+  'browserColorScheme',
   'cellHorizontalPadding',
   'cellTextColor',
   'checkboxCheckedBackgroundColor',

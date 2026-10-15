@@ -30,6 +30,8 @@ jobs:
         run: node scripts/check-allowlist.mjs --build storybook-static/assets
       - name: Stories (interaction and axe) and unit tests
         run: npx vitest run
+      - name: Layout checks with floating scrollbars
+        run: npm run test:overlay
       - name: Visual comparison
         if: ${{ hashFiles('tests/visual/__screenshots__/**') != '' }}
         run: npm run test:visual

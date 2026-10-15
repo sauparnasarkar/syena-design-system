@@ -100,13 +100,28 @@ export const UnitsInBothThemes: Story = {
   ),
 };
 
-export const UnitTracksAsItsOwnTextStep: Story = {
-  render: () => <div style={{ padding: 'var(--syn-space-5)', color: 'var(--syn-color-text-primary)' }}><Figure size="lg" value={37.4} decimals={1} unit="GtCO₂ a year" /></div>,
+export const UnitIsOneTypeStepSmallerAtEverySize: Story = {
+  render: () => (
+    <div style={{ display: 'grid', gap: 'var(--syn-space-4)', padding: 'var(--syn-space-5)', color: 'var(--syn-color-text-primary)' }}>
+      <Figure size="sm" value={40} unit="%" />
+      <Figure size="md" value={4.7} decimals={1} unit="tCO₂" />
+      <Figure size="lg" value={37.4} decimals={1} unit="GtCO₂ a year" />
+    </div>
+  ),
   play: async ({ canvasElement }) => {
-    const [number, unit] = canvasElement.querySelector('div > span')!.children;
-    const em = (el: Element) => parseFloat(getComputedStyle(el).letterSpacing) / parseFloat(getComputedStyle(el).fontSize);
-    // The number keeps its tight display tracking; the unit takes the tracking of its own, smaller step.
-    await expect(em(number)).toBeLessThan(-0.05);
-    await expect(Math.abs(em(unit) - -0.0125)).toBeLessThan(0.001);
+    // `normal` (no tracking) reads as 0.
+    const px = (el: Element, prop: 'fontSize' | 'letterSpacing') => parseFloat(getComputedStyle(el)[prop]) || 0;
+    for (const figure of canvasElement.querySelectorAll<HTMLElement>('div > span')) {
+      const [number, unit] = figure.children;
+      // One step of the scale is a factor of 1.2: the unit is that much smaller than its number, not several steps.
+      const ratio = px(number, 'fontSize') / px(unit, 'fontSize');
+      await expect(ratio).toBeGreaterThan(1.1);
+      await expect(ratio).toBeLessThan(1.3);
+      // The unit does not inherit the number's tight display tracking, which makes its letters collide.
+      await expect(px(unit, 'letterSpacing')).toBeGreaterThanOrEqual(0);
+    }
+    // At the largest size the number keeps its tight tracking while the unit has none.
+    const [number] = canvasElement.querySelectorAll('div > span')[2].children;
+    await expect(px(number, 'letterSpacing') / px(number, 'fontSize')).toBeLessThan(-0.05);
   },
 };

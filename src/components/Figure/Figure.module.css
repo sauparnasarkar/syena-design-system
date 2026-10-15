@@ -4,29 +4,33 @@
   white-space: nowrap;
 }
 
-/* The unit is set inline with the number, in the same face, so the two share one baseline. It is
-   one type step smaller than its number and at most a thin gap away from it. */
+/* The unit is set inline with the number, in the same face, so the two share one baseline. Its size is
+   the type step one below its number's (the figure-unit roles), and it is at most a thin gap away. */
 .unit {
+  /* A long unit may wrap at its spaces, on narrow screens; the number never splits. */
+  white-space: normal;
   margin-inline-start: calc(var(--syn-space-1) / 2);
   color: var(--syn-color-text-muted);
   font-family: var(--syn-family-figure);
-  font-weight: var(--syn-type-text-md-weight);
   font-feature-settings: var(--syn-figure-feature-settings);
 }
 
 .sm .unit {
-  font-size: var(--syn-type-text-md-size);
-  letter-spacing: var(--syn-type-text-md-tracking);
+  font-weight: var(--syn-type-figure-unit-sm-weight);
+  font-size: var(--syn-type-figure-unit-sm-size);
+  letter-spacing: var(--syn-type-figure-unit-sm-tracking);
 }
 
 .md .unit {
-  font-size: var(--syn-type-text-lg-size);
-  letter-spacing: var(--syn-type-text-lg-tracking);
+  font-weight: var(--syn-type-figure-unit-md-weight);
+  font-size: var(--syn-type-figure-unit-md-size);
+  letter-spacing: var(--syn-type-figure-unit-md-tracking);
 }
 
 .lg .unit {
-  font-size: var(--syn-type-title-sm-size);
-  letter-spacing: var(--syn-type-title-sm-tracking);
+  font-weight: var(--syn-type-figure-unit-lg-weight);
+  font-size: var(--syn-type-figure-unit-lg-size);
+  letter-spacing: var(--syn-type-figure-unit-lg-tracking);
 }
 
 .srOnly {

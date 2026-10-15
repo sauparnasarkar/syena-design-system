@@ -94,6 +94,31 @@ export const LegendNamesTheBand: Story = {
   },
 };
 
+const withBand = (i: number, label: string): ChartSeries => ({ ...lineSeries[1], name: `Path ${i + 1}`, slot: i + 2, band: { low: scenarios[i].points.map((p) => p.low), high: scenarios[i].points.map((p) => p.high), label }, x: scenarios[i].points.map((p) => p.year), y: scenarios[i].points.map((p) => p.value) });
+
+export const SeveralRangesShareOneNeutralKey: Story = {
+  args: { series: [lineSeries[0], withBand(0, '66% range'), withBand(1, '66% range'), withBand(2, '66% range')] },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // One swatch for three ranges would wear one path's colour: the key is neutral and says so.
+    await expect(canvas.getAllByText(/66% range/)).toHaveLength(1);
+    await expect(canvas.getByText('66% range, in each path’s colour')).toBeInTheDocument();
+    const swatch = canvas.getByText(/in each path/).previousElementSibling as HTMLElement;
+    const seriesSwatches = [...canvasElement.querySelectorAll('button svg line')].map((l) => getComputedStyle(l).stroke);
+    await expect(seriesSwatches).not.toContain(getComputedStyle(swatch).backgroundColor);
+  },
+};
+
+export const RangesWithDifferentNamesEachGetTheirOwnSwatch: Story = {
+  args: { series: [lineSeries[0], withBand(0, 'Range, path 1'), withBand(1, 'Range, path 2')] },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const first = canvas.getByText('Range, path 1').previousElementSibling as HTMLElement;
+    const second = canvas.getByText('Range, path 2').previousElementSibling as HTMLElement;
+    await expect(getComputedStyle(first).backgroundColor).not.toBe(getComputedStyle(second).backgroundColor);
+  },
+};
+
 export const NarrowDropsDirectLabelsAndKeepsTheLegend: Story = {
   decorators: [panel('min(100%, 22rem)')],
   args: { series: lineSeries },

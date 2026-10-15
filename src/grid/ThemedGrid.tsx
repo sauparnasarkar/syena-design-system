@@ -32,6 +32,8 @@ export interface ThemedGridProps<Row> {
   height?: number;
   /** The grid is as tall as its rows, header included: no empty strip under the last row. */
   fitRows?: boolean;
+  /** No horizontal scrolling or scrollbar: for grids whose columns are known to fit. */
+  suppressHorizontalScroll?: boolean;
   onReady?: (api: GridApi<Row>) => void;
   defaultColDef?: ColDef<Row>;
   /** Shown instead of rows when there are none: say why, and offer the way out. */
@@ -39,7 +41,7 @@ export interface ThemedGridProps<Row> {
 }
 
 /** A data grid themed from tokens. The data table component builds on this. */
-export function ThemedGrid<Row>({ rowData, columnDefs, defaultColDef, ariaLabel, ariaLabelledBy, loading, onRowSelected, height, fitRows, onReady, noRowsOverlayComponent }: ThemedGridProps<Row>) {
+export function ThemedGrid<Row>({ rowData, columnDefs, defaultColDef, ariaLabel, ariaLabelledBy, loading, onRowSelected, height, fitRows, suppressHorizontalScroll, onReady, noRowsOverlayComponent }: ThemedGridProps<Row>) {
   const theme = useGridTheme();
   const host = useRef<HTMLDivElement>(null);
   const [api, setApi] = useState<GridApi<Row> | null>(null);
@@ -53,8 +55,13 @@ export function ThemedGrid<Row>({ rowData, columnDefs, defaultColDef, ariaLabel,
     const header = el.querySelector<HTMLElement>('.ag-header')?.offsetHeight ?? 0;
     let bottom = 0;
     api.forEachNodeAfterFilterAndSort((node) => { bottom = Math.max(bottom, (node.rowTop ?? 0) + (node.rowHeight ?? 0)); });
+    // When the grid scrolls sideways, the scrollbar's own height is reserved below the rows: measured from the bar
+    // element, exactly, whether the browser lays it out in the flow or the grid floats it over the last row. A grid
+    // that does not scroll has no bar (the data table switches it off), so nothing is kept.
     const bar = el.querySelector<HTMLElement>('.ag-body-horizontal-scroll');
-    const barHeight = bar && bar.offsetHeight > 0 ? bar.offsetHeight : 0;
+    const viewport = el.querySelector<HTMLElement>('.ag-body-horizontal-scroll-viewport');
+    const scrolls = !!viewport && viewport.scrollWidth > viewport.clientWidth;
+    const barHeight = bar && scrolls && getComputedStyle(bar).display !== 'none' ? bar.offsetHeight : 0;
     const root = el.querySelector<HTMLElement>('.ag-root-wrapper');
     const frame = root ? root.offsetHeight - (root.clientHeight || root.offsetHeight) : 0;
     if (header > 0) setFitted(header + bottom + barHeight + frame);
@@ -90,6 +97,7 @@ export function ThemedGrid<Row>({ rowData, columnDefs, defaultColDef, ariaLabel,
         defaultColDef={defaultColDef}
         rowSelection={{ mode: 'singleRow', checkboxes: false, enableClickSelection: true }}
         suppressRowVirtualisation={fitRows}
+        suppressHorizontalScroll={suppressHorizontalScroll}
         noRowsOverlayComponent={noRowsOverlayComponent}
         loading={loading}
         onRowSelected={(e) => { if (e.node.isSelected() && e.data) onRowSelected?.(e.data); }}

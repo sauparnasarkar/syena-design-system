@@ -66,6 +66,24 @@
         "step": 5,
         "family": "figure",
         "weight": 500
+      },
+      "figure-unit-sm": {
+        "step": 0,
+        "family": "figure",
+        "weight": 400,
+        "tracking": 0
+      },
+      "figure-unit-md": {
+        "step": 2,
+        "family": "figure",
+        "weight": 400,
+        "tracking": 0
+      },
+      "figure-unit-lg": {
+        "step": 4,
+        "family": "figure",
+        "weight": 400,
+        "tracking": 0
       }
     },
     "iconSteps": {

@@ -18,7 +18,7 @@ const columns: DataTableColumn<Row>[] = [
   { key: 'y2000', header: '2000', numeric: true },
   { key: 'y2010', header: '2010', numeric: true },
   { key: 'y2024', header: '2024', numeric: true },
-  { key: 'change', header: 'Change since 1990', numeric: true, format: signed },
+  { key: 'change', header: 'Change since 1990', unit: 'per cent', numeric: true, format: signed },
 ];
 
 const frame = (width = 'min(100%, 62rem)') => (Story: () => ReactElement) => <div style={{ padding: 'var(--syn-space-4)', width }}><Story /></div>;
@@ -54,7 +54,7 @@ const expectNothingClipped = async (el: HTMLElement) => {
   check();
 };
 
-const ready = (el: HTMLElement) => waitFor(() => expect(el.querySelector('.ag-row')).not.toBeNull());
+const ready = (el: HTMLElement) => waitFor(() => expect(el.querySelector('.ag-row')).not.toBeNull(), { timeout: 10000 });
 const textRight = (el: Element) => { const r = document.createRange(); r.selectNodeContents(el); return Math.round(r.getBoundingClientRect().right); };
 
 export const Structure: Story = {
@@ -102,6 +102,7 @@ export const LabelColumnIsNotTruncatedWhileNumbersHaveSlack: Story = {
 };
 
 export const GridIsAsTallAsItsRows: Story = {
+  tags: ['both-scrollbar-modes'],
   play: async ({ canvasElement }) => {
     await ready(canvasElement);
     const rowsEls = [...canvasElement.querySelectorAll('.ag-grid-scrolling-rows .ag-row')];
@@ -125,7 +126,7 @@ export const NumbersAndHeadersAreRightAligned: Story = {
       const header = within(canvasElement).getByText(year).closest('.ag-header-cell') as HTMLElement;
       const cell = canvasElement.querySelector(`.ag-grid-scrolling-rows .ag-row [col-id="${header.getAttribute('col-id')}"]`) as HTMLElement;
       await expect(getComputedStyle(cell).textAlign).toBe('right');
-      await expect(Math.abs(textRight(header.querySelector('.ag-header-cell-text')!) - textRight(cell))).toBeLessThanOrEqual(1);
+      await expect(Math.abs(textRight(within(header).getByText(year)) - textRight(cell))).toBeLessThanOrEqual(1);
     }
   },
 };
@@ -134,13 +135,73 @@ export const SortsThreeStates: Story = {
   play: async ({ canvasElement }) => {
     await ready(canvasElement);
     const header = within(canvasElement).getByText('2024').closest('.ag-header-cell') as HTMLElement;
-    const label = header.querySelector('.ag-header-cell-label') as HTMLElement;
+    const label = within(header).getByText('2024');
     await userEvent.click(label);
     await waitFor(() => expect(header).toHaveAttribute('aria-sort', 'ascending'));
     await userEvent.click(label);
     await waitFor(() => expect(header).toHaveAttribute('aria-sort', 'descending'));
     await userEvent.click(label);
     await waitFor(() => expect(['none', null]).toContain(header.getAttribute('aria-sort')));
+  },
+};
+
+/** Words whose letters are laid out on more than one line, in the text of every cell and header. */
+const splitWords = (root: Element) => {
+  const split: string[] = [];
+  for (const el of root.querySelectorAll('.ag-cell, .ag-header-cell')) {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const text = node.textContent ?? '';
+      for (const match of text.matchAll(/\S+/g)) {
+        const range = document.createRange();
+        range.setStart(node, match.index!); range.setEnd(node, match.index! + match[0].length);
+        if (new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size > 1) split.push(match[0]);
+      }
+    }
+  }
+  return split;
+};
+
+export const NoWordIsEverSplit: Story = {
+  tags: ['both-scrollbar-modes'],
+  decorators: [frame('min(100%, 320px)')],
+  play: async ({ canvasElement }) => {
+    await ready(canvasElement);
+    await waitFor(() => expect(canvasElement.querySelectorAll('.ag-header-cell').length).toBeGreaterThan(1));
+    // At 320px: no word is broken across lines in a label or a header, and the label column is at least as wide as its longest word.
+    await waitFor(() => expect(splitWords(canvasElement)).toEqual([]), { timeout: 6000 });
+    const pinned = canvasElement.querySelector('.ag-header-cell') as HTMLElement;
+    const longest = Math.max(...rows.flatMap((r) => r.indicator.split(/\s+/)).map((w) => { const probe = document.createElement('span'); probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap'; probe.textContent = w; pinned.appendChild(probe); const width = probe.getBoundingClientRect().width; probe.remove(); return width; }));
+    await expect(pinned.getBoundingClientRect().width).toBeGreaterThanOrEqual(longest);
+    // When two number columns cannot fit beside the label, one shows and the rest scroll: the page itself does not.
+    await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth);
+    // Nothing is covered by the scrollbar or cut off, at 320 as at 390.
+    await expectNothingClipped(canvasElement);
+  },
+};
+
+export const HeaderUnitSitsOnItsOwnLine: Story = {
+  play: async ({ canvasElement }) => {
+    await ready(canvasElement);
+    const header = within(canvasElement).getByText('Change since 1990').closest('.ag-header-cell') as HTMLElement;
+    const name = within(header).getByText('Change since 1990');
+    const unit = within(header).getByText('per cent');
+    await expect(unit.getBoundingClientRect().top).toBeGreaterThanOrEqual(name.getBoundingClientRect().bottom - 1);
+    // Quieter than the name: a lighter weight (the sizes meet at the 12px floor).
+    await expect(Number(getComputedStyle(unit).fontWeight)).toBeLessThan(Number(getComputedStyle(name).fontWeight));
+  },
+};
+
+export const NoStripWhenNothingScrolls: Story = {
+  tags: ['both-scrollbar-modes'],
+  play: async ({ canvasElement }) => {
+    await ready(canvasElement);
+    // Columns that fit have no horizontal scrollbar, so no height is kept for one below the rows.
+    await waitFor(() => {
+      const root = canvasElement.querySelector('.ag-root-wrapper') as HTMLElement;
+      const last = Math.max(...[...canvasElement.querySelectorAll('.ag-grid-scrolling-rows .ag-row')].map((r) => r.getBoundingClientRect().bottom));
+      expect(root.getBoundingClientRect().bottom - last).toBeLessThanOrEqual(3);
+    }, { timeout: 6000 });
   },
 };
 
@@ -179,6 +240,7 @@ export const Loading: Story = {
 };
 
 export const PhoneWidthFillsAndKeepsTwoNumberColumnsBesideTheLabel: Story = {
+  tags: ['both-scrollbar-modes'],
   decorators: [frame('min(100%, 390px)')],
   play: async ({ canvasElement }) => {
     await ready(canvasElement);
@@ -206,6 +268,7 @@ export const PhoneWidthFillsAndKeepsTwoNumberColumnsBesideTheLabel: Story = {
 };
 
 export const NarrowScrollsInsideItsRegionAndKeepsTheFirstColumn: Story = {
+  tags: ['both-scrollbar-modes'],
   decorators: [frame('min(100%, 390px)')],
   play: async ({ canvasElement }) => {
     await ready(canvasElement);

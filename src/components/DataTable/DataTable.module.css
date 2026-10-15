@@ -19,3 +19,41 @@
   display: flex;
   justify-content: center;
 }
+
+/* A header is its name with the unit under it; both wrap at spaces only. */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--syn-space-2);
+  width: 100%;
+  cursor: pointer;
+}
+
+.numeric {
+  justify-content: flex-end;
+  text-align: end;
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.unit {
+  color: var(--syn-color-text-muted);
+  font: var(--syn-type-caption-weight) var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-type-caption-family);
+  letter-spacing: var(--syn-type-caption-tracking);
+}
+
+/* A wrapped label breaks between words only. */
+.label {
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: manual;
+}

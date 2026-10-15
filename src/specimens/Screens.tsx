@@ -156,7 +156,7 @@ export function Forecasts() {
       <ChartCard
         title="Emissions under three scenarios"
         support="GtCO₂ a year; observed to 2024, scenario paths dashed with their ranges."
-        keys={[{ name: 'Observed', color: '--syn-data-text', kind: 'solid' }, ...scenarios.map((s, i) => ({ name: s.name, color: `--syn-data-cat-${i + 1}`, kind: 'dashed' as const })), { name: '66% range of each path', color: '--syn-data-cat-1', kind: 'band' }]}
+        keys={[{ name: 'Observed', color: '--syn-data-text', kind: 'solid' }, ...scenarios.map((s, i) => ({ name: s.name, color: `--syn-data-cat-${i + 1}`, kind: 'dashed' as const })), { name: '66% range of each path, in its colour', color: '--syn-data-text-muted', kind: 'band' }]}
         footer={FOOT}
       >
         <Fit>{(w) => <TrendChart width={w} height={360} showScenarios={3} neutralObserved label="Observed global emissions to 2024 near 37 gigatonnes, then three scenario paths to 2050: current policies roughly flat, announced pledges falling to about 27, and a net zero pathway falling to about 9." />}</Fit>
