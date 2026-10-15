@@ -7,6 +7,8 @@
 /* The unit is set inline with the number, in the same face, so the two share one baseline. Its size is
    the type step one below its number's (the figure-unit roles), and it is at most a thin gap away. */
 .unit {
+  /* A long unit may wrap at its spaces, on narrow screens; the number never splits. */
+  white-space: normal;
   margin-inline-start: calc(var(--syn-space-1) / 2);
   color: var(--syn-color-text-muted);
   font-family: var(--syn-family-figure);
