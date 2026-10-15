@@ -157,7 +157,7 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
         onTableViewChange={setTableView}
         hint="Arrow keys move the map, + and − zoom, 0 resets."
       />
-      <div className={tableView ? styles.tableView : styles.hidden}>
+      <div className={tableView ? styles.tableView : styles.hidden} {...(tableView ? { role: 'region', 'aria-label': 'Table of values', tabIndex: 0 } : {})}>
         <table id={tableId}>
           <caption>{ariaLabel}</caption>
           <thead><tr><th scope="col">Country</th><th scope="col">{valueLabel}</th></tr></thead>

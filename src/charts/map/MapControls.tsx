@@ -16,7 +16,7 @@ export interface MapControlsProps {
   hint: string;
 }
 
-function PanelButton({ icon, children, label, pressed, disabled, onClick }: { icon: IconProps['name']; children?: ReactNode; label?: string; pressed?: boolean; disabled?: boolean; onClick: () => void }) {
+export function PanelButton({ icon, children, label, pressed, disabled, onClick }: { icon: IconProps['name']; children?: ReactNode; label?: string; pressed?: boolean; disabled?: boolean; onClick: () => void }) {
   return (
     <button type="button" className={styles.button} aria-label={label} aria-pressed={pressed} disabled={disabled} onClick={onClick}>
       <Icon name={icon} size="small" />

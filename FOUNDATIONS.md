@@ -1510,6 +1510,25 @@ with named values; there are no colour-named variants.
 - **Accessibility.** The slider is a labelled range input; the button is a toggle that names the
   action and has `aria-pressed`.
 
+#### Treemap
+
+- **Purpose and props.** Tiles whose area is a value, for parts of a whole with many parts. Props:
+  `items` (`id`, `label`, `value`, optional `group` and `colorValue`), `ariaLabel`, `valueLabel`,
+  `unit`, `formatValue`, `colorBy` (`group` or `value`), `colorDomain`, `colorLabel`,
+  `formatColorValue`, `height`.
+- **Anatomy.** Squarified layout: tiles are packed in rows along the shorter side of the space left,
+  each row closed when another tile would make the worst aspect ratio worse; area is exactly
+  proportional to value and the tiles fill the panel. Colour by group takes the categorical
+  slots in order of the group's total, then `data-other`; colour by value blends the sequential
+  ramp across `colorDomain`, with the two ends labelled. A tile shows its name and value when it
+  is at least `space-9` wide and two text lines tall; smaller tiles show neither. A hover
+  read-out gives any tile's name and value; the label colour is whichever ink reaches 4.5:1 on the fill.
+- **Accessibility.** The tiles are a picture with a name and a description pointing at the table
+  of values (largest first, with group and colour value), which is also the *Table view*; no
+  information is carried by colour or size alone.
+- **Tokens.** `data-cat-*`, `data-other`, `data-seq-*`, `data-ink-light`, `data-ink-dark`,
+  `data-surface`, `data-text`, `data-text-muted`.
+
 ### 5.6 Hooks and helpers
 
 - **`useIsMobile`.** True below `bp-compact`. Updates on resize and orientation change;
