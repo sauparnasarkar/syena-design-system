@@ -1,13 +1,6 @@
 .spark {
   display: block;
-  box-sizing: border-box;
   width: 100%;
-  /* The plot is inset by the end dot's radius (half its stroke), so the dot stays inside the box at any size. */
-  padding: calc(var(--syn-layout-focus-ring-width) * 1.5);
-}
-
-.noEnd {
-  padding: calc(var(--syn-layout-focus-ring-width) / 2);
 }
 
 .sm {
