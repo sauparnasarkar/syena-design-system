@@ -34,7 +34,8 @@ export interface ChartProps {
   height?: number;
   /** How area series combine. */
   stackedAreaMode?: 'stack' | 'percent';
-  barmode?: 'group' | 'stack' | 'relative';
+  /** How bars combine. `percent` stacks them to the full height so each bar shows shares of its total; say so in the axis title. */
+  barmode?: 'group' | 'stack' | 'relative' | 'percent';
   orientation?: 'v' | 'h';
   /** Where a projection begins: the region from here on is shaded and labelled. */
   projectionFrom?: number;
@@ -153,7 +154,8 @@ export function Chart(props: ChartProps) {
 
     const layout: Partial<Layout> = {
       showlegend: false,
-      barmode: barmode ?? (series.some((s) => s.kind === 'area') ? undefined : 'group'),
+      barmode: barmode === 'percent' ? 'stack' : barmode ?? (series.some((s) => s.kind === 'area') ? undefined : 'group'),
+      ...(barmode === 'percent' ? { barnorm: 'percent' as const } : {}),
       margin: { t: t.space.s3 + topRows * LABEL_ROW + (topRows ? t.space.s2 : 0), r: t.space.s4 + labelWidth, l: t.space.s5, b: t.space.s5 },
       xaxis: { title: xTitle ? { text: xTitle } : undefined, ...(numericX && Number.isFinite(x0) ? { range: [x0, x1] } : {}) },
       yaxis: { title: { text: yTitle }, ...(yRange ? { range: yRange } : {}) },

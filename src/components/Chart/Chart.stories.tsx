@@ -140,6 +140,28 @@ export const StackedShareOfTotal: Story = {
   play: async ({ canvasElement }) => { await drawn(canvasElement); await expect(within(canvasElement).getAllByRole('button')).toHaveLength(4); },
 };
 
+const decades = ['1990s', '2000s', '2010s', '2020s'];
+const parts = [[62, 66, 70, 72], [22, 20, 18, 16], [6, 6, 6, 6], [10, 8, 6, 6]].map((row, k) => row.map((v, i) => v * (1 + 0.15 * i) * (1 + 0.1 * k)));
+
+export const PercentStackedBarsShowSharesOfEachTotal: Story = {
+  args: {
+    series: compositionNames.map((name, k): ChartSeries => ({ name, kind: 'bar', x: decades, y: parts[k], slot: k === 3 ? 9 : k + 1 })),
+    barmode: 'percent', yTitle: 'Share of CO₂-equivalent (%)', ariaLabel: 'Share of greenhouse gas emissions by gas in each decade, bars stacked to 100 percent. Illustrative values.',
+  },
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    await waitFor(() => expect(canvasElement.querySelectorAll('.barlayer .point')).toHaveLength(16));
+    // The totals differ (the inputs are not shares), but every bar is stacked to the same full height.
+    const bars = [...canvasElement.querySelectorAll<SVGPathElement>('.barlayer .point')].map((b) => b.getBBox());
+    const byColumn = new Map<number, number>();
+    for (const b of bars) byColumn.set(Math.round(b.x), (byColumn.get(Math.round(b.x)) ?? 0) + b.height);
+    const heights = [...byColumn.values()];
+    await expect(heights).toHaveLength(4);
+    await expect(Math.max(...heights) - Math.min(...heights)).toBeLessThan(1.5);
+    await expect(svgText(canvasElement)).toContain('100');
+  },
+};
+
 export const SecondAxis: Story = {
   args: { series: [{ name: 'Emissions', x: years, y: observed.map((p) => p.value) }, { name: 'Anomaly', axis: 'y2', x: anomaly.map((a) => a.year), y: anomaly.map((a) => a.value) }], y2Title: '°C', ariaLabel: 'Emissions with temperature anomaly on a second axis.' },
   play: async ({ canvasElement }) => { await drawn(canvasElement); await expect(svgText(canvasElement)).toContain('°C'); },
