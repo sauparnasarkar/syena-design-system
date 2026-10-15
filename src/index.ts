@@ -21,6 +21,7 @@ export { scrollToJumpTarget } from './lib/scrollToJumpTarget';
 export { useIsMobile } from './hooks/useIsMobile';
 export { useReducedMotion } from './hooks/useReducedMotion';
 export { useFocusTrap } from './hooks/useFocusTrap';
+export { useWidth } from './hooks/useWidth';
 export { Button, type ButtonProps, type ButtonVariant } from './components/Button/Button';
 export { Link, type LinkProps } from './components/Link/Link';
 export { Select, type SelectProps, type SelectOption } from './components/Select/Select';
