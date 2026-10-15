@@ -1,4 +1,4 @@
-import type { ColDef } from 'ag-grid-community';
+import type { ColDef, GridApi } from 'ag-grid-community';
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { numericColumn, ThemedGrid } from '../../grid/ThemedGrid';
 import { useWidth } from '../../hooks/useWidth';
@@ -107,6 +107,23 @@ export function DataTable<Row extends Record<string, unknown>>({ columns, rows, 
     });
   }, [columns, rows, t, width, fontsReady]);
 
+  // Row heights follow the wrapped labels, so they are measured again whenever the columns change width,
+  // the rows change, or a face finishes loading; the grid then re-fits its height to the new rows.
+  const [api, setApi] = useState<GridApi<Row> | null>(null);
+  useEffect(() => {
+    if (!api || api.isDestroyed()) return undefined;
+    const settle = () => { if (!api.isDestroyed()) api.resetRowHeights(); };
+    let second = 0;
+    const first = requestAnimationFrame(() => { settle(); second = requestAnimationFrame(settle); });
+    api.addEventListener('columnResized', settle);
+    document.fonts.addEventListener('loadingdone', settle);
+    return () => {
+      cancelAnimationFrame(first); cancelAnimationFrame(second);
+      if (!api.isDestroyed()) api.removeEventListener('columnResized', settle);
+      document.fonts.removeEventListener('loadingdone', settle);
+    };
+  }, [api, columnDefs, rows]);
+
   const fits = rows.length <= maxVisibleRows;
   const rowHeight = t ? toPx(t['layout-control-height']) : 0;
   const empty = (): ReactNode => <div className={styles.empty}>{emptyMessage}</div>;
@@ -115,7 +132,7 @@ export function DataTable<Row extends Record<string, unknown>>({ columns, rows, 
     <div ref={wrap} className={styles.wrap}>
       <p id={captionId} className={styles.caption}>{caption}</p>
       {columnDefs ? (
-        <ThemedGrid<Row> rowData={rows} columnDefs={columnDefs} ariaLabelledBy={captionId} ariaLabel={caption} fitRows={fits && rows.length > 0} height={rows.length === 0 ? rowHeight * 5 : rowHeight * (maxVisibleRows + 1)} loading={loading} noRowsOverlayComponent={empty} onRowSelected={onRowSelected} />
+        <ThemedGrid<Row> rowData={rows} columnDefs={columnDefs} ariaLabelledBy={captionId} ariaLabel={caption} fitRows={fits && rows.length > 0} height={rows.length === 0 ? rowHeight * 5 : rowHeight * (maxVisibleRows + 1)} loading={loading} onReady={setApi} noRowsOverlayComponent={empty} onRowSelected={onRowSelected} />
       ) : null}
       {rows.length === 0 && emptyAction ? <div className={styles.action}><Button size="small" onClick={emptyAction.onClick}>{emptyAction.label}</Button></div> : null}
     </div>

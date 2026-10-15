@@ -28,6 +28,28 @@ const meta: Meta<typeof DataTable<Row>> = { title: 'Data/DataTable', component: 
 export default meta;
 type Story = StoryObj<typeof DataTable<Row>>;
 
+/** Nothing is cut off: each label's text sits inside its cell, and the last row ends inside the grid body. */
+const expectNothingClipped = async (el: HTMLElement) => {
+  const check = () => {
+    const root = (el.querySelector('.ag-root') as HTMLElement).getBoundingClientRect();
+    const rowsEls = [...el.querySelectorAll('.ag-grid-scrolling-rows .ag-row')];
+    expect(rowsEls.length).toBeGreaterThan(0);
+    expect(Math.max(...rowsEls.map((r) => r.getBoundingClientRect().bottom))).toBeLessThanOrEqual(root.bottom + 1);
+    for (const cell of el.querySelectorAll('.ag-grid-pinned-left-cells .ag-cell')) {
+      const text = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT).nextNode()!;
+      const range = document.createRange(); range.selectNodeContents(text);
+      const box = range.getBoundingClientRect(); const own = cell.getBoundingClientRect();
+      expect(box.top).toBeGreaterThanOrEqual(own.top - 1);
+      expect(box.bottom).toBeLessThanOrEqual(own.bottom + 1);
+      expect(cell.scrollHeight).toBeLessThanOrEqual(cell.clientHeight + 1);
+    }
+  };
+  await waitFor(check, { timeout: 4000 });
+  // It stays that way once the rows have settled.
+  await new Promise((r) => setTimeout(r, 1500));
+  check();
+};
+
 const ready = (el: HTMLElement) => waitFor(() => expect(el.querySelector('.ag-row')).not.toBeNull());
 const textRight = (el: Element) => { const r = document.createRange(); r.selectNodeContents(el); return Math.round(r.getBoundingClientRect().right); };
 
@@ -143,7 +165,7 @@ export const Loading: Story = {
 };
 
 export const PhoneWidthFillsAndKeepsTwoNumberColumnsBesideTheLabel: Story = {
-  decorators: [frame('min(100%, 22rem)')],
+  decorators: [frame('min(100%, 390px)')],
   play: async ({ canvasElement }) => {
     await ready(canvasElement);
     const wrapEl = canvasElement.querySelector('.ag-root-wrapper') as HTMLElement;
@@ -162,27 +184,22 @@ export const PhoneWidthFillsAndKeepsTwoNumberColumnsBesideTheLabel: Story = {
       const range = document.createRange(); range.selectNodeContents(text);
       const tops = [...new Set([...range.getClientRects()].map((r) => Math.round(r.top)))].sort((a, b) => a - b);
       if (tops.length > 1) { wrapped += 1; await expect(Math.abs(tops[1] - tops[0] - lineHeight)).toBeLessThanOrEqual(1); }
-      const row = cell.closest('.ag-row') as HTMLElement;
-      // Row heights settle after the first paint, as the wrapped labels are measured.
-      await waitFor(() => {
-        const box = range.getBoundingClientRect();
-        expect(box.top).toBeGreaterThanOrEqual(row.getBoundingClientRect().top - 1);
-        expect(box.bottom).toBeLessThanOrEqual(row.getBoundingClientRect().bottom + 1);
-      });
     }
     await expect(wrapped).toBeGreaterThan(0);
+    await expectNothingClipped(canvasElement);
     await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth);
   },
 };
 
 export const NarrowScrollsInsideItsRegionAndKeepsTheFirstColumn: Story = {
-  decorators: [frame('min(100%, 20rem)')],
+  decorators: [frame('min(100%, 390px)')],
   play: async ({ canvasElement }) => {
     await ready(canvasElement);
     await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth);
     const viewport = canvasElement.querySelector('.ag-body-horizontal-scroll-viewport') as HTMLElement;
     await waitFor(() => expect(viewport.scrollWidth).toBeGreaterThan(viewport.clientWidth));
     await expect(canvasElement.querySelector('.ag-cell-last-left-pinned')).not.toBeNull();
+    await expectNothingClipped(canvasElement);
   },
 };
 
