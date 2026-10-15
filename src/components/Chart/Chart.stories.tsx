@@ -145,6 +145,21 @@ export const SecondAxis: Story = {
   play: async ({ canvasElement }) => { await drawn(canvasElement); await expect(svgText(canvasElement)).toContain('°C'); },
 };
 
+export const MarkersAreNotJoined: Story = {
+  args: {
+    series: [{ name: 'Annual readings', kind: 'marker', x: observed.map((p) => p.value), y: observed.map((p, i) => 0.04 * (p.value - 22) + 0.08 * Math.sin(i * 1.7)) }],
+    xTitle: 'Emissions, GtCO₂ a year', yTitle: 'Temperature anomaly, °C', ariaLabel: 'Each year plotted as a point: emissions against temperature anomaly. Illustrative values.',
+  },
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    // One point per reading, and no line drawn through them.
+    await waitFor(() => expect(canvasElement.querySelectorAll('.scatterlayer .points path.point')).toHaveLength(observed.length));
+    await expect(canvasElement.querySelector('.scatterlayer .lines path')).toBeNull();
+    // The legend key is a dot, in the series colour.
+    await expect(within(canvasElement).getByRole('button', { name: 'Annual readings' })).toBeInTheDocument();
+  },
+};
+
 export const TableOfTheValues: Story = {
   args: { series: lineSeries.slice(0, 2) },
   play: async ({ canvasElement }) => {

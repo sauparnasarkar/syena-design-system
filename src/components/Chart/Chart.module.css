@@ -45,6 +45,14 @@
   border-radius: var(--syn-radius-control);
 }
 
+.dot {
+  display: inline-block;
+  width: var(--syn-space-3);
+  height: var(--syn-space-3);
+  margin-inline: var(--syn-space-1);
+  border-radius: 50%;
+}
+
 .line {
   width: var(--syn-space-5);
   height: var(--syn-space-3);
