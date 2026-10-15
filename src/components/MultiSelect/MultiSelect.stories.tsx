@@ -51,10 +51,13 @@ export const LimitDisablesTheRestAndSaysWhy: Story = {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('combobox'));
     await expect(canvas.getByRole('option', { name: 'Net zero pathway' })).toHaveAttribute('aria-disabled', 'true');
-    await expect(canvas.getByText('2 of 2 selected. Limit reached')).toBeInTheDocument();
+    // The footer and the live region say the same thing.
+    await expect(canvas.getAllByText('2 selected, limit reached')).toHaveLength(2);
+    await expect(canvas.getByRole('status')).toHaveTextContent('2 selected, limit reached');
     // A chosen option can still be removed.
     await userEvent.click(canvas.getByRole('option', { name: 'Announced pledges' }));
     await expect(canvas.getByRole('option', { name: 'Net zero pathway' })).not.toHaveAttribute('aria-disabled');
+    await expect(canvas.getAllByText('1 selected, up to 2')).toHaveLength(2);
   },
 };
 

@@ -1190,7 +1190,8 @@ with named values; there are no colour-named variants.
 - **Purpose and props.** Choose several options. Props: `label`, `options`, `value`,
   `onChange` (called with the list of chosen values), `maxSelected`, and the rest as for `Select`.
 - **Anatomy.** As `Select`; the field shows the first selections as tags and a count for the
-  rest; options have checkboxes; a footer shows *n of max selected* and a *Clear* action.
+  rest; options have checkboxes; a footer shows *n selected, up to max* (or *limit reached*) and a *Clear* action. The
+  live region announces the same text, so the limit is never read as a position in the list.
 - **States.** As `Select`, plus limit reached: remaining options are disabled and the
   footer says why.
 - **Tokens.** As `Select`; tags use `accent-tint`.
