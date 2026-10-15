@@ -49,6 +49,14 @@
   flex: none;
 }
 
+.rampSwatch {
+  display: inline-block;
+  width: var(--syn-space-5);
+  height: var(--syn-space-3);
+  border-radius: var(--syn-radius-control);
+  background: linear-gradient(in oklab to right, var(--syn-data-seq-1), var(--syn-data-seq-4), var(--syn-data-seq-7));
+}
+
 .dot {
   display: inline-block;
   width: var(--syn-space-3);

@@ -174,6 +174,9 @@ export const BarsColouredByASecondValue: Story = {
     // Bars with larger values are drawn in different colours, one step of the ramp apart at the ends.
     const fills = [...canvasElement.querySelectorAll<SVGPathElement>('.barlayer .point path')].map((b) => getComputedStyle(b).fill);
     await expect(new Set(fills).size).toBe(emitters.length);
+    // The legend does not show a solid swatch in a colour no bar uses: the key is the ramp.
+    await expect(canvasElement.querySelector('button [class*="__swatch__"]')).toBeNull();
+    await expect(canvasElement.querySelector('button [class*="__rampSwatch__"]')).not.toBeNull();
     // The ramp names what the colour measures and labels both ends.
     await expect(canvas.getAllByText('Reduction under the scenario, %').length).toBeGreaterThan(0);
     await expect(canvas.getByText('6%')).toBeInTheDocument();
@@ -203,7 +206,8 @@ export const SignedBarsColourRisesAndFallsAndSayThemInWords: Story = {
     yoy.forEach((d, i) => { const v = Number(d.change.toFixed(1)); if (v !== 0) expect(bars[i]).toBe(v < 0 ? fall : rise); });
     await expect(bars).toContain(fall);
     await expect(bars).toContain(rise);
-    // The two signs are named in the legend with a glyph, so colour is not the only carrier.
+    // The legend keeps only the two signs (no repeated series entry), each with a glyph, so colour is not the only carrier.
+    await expect(canvas.queryByRole('button', { name: 'Year-on-year change' })).toBeNull();
     await expect(canvas.getByText('Falls')).toBeInTheDocument();
     await expect(canvas.getByText('Rises')).toBeInTheDocument();
     // And the values are written with their sign and the true minus in the table form.
@@ -244,6 +248,16 @@ export const MarkersAreNotJoined: Story = {
     // One point per reading, and no line drawn through them.
     await waitFor(() => expect(canvasElement.querySelectorAll('.scatterlayer .points path.point')).toHaveLength(observed.length));
     await expect(canvasElement.querySelector('.scatterlayer .lines path')).toBeNull();
+    // Every marker is drawn whole, including the ones on the edges of the plot: the trace is not clipped at the axes,
+    // and each marker lies inside the chart's own box.
+    const box = (canvasElement.querySelector('.main-svg') as SVGElement).getBoundingClientRect();
+    const markers = [...canvasElement.querySelectorAll<SVGPathElement>('.scatterlayer .points path.point')];
+    for (let e: Element | null = markers[0]; e && e.tagName.toLowerCase() !== 'svg'; e = e.parentElement) await expect(getComputedStyle(e).clipPath).toBe('none');
+    for (const m of markers) {
+      const r = m.getBoundingClientRect();
+      await expect(r.left).toBeGreaterThanOrEqual(box.left); await expect(r.right).toBeLessThanOrEqual(box.right);
+      await expect(r.top).toBeGreaterThanOrEqual(box.top); await expect(r.bottom).toBeLessThanOrEqual(box.bottom);
+    }
     // The legend key is a dot, in the series colour.
     await expect(within(canvasElement).getByRole('button', { name: 'Annual readings' })).toBeInTheDocument();
   },

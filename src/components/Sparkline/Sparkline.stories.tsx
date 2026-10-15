@@ -66,6 +66,34 @@ export const EndDotAndFill: Story = {
   },
 };
 
+export const TheEndDotStaysInsideTheBoxAtAnySize: Story = {
+  args: { filled: true },
+  render: (args) => (
+    <div style={{ display: 'grid', gap: 'var(--syn-space-4)' }}>
+      {(['sm', 'md'] as const).flatMap((size) => ['4rem', '12rem', '100%'].map((w) => (
+        <div key={`${size}-${w}`} style={{ width: w }}><Sparkline {...args} size={size} ariaLabel={`Sparkline ${size} ${w}`} /></div>
+      )))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    for (const svg of canvasElement.querySelectorAll('svg')) {
+      const box = svg.getBoundingClientRect();
+      const dot = svg.querySelector('path[class*="__end__"]') as SVGPathElement;
+      const dotBox = dot.getBoundingClientRect(); // the dot's centre: a zero-length path
+      const radius = parseFloat(getComputedStyle(dot).strokeWidth) / 2;
+      await expect(dotBox.right + radius).toBeLessThanOrEqual(box.right + 0.01);
+      await expect(dotBox.left - radius).toBeGreaterThanOrEqual(box.left - 0.01);
+      await expect(dotBox.top - radius).toBeGreaterThanOrEqual(box.top - 0.01);
+      await expect(dotBox.bottom + radius).toBeLessThanOrEqual(box.bottom + 0.01);
+      // The line, too, is inside the box (the dot is the widest thing drawn).
+      const line = svg.querySelector('path[class*="__line__"]') as SVGPathElement;
+      const lineBox = line.getBoundingClientRect(); const half = parseFloat(getComputedStyle(line).strokeWidth) / 2;
+      await expect(lineBox.top - half).toBeGreaterThanOrEqual(box.top - 0.01);
+      await expect(lineBox.bottom + half).toBeLessThanOrEqual(box.bottom + 0.01);
+    }
+  },
+};
+
 export const NoEndDot: Story = { args: { showEnd: false }, play: async ({ canvasElement }) => { await expect(canvasElement.querySelector('path[class*="__end__"]')).toBeNull(); } };
 
 export const OnTheDataPanel: Story = {

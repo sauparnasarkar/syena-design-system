@@ -108,7 +108,7 @@ function buildTraces(t: ChartTokens, series: ChartSeries[], hidden: Set<number>,
       traces.push({ type: 'scatter', mode: 'lines', name, x: s.x, y: s.y, stackgroup: 'area', ...(props.stackedAreaMode === 'percent' ? { groupnorm: 'percent' as const } : {}), line: { color: colour, width: 0 }, fillcolor: colour, ...axis } as Data);
     } else if (s.kind === 'marker') {
       // Points that are not joined: each reading stands alone, as in a relationship between two measures.
-      traces.push({ type: 'scatter', mode: 'markers', name, x: s.x, y: s.y, marker: { color: colour, size: 4 * t.strokeWidth }, ...axis } as Data);
+      traces.push({ type: 'scatter', mode: 'markers', name, x: s.x, y: s.y, marker: { color: colour, size: 4 * t.strokeWidth }, cliponaxis: false, ...axis } as Data);
     } else {
       traces.push({ type: 'scatter', mode: 'lines', name, x: s.x, y: s.y, line: { color: colour, ...(s.projected ? { dash: projectionDash(t) } : {}) }, ...axis } as Data);
     }
@@ -117,6 +117,7 @@ function buildTraces(t: ChartTokens, series: ChartSeries[], hidden: Set<number>,
 }
 
 function KeyMark({ series, colour, t }: { series: ChartSeries; colour: string; t: ChartTokens }) {
+  if (series.colorValues) return <span className={styles.rampSwatch} aria-hidden="true" />;
   if (series.signed) {
     const c = signColours(t, series.signed);
     return <span className={styles.swatch} style={{ background: `linear-gradient(to right, ${c.negative} 50%, ${c.positive} 50%)` }} aria-hidden="true" />;
@@ -214,14 +215,14 @@ export function Chart(props: ChartProps) {
     <div ref={ref} className={styles.chart}>
       {showLegend && t ? (
         <ul className={styles.legend} aria-label="Legend">
-          {series.map((s, i) => (
+          {series.map((s, i) => (s.signed ? null : (
             <li key={`${s.name}-${i}`}>
               <button type="button" className={[styles.key, hidden.has(i) ? styles.off : ''].join(' ')} aria-pressed={!hidden.has(i)} onClick={() => toggle(i)}>
                 <KeyMark series={s} colour={seriesColour(t, s.slot ?? i + 1)} t={t} />
                 <span>{s.projected ? `${s.name} (projection)` : s.name}</span>
               </button>
             </li>
-          ))}
+          )))}
           {series.filter((s) => s.signed).map((s) => {
             const c = signColours(t, s.signed!);
             const [fall, rise] = s.signLabels ?? ['Falls', 'Rises'];

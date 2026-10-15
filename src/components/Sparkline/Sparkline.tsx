@@ -40,7 +40,7 @@ export function Sparkline({ values, ariaLabel, surface = 'card', size = 'sm', sh
   values.forEach((v, i) => { if (v !== null) lastIndex = i; });
 
   return (
-    <svg className={[styles.spark, styles[surface], styles[size]].join(' ')} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label={ariaLabel}>
+    <svg className={[styles.spark, styles[surface], styles[size], showEnd ? '' : styles.noEnd].join(' ')} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label={ariaLabel}>
       {filled && area ? <path className={styles.fill} d={area} /> : null}
       <path className={styles.line} d={d} vectorEffect="non-scaling-stroke" />
       {showEnd && lastIndex >= 0 ? (
