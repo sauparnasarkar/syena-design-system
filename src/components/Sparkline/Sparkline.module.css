@@ -1,0 +1,50 @@
+.spark {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+.sm {
+  height: var(--syn-space-6);
+}
+
+.md {
+  height: var(--syn-space-7);
+}
+
+/* On a card or the page, the accent text colour (3:1 or better on every surface); on the dark data panel, the first series colour. */
+.line {
+  fill: none;
+  stroke-width: var(--syn-layout-focus-ring-width);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.end {
+  fill: none;
+  stroke-width: calc(var(--syn-layout-focus-ring-width) * 3);
+  stroke-linecap: round;
+}
+
+.fill {
+  opacity: var(--syn-opacity-band);
+  stroke: none;
+}
+
+.card .line,
+.card .end {
+  stroke: var(--syn-color-accent-text);
+}
+
+.card .fill {
+  fill: var(--syn-color-accent-text);
+}
+
+.panel .line,
+.panel .end {
+  stroke: var(--syn-data-cat-1);
+}
+
+.panel .fill {
+  fill: var(--syn-data-cat-1);
+}
