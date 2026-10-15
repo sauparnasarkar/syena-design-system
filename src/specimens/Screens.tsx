@@ -1,5 +1,5 @@
 import { AnomalyChart, CompositionChart, Fit, HeatGrid, RankingChart, TrendChart } from './charts';
-import { anomaly, fmt, observed, scenarios, signed } from './data';
+import { anomaly, countryObserved, countryScenarios, fmt, observed, scenarios, signed } from './data';
 import { SpecimenShell, layoutStyles } from './Layout';
 import { Alert, ChartCard, Kpi, Kpis, Tag, partStyles as p } from './Parts';
 import { Icon } from '../components/Icon/Icon';
@@ -49,7 +49,7 @@ export function Overview() {
           </div>
         </ChartCard>
         <ChartCard title="Global temperature anomaly" support="°C relative to the 1991 to 2020 baseline." footer={FOOT}>
-          <Fit>{(w) => <AnomalyChart width={w} height={300} label="Bars of yearly temperature anomaly from 2004 to 2024 relative to a 1991 to 2020 baseline, below zero in the early years and above zero in the later years." />}</Fit>
+          <Fit>{(w) => <AnomalyChart width={w} height={300} label="Bars of yearly temperature anomaly from 2004 to 2024 relative to a 1991 to 2020 baseline, near zero in the early years and rising to about 0.6 degrees in the latest year." />}</Fit>
         </ChartCard>
       </div>
     </SpecimenShell>
@@ -77,12 +77,12 @@ export function CountryProfile() {
       strip={STRIP}
     >
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--syn-space-2)', alignItems: 'center' }}>
-        <Tag accent>Example country</Tag><Tag>Upper-middle income</Tag><Tag>Population 54 million</Tag>
+        <Tag>Example country</Tag><Tag>Upper-middle income</Tag><Tag>Population 54 million</Tag>
       </div>
       <Kpis>
         <Kpi label="CO₂ emissions, 2024" value="449" unit="MtCO₂" delta="−13.8%" note="since 2010" direction="down" tone="positive" />
         <Kpi label="Per person" value="6.4" unit="tCO₂" delta="−21.0%" note="since 2010" direction="down" tone="positive" />
-        <Kpi label="Share of world emissions" value="1.2" unit="%" delta="+0.0" note="points on 2023" direction="up" tone="neutral" />
+        <Kpi label="Share of world emissions" value="1.2" unit="%" delta="0.0" note="points on 2023" direction="flat" tone="neutral" />
         <Kpi label="Projected change to 2050" value="−18" unit="% from 2024" delta="−2.0" note="points per decade" direction="down" tone="positive" />
       </Kpis>
       <ChartCard
@@ -91,7 +91,7 @@ export function CountryProfile() {
         keys={[{ name: 'Observed', color: '--syn-data-cat-1', kind: 'solid' }, { name: 'Current policies (projection)', color: '--syn-data-cat-1', kind: 'dashed' }, { name: '66% range', color: '--syn-data-cat-1', kind: 'band' }]}
         footer={FOOT}
       >
-        <Fit>{(w) => <TrendChart width={w} height={340} label="Annual emissions for the example country from 1990 to 2024 with a flat to slowly falling projection to 2050 and a widening range." />}</Fit>
+        <Fit>{(w) => <TrendChart width={w} height={340} observedData={countryObserved} scenarioData={countryScenarios} yTicks={[300, 400, 500, 600]} yStep={100} yTitle="MtCO₂ a year" label="Annual emissions for the example country from 1990 to 2024, rising from about 410 to a peak near 520 around 2010 and falling to about 450, with a projection that falls about 18 percent to about 370 by 2050 and a widening range." />}</Fit>
       </ChartCard>
       <div className={layoutStyles.rowWide}>
         <div className={p.card}>

@@ -99,6 +99,19 @@ export const CompactDrawerAndSheet: Story = {
     await waitFor(() => expect(canvas.queryByRole('dialog')).toBeNull());
     await expect(open).toHaveFocus();
 
+    // A visible close control closes the drawer and gives focus back to the menu button.
+    await userEvent.click(open);
+    await userEvent.click(within(await canvas.findByRole('dialog', { name: 'Navigation' })).getByRole('button', { name: 'Close navigation' }));
+    await waitFor(() => expect(canvas.queryByRole('dialog')).toBeNull());
+    await expect(open).toHaveFocus();
+    // So does a tap on the dimmed area.
+    await userEvent.click(open);
+    await canvas.findByRole('dialog', { name: 'Navigation' });
+    const scrim = document.querySelector('[aria-hidden="true"][class*="scrim"]') as HTMLElement;
+    await userEvent.click(scrim);
+    await waitFor(() => expect(canvas.queryByRole('dialog')).toBeNull());
+    await expect(open).toHaveFocus();
+
     // Choosing a destination closes it too.
     await userEvent.click(open);
     await userEvent.click(within(await canvas.findByRole('dialog', { name: 'Navigation' })).getByRole('link', { name: 'Forecasts' }));
@@ -109,7 +122,13 @@ export const CompactDrawerAndSheet: Story = {
     await userEvent.click(controls);
     const sheet = await canvas.findByRole('dialog', { name: 'Analysis controls' });
     await expect(within(sheet).getByLabelText('Period')).toBeInTheDocument();
-    await expect(within(sheet).getByRole('heading', { level: 2, name: 'Country profile' })).toBeInTheDocument();
+    // The page title is in the top bar only: the sheet has its own heading and does not repeat it.
+    await expect(within(sheet).getByRole('heading', { level: 2, name: 'Filters' })).toBeInTheDocument();
+    await expect(canvas.getAllByRole('heading', { name: 'Country profile' })).toHaveLength(1);
+    // Each control fills the sheet's width.
+    const field = within(sheet).getByLabelText('Period').closest('label') as HTMLElement;
+    const inner = sheet.querySelector('section')!.getBoundingClientRect();
+    await expect(Math.abs(field.getBoundingClientRect().width - (inner.width - 2 * parseFloat(getComputedStyle(sheet.querySelector('section')!).paddingLeft)))).toBeLessThanOrEqual(2);
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(canvas.queryByRole('dialog')).toBeNull());
     await expect(controls).toHaveFocus();

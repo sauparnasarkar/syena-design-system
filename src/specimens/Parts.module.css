@@ -83,6 +83,7 @@
 .kpis {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--syn-layout-stat-min)), 1fr));
+  align-items: start;
   gap: var(--syn-layout-gutter);
 }
 
@@ -302,6 +303,7 @@
 .compare {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--syn-layout-module-min)), 1fr));
+  align-items: start;
   gap: var(--syn-layout-gutter);
 }
 

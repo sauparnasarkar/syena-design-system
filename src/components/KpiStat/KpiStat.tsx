@@ -30,8 +30,14 @@ const toneClass: Record<DeltaTone, string> = { positive: styles.positive, negati
 
 /** One headline figure with context: label, value, and a change with its direction and tone. */
 export function KpiStat({ label, value, unit, unitLabel, decimals, delta, deltaDirection, tone = 'neutral', deltaNote, deltaDecimals, deltaUnit, card, loading }: KpiStatProps) {
-  const sign = typeof delta === 'number' ? formatFigure(delta, { signed: true, decimals: deltaDecimals }) : delta;
-  const spoken = delta === undefined ? '' : `${deltaDirection ?? ''} ${typeof delta === 'number' ? formatFigure(Math.abs(delta), { decimals: deltaDecimals }) : String(delta).replace(/^[+−-]/, '')}${deltaUnit ? ` ${deltaUnit === '%' ? 'percent' : deltaUnit}` : ''} ${deltaNote ?? ''}`.trim();
+  // A change that shows as zero has no direction: a flat glyph, no sign, the neutral tone.
+  const flat = typeof delta === 'number' && Number(Math.abs(delta).toFixed(deltaDecimals ?? 0)) === 0;
+  const direction = flat ? undefined : deltaDirection;
+  const shownTone: DeltaTone = flat ? 'neutral' : tone;
+  const sign = typeof delta === 'number' ? (flat ? formatFigure(0, { decimals: deltaDecimals }) : formatFigure(delta, { signed: true, decimals: deltaDecimals })) : delta;
+  const amount = typeof delta === 'number' ? formatFigure(Math.abs(delta), { decimals: deltaDecimals }) : String(delta).replace(/^[+−-]/, '');
+  const unitWords = deltaUnit ? ` ${deltaUnit === '%' ? 'percent' : deltaUnit.trim()}` : '';
+  const spoken = delta === undefined ? '' : flat ? `no change ${deltaNote ?? ''}`.trim() : `${direction ?? ''} ${amount}${unitWords} ${deltaNote ?? ''}`.trim();
   const body = (
     <section className={styles.stat} aria-label={label} aria-busy={loading || undefined}>
       <span className={styles.label}>{label}</span>
@@ -41,8 +47,8 @@ export function KpiStat({ label, value, unit, unitLabel, decimals, delta, deltaD
         <>
           <Figure size="md" value={value} unit={unit} unitLabel={unitLabel} decimals={decimals} tone="primary" />
           {delta !== undefined ? (
-            <span className={[styles.delta, toneClass[tone]].join(' ')}>
-              {deltaDirection ? <Icon name={deltaDirection === 'up' ? 'up' : 'down'} size="small" /> : null}
+            <span className={[styles.delta, toneClass[shownTone]].join(' ')}>
+              {flat ? <Icon name="flat" size="small" /> : direction ? <Icon name={direction === 'up' ? 'up' : 'down'} size="small" /> : null}
               <span aria-hidden="true" className={styles.figure}>{sign}{deltaUnit ?? ''}</span>
               {deltaNote ? <span aria-hidden="true" className={styles.note}>{deltaNote}</span> : null}
               <span className={styles.spoken}>{spoken}</span>
