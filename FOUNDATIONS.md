@@ -654,6 +654,12 @@ night `#09152b`, tidewater `#061e28`
 canvas (`L_base · τ⁻¹`); in tidewater it is a seed, so charts remain a dark panel on the
 light page. All data colours are validated against it.
 
+**Design decision: dark data panels in the light theme.** In tidewater the chart and globe
+panels stay dark on purpose. A dark panel on a light page marks the data as its own surface,
+matches the dark feature banners the products place on the same pages, and lets one set of data
+colours, validated once against one ground, serve both themes. The decision applies to every
+chart, chart card and globe, not only to banners, so there is no per-component surface option.
+
 **Neutrals on the ground.** Each is the lightness that gives an exact contrast ratio against
 the ground, at the ground's hue:
 
