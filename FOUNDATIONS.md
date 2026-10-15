@@ -246,7 +246,7 @@ labels and units far more often than next to Poppins digits.
 | `caption` | -2 | ui | 400 | 12 px | 0.75 | 20 px | 1.632 | 0.025 |
 | `text-sm` | -1.5 | ui | 400 | 12 px | 0.75 | 20 px | 1.594 | 0.0187 |
 | `text-md` | -1 | ui | 400 | 13 px | 0.8125 | 20 px | 1.560 | 0.0125 |
-| `text-lg` | 0 | ui | 400 | 16 px | 1 | 24 px | 1.500 | 0 |
+| `text-lg` | 0 | ui | 400 | 16 px | 1 | 26 px | 1.625 | 0 |
 | `title-sm` | 1 | ui | 600 | 19 px | 1.1875 | 28 px | 1.450 | -0.0125 |
 | `title-md` | 2 | ui | 600 | 23 px | 1.4375 | 32 px | 1.408 | -0.025 |
 | `title-lg` | 3 | ui | 600 | 28 px | 1.75 | 38 px | 1.374 | -0.0375 |
@@ -261,7 +261,8 @@ and tracking. Role usage:
 
 - `display`: page title on landing and report covers only.
 - `title-lg`, `title-md`, `title-sm`: section, card and sub-section headings.
-- `text-lg`: long-form prose and lead paragraphs.
+- `text-lg`: long-form prose and lead paragraphs. It fixes its own leading at 1.625 (26 px at
+  16 px), looser than the scale gives, because lines of prose are long and need the air.
 - `text-md`: default interface text, control labels, table cells.
 - `text-sm`: dense table cells, secondary notes, tooltips.
 - `caption`: source lines, axis titles, fine print.

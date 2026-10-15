@@ -27,7 +27,10 @@ export interface ThemedGridProps<Row> {
   ariaLabelledBy?: string;
   loading?: boolean;
   onRowSelected?: (row: Row) => void;
-  height: number;
+  /** Fixed height in pixels. Omit with `fitRows` to size the grid to its rows. */
+  height?: number;
+  /** The grid is as tall as its rows, header included: no empty strip under the last row. */
+  fitRows?: boolean;
   onReady?: (api: GridApi<Row>) => void;
   defaultColDef?: ColDef<Row>;
   /** Shown instead of rows when there are none: say why, and offer the way out. */
@@ -35,16 +38,17 @@ export interface ThemedGridProps<Row> {
 }
 
 /** A data grid themed from tokens. The data table component builds on this. */
-export function ThemedGrid<Row>({ rowData, columnDefs, defaultColDef, ariaLabel, ariaLabelledBy, loading, onRowSelected, height, onReady, noRowsOverlayComponent }: ThemedGridProps<Row>) {
+export function ThemedGrid<Row>({ rowData, columnDefs, defaultColDef, ariaLabel, ariaLabelledBy, loading, onRowSelected, height, fitRows, onReady, noRowsOverlayComponent }: ThemedGridProps<Row>) {
   const theme = useGridTheme();
   if (!theme) return null;
   return (
-    <div role="region" aria-label={ariaLabelledBy ? undefined : ariaLabel} aria-labelledby={ariaLabelledBy} style={{ height }}>
+    <div role="region" aria-label={ariaLabelledBy ? undefined : ariaLabel} aria-labelledby={ariaLabelledBy} style={fitRows ? undefined : { height }}>
       <AgGridReact<Row>
         theme={theme}
         rowData={rowData}
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
+        domLayout={fitRows ? 'autoHeight' : 'normal'}
         rowSelection={{ mode: 'singleRow', checkboxes: false, enableClickSelection: true }}
         noRowsOverlayComponent={noRowsOverlayComponent}
         loading={loading}

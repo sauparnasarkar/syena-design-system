@@ -105,8 +105,10 @@ export function Chart(props: ChartProps) {
     const lines = visible.filter((s) => (s.kind ?? 'line') === 'line');
     // End labels name lines directly, when there are few and the chart is wide enough; otherwise the legend carries identity.
     const direct = lines.length > 0 && lines.length <= 4 && width >= 520 && orientation !== 'h';
-    const labelWidth = direct ? Math.max(...lines.map((s) => s.name.length)) * 0.6 * t.smallSize + t.space.s4 : 0;
+    const labelWidth = direct ? Math.max(...lines.map((s) => s.name.length)) * 0.56 * t.smallSize + t.space.s3 : 0;
     const xs = series.flatMap((s) => s.x).filter((x): x is number => typeof x === 'number');
+    // The axis ends at the first and last data values, not at a padded tick; bars need their padding.
+    const numericX = xs.length > 0 && xs.length === series.flatMap((s) => s.x).length && !series.some((s) => s.kind === 'bar') && orientation !== 'h';
     const x0 = Math.min(...xs); const x1 = Math.max(...xs);
     const plotWidth = Math.max(1, width - t.space.s5 - t.space.s4 - labelWidth);
     const px = (x: number) => ((x - x0) / Math.max(1, x1 - x0)) * plotWidth;
@@ -132,14 +134,24 @@ export function Chart(props: ChartProps) {
     (annotations ?? []).forEach((a) => notations.push({ x: a.x, y: a.y, text: a.text, showarrow: true, ax: 0, ay: -t.space.s5, arrowwidth: t.strokeWidth }));
     if (direct) {
       const ends = lines.map((s) => ({ s, y: s.y[s.y.length - 1], x: s.x[s.x.length - 1] })).sort((a, b) => a.y - b.y);
-      ends.forEach((e) => notations.push({ x: e.x, y: e.y, xref: 'x', yref: e.s.axis === 'y2' ? 'y2' : 'y', text: e.s.name, xanchor: 'left', xshift: t.space.s2, showarrow: false, font: { color: t.text, size: t.smallSize, family: t.familyUi } }));
+      ends.forEach((e) => {
+        const atEdge = typeof e.x !== 'number' || e.x >= x1;
+        // A line that stops before the right edge is named just before its end, on the side away from its
+        // own stroke, so the label never sits on the range that continues beyond it.
+        const rising = e.s.y[e.s.y.length - 1] >= e.s.y[Math.max(0, e.s.y.length - 4)];
+        notations.push({
+          x: e.x, y: e.y, xref: 'x', yref: e.s.axis === 'y2' ? 'y2' : 'y', text: e.s.name, showarrow: false,
+          ...(atEdge ? { xanchor: 'left' as const, xshift: t.space.s2 } : { xanchor: 'right' as const, xshift: -t.space.s2, yanchor: rising ? ('bottom' as const) : ('top' as const), yshift: rising ? t.space.s2 : -t.space.s2 }),
+          font: { color: t.text, size: t.smallSize, family: t.familyUi },
+        });
+      });
     }
 
     const layout: Partial<Layout> = {
       showlegend: false,
       barmode: barmode ?? (series.some((s) => s.kind === 'area') ? undefined : 'group'),
       margin: { t: t.space.s3 + topRows * LABEL_ROW + (topRows ? t.space.s2 : 0), r: t.space.s4 + labelWidth, l: t.space.s5, b: t.space.s5 },
-      xaxis: { title: xTitle ? { text: xTitle } : undefined },
+      xaxis: { title: xTitle ? { text: xTitle } : undefined, ...(numericX && Number.isFinite(x0) ? { range: [x0, x1] } : {}) },
       yaxis: { title: { text: yTitle }, ...(yRange ? { range: yRange } : {}) },
       ...(y2Title ? { yaxis2: { title: { text: y2Title }, overlaying: 'y', side: 'right', tickformat: y2TickFormat, showgrid: false } } : {}),
       shapes, annotations: notations,

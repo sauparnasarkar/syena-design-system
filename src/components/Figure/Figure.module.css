@@ -17,14 +17,17 @@
 
 .sm .unit {
   font-size: var(--syn-type-text-md-size);
+  letter-spacing: var(--syn-type-text-md-tracking);
 }
 
 .md .unit {
   font-size: var(--syn-type-text-lg-size);
+  letter-spacing: var(--syn-type-text-lg-tracking);
 }
 
 .lg .unit {
   font-size: var(--syn-type-title-sm-size);
+  letter-spacing: var(--syn-type-title-sm-tracking);
 }
 
 .srOnly {

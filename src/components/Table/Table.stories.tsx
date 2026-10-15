@@ -52,7 +52,19 @@ export const UnitUnderTheHeader: Story = {
 export const GroupedHeaders: Story = {
   args: { groups: [{ label: '', span: 1 }, { label: 'Level', span: 4 }, { label: 'Change', span: 1 }] },
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByRole('columnheader', { name: 'Level' })).toHaveAttribute('colspan', '4');
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('columnheader', { name: 'Level' })).toHaveAttribute('colspan', '4');
+    // Each group label's cell covers exactly the columns it spans, edge to edge.
+    const heads = canvas.getAllByRole('columnheader').filter((h) => !h.hasAttribute('colspan'));
+    const edges = (el: Element) => { const r = el.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.right)]; };
+    const level = edges(canvas.getByRole('columnheader', { name: 'Level' }));
+    const change = edges(canvas.getByRole('columnheader', { name: 'Change' }));
+    await expect(level).toEqual([edges(heads[1])[0], edges(heads[4])[1]]);
+    await expect(change).toEqual(edges(heads[5]));
+    // The empty cell sits over the Indicator column, and its text sits in the middle of its own span.
+    const gap = canvasElement.querySelector('thead tr:first-child td') as HTMLElement;
+    await expect(edges(gap)).toEqual(edges(heads[0]));
+    await expect(getComputedStyle(canvas.getByRole('columnheader', { name: 'Level' })).textAlign).toBe('center');
   },
 };
 

@@ -12,8 +12,8 @@ const panel = (width = 'min(100%, 56rem)') => (Story: () => ReactElement) => (
 
 const years = observed.map((p) => p.year);
 const lineSeries: ChartSeries[] = [
-  { name: 'Observed', x: years, y: observed.map((p) => p.value) },
-  { name: 'Current policies', projected: true, x: scenarios[0].points.map((p) => p.year), y: scenarios[0].points.map((p) => p.value), band: { low: scenarios[0].points.map((p) => p.low), high: scenarios[0].points.map((p) => p.high), label: '66% range' }, slot: 1 },
+  { name: 'Observed', x: years, y: observed.map((p) => p.value), slot: 1 },
+  { name: 'Current policies', projected: true, x: scenarios[0].points.map((p) => p.year), y: scenarios[0].points.map((p) => p.value), band: { low: scenarios[0].points.map((p) => p.low), high: scenarios[0].points.map((p) => p.high), label: '66% range' }, slot: 2 },
   { name: 'Net zero pathway', projected: true, x: scenarios[2].points.map((p) => p.year), y: scenarios[2].points.map((p) => p.value), slot: 3 },
 ];
 
@@ -33,6 +33,39 @@ export const ObservedAndProjections: Story = {
     await expect(svgText(canvasElement)).toContain('2030 milestone');
     // With few lines and room, lines are named directly at their ends.
     await expect(svgText(canvasElement)).toContain('Net zero pathway');
+  },
+};
+
+export const LabelsClearTheBandAndTheAxisEndsAtTheData: Story = {
+  args: { series: lineSeries, projectionFrom: 2024 },
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    await waitFor(() => expect(svgText(canvasElement)).toContain('Observed'));
+    const box = (e: Element) => e.getBoundingClientRect();
+    const band = canvasElement.querySelector('.scatterlayer path.js-fill');
+    await expect(band).not.toBeNull();
+    const b = box(band!);
+    const labels = [...canvasElement.querySelectorAll('g.annotation')].filter((g) => ['Observed', 'Current policies', 'Net zero pathway'].includes(g.textContent ?? ''));
+    await expect(labels).toHaveLength(3);
+    // No direct label overlaps the range band.
+    for (const label of labels) {
+      const r = box(label);
+      const overlaps = r.left < b.right && r.right > b.left && r.top < b.bottom && r.bottom > b.top;
+      await expect(overlaps).toBe(false);
+    }
+    // Labels do not overlap each other.
+    for (let i = 0; i < labels.length; i += 1) for (let j = i + 1; j < labels.length; j += 1) {
+      const a = box(labels[i]); const c = box(labels[j]);
+      await expect(a.left < c.right && a.right > c.left && a.top < c.bottom && a.bottom > c.top).toBe(false);
+    }
+    // The x-axis ends at the last data year, not at a padded tick.
+    const ticks = [...canvasElement.querySelectorAll('.xtick text')].map((t) => t.textContent);
+    await expect(ticks).toContain('2050');
+    await expect(ticks).not.toContain('2060');
+    // The plot uses the width: the labels end near the right edge of the chart.
+    const svg = box(canvasElement.querySelector('.main-svg')!);
+    const rightmost = Math.max(...labels.map((l) => box(l).right));
+    await expect(svg.right - rightmost).toBeLessThanOrEqual(48);
   },
 };
 

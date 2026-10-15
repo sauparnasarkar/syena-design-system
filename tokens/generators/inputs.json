@@ -29,7 +29,8 @@
       "text-lg": {
         "step": 0,
         "family": "ui",
-        "weight": 400
+        "weight": 400,
+        "leading": 1.625
       },
       "title-sm": {
         "step": 1,

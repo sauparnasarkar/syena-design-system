@@ -99,3 +99,14 @@ export const UnitsInBothThemes: Story = {
     </div>
   ),
 };
+
+export const UnitTracksAsItsOwnTextStep: Story = {
+  render: () => <div style={{ padding: 'var(--syn-space-5)', color: 'var(--syn-color-text-primary)' }}><Figure size="lg" value={37.4} decimals={1} unit="GtCO₂ a year" /></div>,
+  play: async ({ canvasElement }) => {
+    const [number, unit] = canvasElement.querySelector('div > span')!.children;
+    const em = (el: Element) => parseFloat(getComputedStyle(el).letterSpacing) / parseFloat(getComputedStyle(el).fontSize);
+    // The number keeps its tight display tracking; the unit takes the tracking of its own, smaller step.
+    await expect(em(number)).toBeLessThan(-0.05);
+    await expect(Math.abs(em(unit) - -0.0125)).toBeLessThan(0.001);
+  },
+};

@@ -6,8 +6,8 @@ import { Table } from '../Table/Table';
 import { ChartCard } from './ChartCard';
 
 const series: ChartSeries[] = [
-  { name: 'Observed', x: observed.map((p) => p.year), y: observed.map((p) => p.value) },
-  { name: 'Current policies', projected: true, x: scenarios[0].points.map((p) => p.year), y: scenarios[0].points.map((p) => p.value) },
+  { name: 'Observed', x: observed.map((p) => p.year), y: observed.map((p) => p.value), slot: 1 },
+  { name: 'Current policies', projected: true, slot: 2, x: scenarios[0].points.map((p) => p.year), y: scenarios[0].points.map((p) => p.value) },
 ];
 const { columns, rows } = chartTable(series, 'Year');
 const chart = <Chart series={series} yTitle="GtCO₂ a year" projectionFrom={2024} ariaLabel="Annual emissions to 2024 with a projection to 2050." />;

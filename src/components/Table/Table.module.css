@@ -70,8 +70,12 @@
   vertical-align: bottom;
 }
 
-.group {
-  border-bottom-color: var(--syn-color-border-default);
+.table .group {
+  /* The rule under a group is inset at both ends, so neighbouring groups read as separate spans. */
+  border-bottom: 0;
+  background:
+    linear-gradient(var(--syn-color-border-default), var(--syn-color-border-default)) center bottom / calc(100% - var(--syn-space-4)) var(--syn-layout-border-hairline) no-repeat,
+    var(--syn-color-surface-sunken);
   font: 600 var(--syn-type-overline-size) / var(--syn-type-overline-line) var(--syn-type-overline-family);
   letter-spacing: var(--syn-type-overline-tracking);
   text-align: center;

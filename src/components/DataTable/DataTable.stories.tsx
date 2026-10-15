@@ -57,6 +57,31 @@ export const ColumnsFillTheWidth: Story = {
   },
 };
 
+export const LabelColumnIsNotTruncatedWhileNumbersHaveSlack: Story = {
+  play: async ({ canvasElement }) => {
+    await ready(canvasElement);
+    const first = [...canvasElement.querySelectorAll('.ag-grid-pinned-left-cells .ag-cell')];
+    await expect(first.length).toBeGreaterThan(0);
+    for (const cell of first) await expect(cell.scrollWidth).toBeLessThanOrEqual(cell.clientWidth + 1);
+    // Number columns take their content plus padding; the spare width is shared, not left to the label.
+    const header = within(canvasElement).getByText('Indicator').closest('.ag-header-cell') as HTMLElement;
+    const number = within(canvasElement).getByText('2024').closest('.ag-header-cell') as HTMLElement;
+    await expect(header.getBoundingClientRect().width).toBeLessThan(number.getBoundingClientRect().width * 3);
+  },
+};
+
+export const GridIsAsTallAsItsRows: Story = {
+  play: async ({ canvasElement }) => {
+    await ready(canvasElement);
+    const rowsEls = [...canvasElement.querySelectorAll('.ag-grid-scrolling-rows .ag-row')];
+    await expect(rowsEls).toHaveLength(rows.length);
+    const last = rowsEls.reduce((m, r) => Math.max(m, r.getBoundingClientRect().bottom), 0);
+    const root = canvasElement.querySelector('.ag-root-wrapper') as HTMLElement;
+    // No empty strip under the last row (the frame's own border is allowed).
+    await expect(root.getBoundingClientRect().bottom - last).toBeLessThanOrEqual(3);
+  },
+};
+
 export const NumbersAndHeadersAreRightAligned: Story = {
   play: async ({ canvasElement }) => {
     await ready(canvasElement);
@@ -114,6 +139,22 @@ export const Loading: Story = {
   args: { loading: true },
   play: async ({ canvasElement }) => {
     await waitFor(() => expect(canvasElement.querySelector('.ag-overlay-loading-wrapper, .ag-overlay')).not.toBeNull());
+  },
+};
+
+export const PhoneWidthFillsAndKeepsTwoNumberColumnsBesideTheLabel: Story = {
+  decorators: [frame('min(100%, 22rem)')],
+  play: async ({ canvasElement }) => {
+    await ready(canvasElement);
+    const wrapEl = canvasElement.querySelector('.ag-root-wrapper') as HTMLElement;
+    const holder = (wrapEl.closest('[role="region"]') as HTMLElement).getBoundingClientRect();
+    // The grid fills its container's width.
+    await expect(Math.abs(wrapEl.getBoundingClientRect().right - holder.right)).toBeLessThanOrEqual(2);
+    // The label is capped and wraps; at least two number columns are fully visible beside it.
+    const view = (canvasElement.querySelector('.ag-grid-viewport') as HTMLElement).getBoundingClientRect();
+    const seen = [...canvasElement.querySelectorAll('.ag-header-cell:not(.ag-column-first)')].filter((h) => { const r = h.getBoundingClientRect(); return r.left >= view.left - 1 && r.right <= view.right + 1; });
+    await expect(seen.length).toBeGreaterThanOrEqual(2);
+    await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth);
   },
 };
 
