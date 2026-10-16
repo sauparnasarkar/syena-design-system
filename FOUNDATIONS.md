@@ -1455,7 +1455,8 @@ with named values; there are no colour-named variants.
 - **Purpose and props.** A themed chart on the plotting library. Props: `series`, `xTitle`,
   `yTitle`, `y2Title`, `y2TickFormat`, `ariaLabel`, `showLegend`, `height`,
   `stackedAreaMode`, `barmode`, `orientation`, `projectionFrom`, `referenceX`, `annotations`,
-  `yRange`. A series has a `kind` (`line`, `bar`, `area` or `marker`), and optionally `projected`,
+  `yRange`; `referenceX` is one reference line or a list. A series' values may be `null`, which
+  leaves a gap (the line breaks and is never joined across it). A series has a `kind` (`line`, `bar`, `area` or `marker`), and optionally `projected`,
   `band`, `axis`, `slot`, `signed` and `signLabels`, and `colorValues`, `colorDomain`, `colorLabel`
   and `formatColorValue`.
 - **Series kinds.** `marker` draws points that are not joined, for a relationship between two
@@ -1534,8 +1535,11 @@ with named values; there are no colour-named variants.
 
 - **Purpose and props.** Tiles whose area is a value, for parts of a whole with many parts. Props:
   `items` (`id`, `label`, `value`, optional `group` and `colorValue`), `ariaLabel`, `valueLabel`,
-  `unit`, `formatValue`, `colorBy` (`group` or `value`), `colorDomain`, `colorLabel`,
-  `formatColorValue`, `height`.
+  `unit`, `formatValue`, `colorBy` (`group` or `value`), `colorDomain`, `diverging`, `colorLabel`,
+  `formatColorValue`, `height`, `onSelect`, `selectedId`. `diverging` colours by value on the
+  diverging ramp, symmetrical about zero, for a change. With `onSelect` every tile is a button
+  (named by what it shows, or by its reading where it has no room for text) and the chosen one
+  is outlined, for choosing a tile where hover is not available.
 - **Anatomy.** Squarified layout: tiles are packed in rows along the shorter side of the space left,
   each row closed when another tile would make the worst aspect ratio worse; area is exactly
   proportional to value and the tiles fill the panel. Colour by group takes the categorical

@@ -263,6 +263,26 @@ export const MarkersAreNotJoined: Story = {
   },
 };
 
+export const AGapInTheValuesBreaksTheLine: Story = {
+  args: { series: [{ name: 'With a gap', x: [2000, 2001, 2002, 2003, 2004, 2005], y: [1, 2, 3, null, null, 6] }], ariaLabel: 'Six values with a gap in the middle. Illustrative.' },
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    await waitFor(() => expect(canvasElement.querySelectorAll('.scatterlayer .lines path').length).toBeGreaterThan(0));
+    // The line is in two pieces, one before the gap and one after: it is never joined across it.
+    const moves = [...canvasElement.querySelectorAll('.scatterlayer .lines path')].reduce((n, p) => n + (p.getAttribute('d')!.match(/M/g)?.length ?? 0), 0);
+    await expect(moves).toBe(2);
+  },
+};
+
+export const SeveralReferenceLines: Story = {
+  args: { series: lineSeries.slice(0, 2), referenceX: [{ x: 2000, label: 'Start' }, { x: 2030, label: 'Milestone' }] },
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    await waitFor(() => expect(svgText(canvasElement)).toContain('Start'));
+    await expect(svgText(canvasElement)).toContain('Milestone');
+  },
+};
+
 export const TableOfTheValues: Story = {
   args: { series: lineSeries.slice(0, 2) },
   play: async ({ canvasElement }) => {

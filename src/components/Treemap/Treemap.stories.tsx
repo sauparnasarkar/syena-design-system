@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { contrastRatio } from '../../lib/colour';
 import { illustrativeEmissions } from '../../specimens/countryValues';
 import { coded } from '../../charts/map/countries';
@@ -115,6 +115,44 @@ export const ColouredByAValue: Story = {
     await expect(colours.size).toBeGreaterThan(4);
     await userEvent.click(canvas.getByRole('button', { name: 'Table view' }));
     await expect(canvas.getByRole('columnheader', { name: 'Reduction under the scenario, %' })).toBeInTheDocument();
+  },
+};
+
+export const DivergingColoursAreCentredOnZero: Story = {
+  args: {
+    items: byValue.map((i, k) => ({ ...i, colorValue: (k % 2 === 0 ? 1 : -1) * (5 + k) })),
+    colorBy: 'value', diverging: true, colorLabel: '2040 against today, MtCO₂', formatColorValue: (v: number) => `${v > 0 ? '+' : v < 0 ? '\u2212' : ''}${Math.abs(v)}`,
+    ariaLabel: 'Treemap of annual CO₂ emissions, each tile coloured by its change to 2040, illustrative values.',
+  },
+  play: async ({ canvasElement }) => {
+    await painted(canvasElement);
+    const canvas = within(canvasElement);
+    // The ramp's ends are the same size either side of zero.
+    const ends = canvasElement.querySelectorAll('[class*="__rampRow__"] > span:not([class*="__bar__"])');
+    const [lo, hi] = [...ends].map((e) => (e.textContent ?? '').replace('\u2212', '-'));
+    await expect(Math.abs(Number(lo))).toBe(Math.abs(Number(hi)));
+    // Tiles below and above zero are different colours.
+    const fills = new Set(tilesOf(canvasElement).map((t) => getComputedStyle(t).backgroundColor));
+    await expect(fills.size).toBeGreaterThan(4);
+    await expect(canvas.getAllByText('2040 against today, MtCO₂').length).toBeGreaterThan(0);
+  },
+};
+
+export const TilesCanBeChosenWhereHoverIsNotAvailable: Story = {
+  args: { onSelect: fn(), selectedId: 'CHN' },
+  play: async ({ canvasElement, args }) => {
+    await waitFor(() => expect(canvasElement.querySelectorAll('button[aria-pressed]').length).toBeGreaterThan(5), { timeout: 8000 });
+    const canvas = within(canvasElement);
+    // Each tile is a button named by what it shows (or, where it has no room for text, by its reading); the chosen one is marked.
+    const china = canvas.getByRole('button', { name: /^China/ });
+    await expect(china).toHaveAttribute('aria-pressed', 'true');
+    const india = canvas.getByRole('button', { name: /^India/ });
+    await expect(india).toHaveAttribute('aria-pressed', 'false');
+    await userEvent.click(india);
+    await expect(args.onSelect).toHaveBeenCalledWith('IND');
+    india.focus();
+    await userEvent.keyboard('{Enter}');
+    await expect(args.onSelect).toHaveBeenCalledTimes(2);
   },
 };
 

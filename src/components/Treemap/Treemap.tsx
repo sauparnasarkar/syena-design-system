@@ -31,22 +31,29 @@ export interface TreemapProps {
   colorBy?: 'group' | 'value';
   /** The range the ramp covers when colouring by value. The range of the values by default. */
   colorDomain?: [number, number];
+  /** Colours by value on the diverging ramp, centred on zero: for a change, where below and above zero differ in meaning. The range is symmetrical about zero. */
+  diverging?: boolean;
   /** What the colour measures, when colouring by value. */
   colorLabel?: string;
   formatColorValue?: (value: number) => string;
   height?: number;
+  /** Makes every tile a button that reports its id: for choosing a tile where hover is not available. */
+  onSelect?: (id: string) => void;
+  /** The chosen tile, marked on the chart. */
+  selectedId?: string;
 }
 
 const catNames = ['data-cat-1', 'data-cat-2', 'data-cat-3', 'data-cat-4', 'data-cat-5', 'data-cat-6', 'data-cat-7', 'data-cat-8'] as const;
 const seqNames = ['data-seq-1', 'data-seq-2', 'data-seq-3', 'data-seq-4', 'data-seq-5', 'data-seq-6', 'data-seq-7'] as const;
-const tokenNames = ['data-surface', 'data-text', 'data-text-muted', 'data-ink-dark', 'data-ink-light', 'data-other', 'space-9', 'type-text-sm-line', ...catNames, ...seqNames] as const;
+const divNames = ['data-div-neg-3', 'data-div-neg-2', 'data-div-neg-1', 'data-div-mid', 'data-div-pos-1', 'data-div-pos-2', 'data-div-pos-3'] as const;
+const tokenNames = ['data-surface', 'data-text', 'data-text-muted', 'data-ink-dark', 'data-ink-light', 'data-other', 'space-9', 'type-text-sm-line', ...catNames, ...seqNames, ...divNames] as const;
 const plain = (v: number) => v.toLocaleString('en-GB');
 
 /**
  * A treemap: tiles whose area is the value, coloured by group or by a second value. Labels show where a tile has room
  * and are always in the table view, which is also the text alternative.
  */
-export function Treemap({ items, ariaLabel, valueLabel, unit, formatValue = plain, colorBy = 'group', colorDomain, colorLabel, formatColorValue = plain, height = 320 }: TreemapProps) {
+export function Treemap({ items, ariaLabel, valueLabel, unit, formatValue = plain, colorBy = 'group', colorDomain, diverging = false, colorLabel, formatColorValue = plain, height = 320, onSelect, selectedId }: TreemapProps) {
   const [box, width] = useWidth<HTMLDivElement>();
   const t = useResolvedTokens(tokenNames);
   const [tableView, setTableView] = useState(false);
@@ -61,12 +68,13 @@ export function Treemap({ items, ariaLabel, valueLabel, unit, formatValue = plai
   const [lo, hi] = useMemo<[number, number]>(() => {
     if (colorDomain) return colorDomain;
     const v = items.flatMap((i) => (i.colorValue === undefined ? [] : [i.colorValue]));
+    if (diverging) { const m = v.length ? Math.max(...v.map(Math.abs)) : 1; return [-m, m]; }
     return v.length ? [Math.min(...v), Math.max(...v)] : [0, 1];
-  }, [colorDomain, items]);
+  }, [colorDomain, diverging, items]);
 
   const fillOf = (item: TreemapItem) => {
     if (!t) return 'transparent';
-    if (colorBy === 'value') return blendStops(seqNames.map((n) => t[n]), item.colorValue === undefined ? 0 : (item.colorValue - lo) / Math.max(1e-9, hi - lo));
+    if (colorBy === 'value') return blendStops((diverging ? divNames : seqNames).map((n) => t[n]), item.colorValue === undefined ? (diverging ? 0.5 : 0) : (item.colorValue - lo) / Math.max(1e-9, hi - lo));
     const slot = item.group ? groups.indexOf(item.group) : -1;
     return slot >= 0 && slot < catNames.length ? t[catNames[slot]] : t['data-other'];
   };
@@ -81,22 +89,27 @@ export function Treemap({ items, ariaLabel, valueLabel, unit, formatValue = plai
     <figure className={styles.treemap}>
       <div ref={box} className={[styles.stage, tableView ? styles.stageOff : ''].join(' ')} style={{ height: tableView ? 0 : height }} aria-hidden={tableView || undefined}>
         {t ? (
-          <div role="img" aria-label={ariaLabel} aria-describedby={tableId} className={styles.tiles} onPointerLeave={() => setHover(null)}>
+          <div {...(onSelect ? { role: 'group', 'aria-label': ariaLabel } : { role: 'img', 'aria-label': ariaLabel, 'aria-describedby': tableId })} className={styles.tiles} onPointerLeave={() => setHover(null)}>
             {tiles.map(({ item, x, y, w, h }) => {
               const fill = fillOf(item);
               const roomy = w >= minW && h >= minH;
-              return (
-                // The tiles are a picture: the table below is the text alternative and each tile is read out there.
-                // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-                <div
-                  key={item.id}
-                  className={styles.tile}
-                  style={{ left: x, top: y, width: w, height: h, background: fill, color: bestInk(fill, t['data-ink-light'], t['data-ink-dark']) }}
-                  onPointerEnter={() => setHover(describe(item))}
-                >
+              const props = {
+                className: [styles.tile, onSelect ? styles.pick : '', item.id === selectedId ? styles.chosen : ''].filter(Boolean).join(' '),
+                style: { left: x, top: y, width: w, height: h, background: fill, color: bestInk(fill, t['data-ink-light'], t['data-ink-dark']) },
+                onPointerEnter: () => setHover(describe(item)),
+              };
+              const inside = (
+                <>
                   {roomy ? <span className={styles.label}>{item.label}</span> : null}
                   {roomy ? <span className={styles.value}>{formatValue(item.value)}{unit ? ` ${unit}` : ''}</span> : null}
-                </div>
+                </>
+              );
+              // The tiles are a picture and the table below is its text alternative; with `onSelect` each tile is a button instead, named by its own reading.
+              return onSelect ? (
+                <button key={item.id} type="button" aria-label={roomy ? undefined : describe(item)} aria-pressed={item.id === selectedId} onClick={() => onSelect(item.id)} {...props}>{inside}</button>
+              ) : (
+                // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+                <div key={item.id} {...props}>{inside}</div>
               );
             })}
           </div>
@@ -141,7 +154,7 @@ export function Treemap({ items, ariaLabel, valueLabel, unit, formatValue = plai
           <span>{colorLabel ?? 'Colour value'}</span>
           <div className={styles.rampRow}>
             <span>{formatColorValue(lo)}</span>
-            <span className={styles.bar} aria-hidden="true" />
+            <span className={[styles.bar, diverging ? styles.diverging : ''].filter(Boolean).join(' ')} aria-hidden="true" />
             <span>{formatColorValue(hi)}</span>
           </div>
         </div>

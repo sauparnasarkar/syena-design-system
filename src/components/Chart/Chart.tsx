@@ -13,7 +13,8 @@ export type SeriesKind = 'line' | 'bar' | 'area' | 'marker';
 export interface ChartSeries {
   name: string;
   x: Array<number | string>;
-  y: number[];
+  /** The values. `null` leaves a gap: the line breaks there and is never joined across it. */
+  y: Array<number | null>;
   kind?: SeriesKind;
   /** Drawn dashed, with its band, and marked as a projection in the tooltip. */
   projected?: boolean;
@@ -52,8 +53,8 @@ export interface ChartProps {
   orientation?: 'v' | 'h';
   /** Where a projection begins: the region from here on is shaded and labelled. */
   projectionFrom?: number;
-  /** A reference line, for example a milestone year. */
-  referenceX?: { x: number; label: string };
+  /** One or more reference lines, for example a milestone year. */
+  referenceX?: { x: number; label: string } | Array<{ x: number; label: string }>;
   annotations?: Array<{ x: number | string; y: number; text: string }>;
   yRange?: [number, number];
 }
@@ -96,11 +97,11 @@ function buildTraces(t: ChartTokens, series: ChartSeries[], hidden: Set<number>,
     if (s.kind === 'bar') {
       const [lo, hi] = colourRange(s);
       const sign = s.signed ? signColours(t, s.signed) : null;
-      const fills = sign ? s.y.map((v) => (v < 0 ? sign.negative : sign.positive)) : s.colorValues ? s.colorValues.map((v) => blendStops(t.sequential, (v - lo) / Math.max(1e-9, hi - lo))) : colour;
+      const fills = sign ? s.y.map((v) => ((v ?? 0) < 0 ? sign.negative : sign.positive)) : s.colorValues ? s.colorValues.map((v) => blendStops(t.sequential, (v - lo) / Math.max(1e-9, hi - lo))) : colour;
       const format = s.formatColorValue ?? ((v: number) => v.toLocaleString('en-GB'));
       traces.push({
         type: 'bar', name, orientation: horizontal ? 'h' : 'v', x: horizontal ? s.y : s.x, y: horizontal ? s.x : s.y, marker: { color: fills },
-        ...(sign ? { customdata: s.y.map((v) => signedText(v)), hovertemplate: `%{${horizontal ? 'y' : 'x'}}: %{customdata}<extra>${name}</extra>` } : {}),
+        ...(sign ? { customdata: s.y.map((v) => (v === null ? '' : signedText(v))), hovertemplate: `%{${horizontal ? 'y' : 'x'}}: %{customdata}<extra>${name}</extra>` } : {}),
         ...(s.colorValues ? { customdata: s.colorValues.map(format), hovertemplate: `%{${horizontal ? 'y' : 'x'}}: %{${horizontal ? 'x' : 'y'}}<br>${s.colorLabel ?? 'Colour value'}: %{customdata}<extra>${name}</extra>` } : {}),
         ...axis,
       } as Data);
@@ -161,7 +162,8 @@ export function Chart(props: ChartProps) {
     // Labels above the plot: a label that would overlap an earlier one moves down a row.
     const notes: Array<{ x: number; text: string }> = [];
     if (projectionFrom !== undefined) notes.push({ x: projectionFrom, text: 'Projection' });
-    if (referenceX) notes.push({ x: referenceX.x, text: referenceX.label });
+    const references = referenceX === undefined ? [] : Array.isArray(referenceX) ? referenceX : [referenceX];
+    references.forEach((r) => notes.push({ x: r.x, text: r.label }));
     const placed: Array<{ a: number; b: number; row: number }> = [];
     const rows = notes.map((n) => {
       const box = { a: px(n.x) - t.space.s2, b: px(n.x) + n.text.length * 0.6 * t.captionSize + t.space.s2, row: 0 };
@@ -174,16 +176,22 @@ export function Chart(props: ChartProps) {
     const shapes: Partial<Shape>[] = [];
     const notations: Partial<Annotations>[] = [];
     if (projectionFrom !== undefined) shapes.push({ type: 'rect', xref: 'x', yref: 'paper', x0: projectionFrom, x1, y0: 0, y1: 1, fillcolor: t.uncertainty, opacity: t.projectionOpacity, line: { width: 0 }, layer: 'below' });
-    if (referenceX) shapes.push({ type: 'line', xref: 'x', yref: 'paper', x0: referenceX.x, x1: referenceX.x, y0: 0, y1: 1 });
+    references.forEach((r) => shapes.push({ type: 'line', xref: 'x', yref: 'paper', x0: r.x, x1: r.x, y0: 0, y1: 1 }));
     notes.forEach((n, i) => notations.push({ x: n.x, xref: 'x', y: 1, yref: 'paper', text: n.text, xanchor: 'left', yanchor: 'bottom', xshift: t.space.s2, yshift: rows[i] * LABEL_ROW, showarrow: false }));
     (annotations ?? []).forEach((a) => notations.push({ x: a.x, y: a.y, text: a.text, showarrow: true, ax: 0, ay: -t.space.s5, arrowwidth: t.strokeWidth }));
     if (direct) {
-      const ends = lines.map((s) => ({ s, y: s.y[s.y.length - 1], x: s.x[s.x.length - 1] })).sort((a, b) => a.y - b.y);
+      // Each line is named at its last value, skipping any gap at the end.
+      const ends = lines.flatMap((s) => {
+        let i = s.y.length - 1;
+        while (i > 0 && s.y[i] === null) i -= 1;
+        const y = s.y[i];
+        return y === null || y === undefined ? [] : [{ s, y, x: s.x[i], earlier: s.y.slice(Math.max(0, i - 3), i + 1).find((v) => v !== null) ?? y }];
+      }).sort((a, b) => a.y - b.y);
       ends.forEach((e) => {
         const atEdge = typeof e.x !== 'number' || e.x >= x1;
         // A line that stops before the right edge is named just before its end, on the side away from its
         // own stroke, so the label never sits on the range that continues beyond it.
-        const rising = e.s.y[e.s.y.length - 1] >= e.s.y[Math.max(0, e.s.y.length - 4)];
+        const rising = e.y >= e.earlier;
         notations.push({
           x: e.x, y: e.y, xref: 'x', yref: e.s.axis === 'y2' ? 'y2' : 'y', text: e.s.name, showarrow: false,
           ...(atEdge ? { xanchor: 'left' as const, xshift: t.space.s2 } : { xanchor: 'right' as const, xshift: -t.space.s2, yanchor: rising ? ('bottom' as const) : ('top' as const), yshift: rising ? t.space.s2 : -t.space.s2 }),
