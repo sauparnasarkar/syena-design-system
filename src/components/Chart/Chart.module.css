@@ -45,7 +45,51 @@
   border-radius: var(--syn-radius-control);
 }
 
+.bandKey svg {
+  flex: none;
+}
+
+.rampSwatch {
+  display: inline-block;
+  width: var(--syn-space-5);
+  height: var(--syn-space-3);
+  border-radius: var(--syn-radius-control);
+  background: linear-gradient(in oklab to right, var(--syn-data-seq-1), var(--syn-data-seq-4), var(--syn-data-seq-7));
+}
+
+.dot {
+  display: inline-block;
+  width: var(--syn-space-3);
+  height: var(--syn-space-3);
+  margin-inline: var(--syn-space-1);
+  border-radius: 50%;
+}
+
 .line {
   width: var(--syn-space-5);
   height: var(--syn-space-3);
+}
+
+.ramp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--syn-space-2);
+  color: var(--syn-data-text-muted);
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+}
+
+.rampRow {
+  display: flex;
+  align-items: center;
+  gap: var(--syn-space-3);
+  font-family: var(--syn-family-figure);
+  font-feature-settings: var(--syn-figure-feature-settings);
+}
+
+.bar {
+  flex: 1 1 var(--syn-layout-field-min);
+  min-width: 0;
+  height: var(--syn-space-3);
+  border-radius: var(--syn-radius-control);
+  background: linear-gradient(in oklab to right, var(--syn-data-seq-1), var(--syn-data-seq-2), var(--syn-data-seq-3), var(--syn-data-seq-4), var(--syn-data-seq-5), var(--syn-data-seq-6), var(--syn-data-seq-7));
 }
