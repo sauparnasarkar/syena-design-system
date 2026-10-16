@@ -27,6 +27,8 @@ export interface TableProps<Row> {
   rows: Row[];
   /** What the table holds and the period. Shown above the table, outside its scrolling area, and names it. */
   caption: string;
+  /** Keeps the caption for assistive technology but does not show it, when the surrounding text already says what the table holds. */
+  hideCaption?: boolean;
   /** The column whose cells are row headers. The first by default. */
   rowHeaderKey?: keyof Row & string;
   groups?: TableColumnGroup[];
@@ -42,13 +44,13 @@ export interface TableProps<Row> {
  * A static table for short lists. The caption sits above the scrolling area, the first column stays
  * in view when the table scrolls sideways, and edge shadows show that there is more to see.
  */
-export function Table<Row extends object>({ columns, rows, caption, rowHeaderKey, groups, size = 'default', striped, rowBorders = true, withBorder = true, selectedIndex }: TableProps<Row>) {
+export function Table<Row extends object>({ columns, rows, caption, rowHeaderKey, hideCaption, groups, size = 'default', striped, rowBorders = true, withBorder = true, selectedIndex }: TableProps<Row>) {
   const id = useId();
   const header = rowHeaderKey ?? columns[0]?.key;
   const cell = (row: Row, col: TableColumn<Row>) => (col.render ? col.render(row) : ((row as Record<string, unknown>)[col.key] as ReactNode));
   return (
     <div className={[styles.wrap, withBorder ? styles.bordered : ''].filter(Boolean).join(' ')}>
-      <p id={id} className={styles.caption}>{caption}</p>
+      <p id={id} className={hideCaption ? styles.srOnly : styles.caption}>{caption}</p>
       <div role="region" aria-labelledby={id} tabIndex={0} className={styles.scroll}>
         <table aria-labelledby={id} className={[styles.table, size === 'small' ? styles.small : '', striped ? styles.striped : '', rowBorders ? styles.rowBorders : ''].filter(Boolean).join(' ')}>
           <thead>

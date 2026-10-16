@@ -88,6 +88,16 @@ export const ALongTextColumnWraps: Story = {
   },
 };
 
+export const ACaptionCanBeKeptForReadersWithoutShowingIt: Story = {
+  args: { hideCaption: true },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('table', { name: /Indicators for the example country/ })).toBeInTheDocument();
+    const caption = canvas.getByText(/Indicators for the example country/);
+    await expect(caption.getBoundingClientRect().width).toBeLessThanOrEqual(2);
+  },
+};
+
 export const Striped: Story = { args: { striped: true, size: 'small' } };
 
 export const NarrowKeepsTheFirstColumnAndScrollsInsideItsRegion: Story = {
