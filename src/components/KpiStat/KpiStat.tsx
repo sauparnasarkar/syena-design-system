@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import { Card } from '../Card/Card';
 import { Figure, formatFigure } from '../Figure/Figure';
 import { Icon } from '../Icon/Icon';
@@ -7,7 +8,7 @@ export type DeltaTone = 'positive' | 'negative' | 'neutral';
 
 export interface KpiStatProps {
   label: string;
-  value: number | string;
+  value: number | string | ReactElement;
   unit?: string;
   /** The unit spelled for screen readers when `unit` is an abbreviation. */
   unitLabel?: string;
@@ -22,6 +23,8 @@ export interface KpiStatProps {
   deltaDecimals?: number;
   deltaUnit?: string;
   /** Wraps the stat in a card. */
+  /** A plain line under the value that is not a change: what the figure covers, or "of 192 countries". It carries no direction or tone. */
+  note?: string;
   card?: boolean;
   loading?: boolean;
 }
@@ -29,7 +32,7 @@ export interface KpiStatProps {
 const toneClass: Record<DeltaTone, string> = { positive: styles.positive, negative: styles.negative, neutral: styles.neutral };
 
 /** One headline figure with context: label, value, and a change with its direction and tone. */
-export function KpiStat({ label, value, unit, unitLabel, decimals, delta, deltaDirection, tone = 'neutral', deltaNote, deltaDecimals, deltaUnit, card, loading }: KpiStatProps) {
+export function KpiStat({ label, value, unit, unitLabel, decimals, delta, deltaDirection, tone = 'neutral', deltaNote, deltaDecimals, deltaUnit, note, card, loading }: KpiStatProps) {
   // A change that shows as zero has no direction: a flat glyph, no sign, the neutral tone.
   const flat = typeof delta === 'number' && Number(Math.abs(delta).toFixed(deltaDecimals ?? 0)) === 0;
   const direction = flat ? undefined : deltaDirection;
@@ -54,6 +57,7 @@ export function KpiStat({ label, value, unit, unitLabel, decimals, delta, deltaD
               <span className={styles.spoken}>{spoken}</span>
             </span>
           ) : null}
+          {note ? <span className={styles.note}>{note}</span> : null}
         </>
       )}
     </section>

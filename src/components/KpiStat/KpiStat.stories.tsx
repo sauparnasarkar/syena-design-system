@@ -56,6 +56,21 @@ export const SmallRoundedChangeIsFlatToo: Story = {
 };
 export const WithoutChange: Story = { args: { label: 'Atmospheric CO₂', value: 422.8, decimals: 1, unit: 'ppm', unitLabel: 'parts per million' } };
 
+export const ANoteIsNotAChange: Story = {
+  args: { label: 'Rank by emissions', value: '#3', note: 'of 192 countries' },
+  play: async ({ canvasElement }) => {
+    const stat = within(canvasElement).getByRole('region', { name: 'Rank by emissions' });
+    await expect(stat).toHaveTextContent('of 192 countries');
+    // No arrow, no sign, no tone: just the line.
+    await expect(stat.querySelectorAll('svg')).toHaveLength(0);
+  },
+};
+
+export const TheValueCanBeAnElementThatWritesItself: Story = {
+  args: { label: 'Annual CO₂ emissions', value: <span>{'37.4'}</span>, unit: 'GtCO₂' },
+  play: async ({ canvasElement }) => { await expect(within(canvasElement).getByRole('region')).toHaveTextContent('37.4GtCO₂'); },
+};
+
 export const Loading: Story = {
   args: { label: 'Annual CO₂ emissions', value: 0, loading: true },
   play: async ({ canvasElement }) => {

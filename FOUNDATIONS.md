@@ -1412,8 +1412,9 @@ with named values; there are no colour-named variants.
 
 #### KpiStat
 
-- **Purpose and props.** One headline figure with context. Props: `label`, `value`, `delta`,
-  `deltaDirection`, `tone`, `card`.
+- **Purpose and props.** One headline figure with context. Props: `label`, `value` (a number,
+  text, or an element that writes the number itself), `delta`, `deltaDirection`, `tone`, `note`
+  (a plain line that is not a change, such as "of 192 countries"), `card`.
 - **Anatomy.** Label (`caption`, `text-muted`); value (`figure-md`, `text-primary`) with its
   unit in `figure-unit-md`; delta line: a direction glyph, the signed change, and the comparison
   period in `text-sm`. `card` wraps it in a card.
@@ -1586,7 +1587,8 @@ with named values; there are no colour-named variants.
 #### Figure
 
 - **Purpose and props.** A number set in the figure face. Props: `size` (`sm`, `md`, `lg`, for
-  the `figure-*` roles), `value` (a number, or text already formatted), `unit`, `unitLabel` (the
+  the `figure-*` roles), `value` (a number, text already formatted, or an element that writes
+  the number itself), `unit`, `unitLabel` (the
   unit spelled for screen readers), `decimals`, `locale`, `tone`, `signed`. Negative values use
   the true minus character.
 - **Anatomy.** The value in the figure face with tabular, lining numerals; the unit baseline-aligned
