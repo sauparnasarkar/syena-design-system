@@ -1430,8 +1430,9 @@ with named values; there are no colour-named variants.
 
 #### Table
 
-- **Purpose and props.** A simple, static table for short lists. Props: `columns`, `rows`,
-  `size`, `striped`, `rowBorders`, `withBorder`, `caption`.
+- **Purpose and props.** A simple, static table for short lists. Props: `columns` (each
+  `{ key, header, unit?, numeric?, wrap?, render? }`; `header` may be inline content, and a `wrap`
+  column wraps running text), `rows`, `size`, `striped`, `rowBorders`, `withBorder`, `caption`.
 - **Anatomy and states.** As the table specification in §6.2; `Table` is the lightweight
   variant without sorting or virtualisation. The caption is shown above the table, outside
   its scrolling region, and names both. `groups` adds a group header row.
@@ -1441,7 +1442,7 @@ with named values; there are no colour-named variants.
 #### DataTable
 
 - **Purpose and props.** A sortable, scrollable data grid built on the grid library. Props:
-  `columns`, `rows`.
+  `columns`, `rows`. A column whose values are all numbers is right-aligned without being told.
 - **Anatomy and states.** As §6.2, including the grid theme derived from tokens. The first
   column is pinned and the others share the remaining width, so the last column meets the
   right edge of the header and of the container. Props also include `caption`, `loading`,

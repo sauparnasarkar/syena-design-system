@@ -75,6 +75,19 @@ export const SelectedRow: Story = {
   },
 };
 
+export const ALongTextColumnWraps: Story = {
+  args: {
+    columns: [{ key: 'step', header: 'Step' }, { key: 'detail', header: 'Detail', wrap: true }],
+    rows: [{ step: 'One', detail: 'A long description that runs to several words and would, kept on one line, make the table scroll sideways for no good reason at all.' }],
+    caption: 'Steps',
+  } as never,
+  play: async ({ canvasElement }) => {
+    const cell = within(canvasElement).getByText(/A long description/);
+    await expect(getComputedStyle(cell).whiteSpace).toBe('normal');
+    await expect(cell.getBoundingClientRect().height).toBeGreaterThan(parseFloat(getComputedStyle(cell).lineHeight) * 1.5);
+  },
+};
+
 export const Striped: Story = { args: { striped: true, size: 'small' } };
 
 export const NarrowKeepsTheFirstColumnAndScrollsInsideItsRegion: Story = {

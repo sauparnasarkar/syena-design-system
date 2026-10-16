@@ -132,3 +132,9 @@
 .table .selected > th {
   box-shadow: inset var(--syn-layout-focus-ring-width) 0 0 var(--syn-color-accent-fill);
 }
+
+/* A column of running text wraps, in a column no narrower than a field. */
+.table .wrap {
+  min-width: var(--syn-layout-field-min);
+  white-space: normal;
+}
