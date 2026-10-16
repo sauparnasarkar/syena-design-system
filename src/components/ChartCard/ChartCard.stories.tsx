@@ -69,6 +69,18 @@ export const ExpandsAndReturnsFocus: Story = {
   },
 };
 
+export const ChildrenCanBeToldWhetherTheCardIsExpanded: Story = {
+  args: { expandable: true, children: (expanded: boolean) => <p>{expanded ? 'Expanded chart' : 'Compact chart'}</p> },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('Compact chart')).toBeInTheDocument();
+    await userEvent.click(canvas.getByRole('button', { name: 'Expand Annual emissions' }));
+    await expect(await canvas.findByText('Expanded chart')).toBeInTheDocument();
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(canvas.getByText('Compact chart')).toBeInTheDocument());
+  },
+};
+
 export const Loading: Story = {
   args: { state: 'loading' },
   play: async ({ canvasElement }) => { await expect(within(canvasElement).getByLabelText('Loading Annual emissions')).toHaveAttribute('aria-busy', 'true'); },

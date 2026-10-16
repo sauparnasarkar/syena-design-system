@@ -1149,8 +1149,12 @@ with named values; there are no colour-named variants.
 #### JumpLinks and scrollToJumpTarget
 
 - **Purpose and props.** In-page navigation between sections of a long view. Props:
-  `items` (id, label), `activeId`. `scrollToJumpTarget(id)` scrolls a section into view
-  below the sticky analysis bar.
+  `items` (id, label, and optionally `onBeforeJump` and `topSection`), `activeId`, `onSelect`.
+  `scrollToJumpTarget(id)` scrolls a section into view below the sticky analysis bar; with
+  `skipIfVisible` a target already fully in view is left where it is. `onBeforeJump` runs first
+  (for example to open the panel the target is in) and the jump waits for it and for the page to
+  settle. The first item, and any item marked `topSection`, does not scroll when its section is
+  already fully in view (focus still moves).
 - **Anatomy.** A horizontal list of links in `text-sm`; the active link has an underline of
   `accent-fill` two focus-ring widths thick and `text-primary` colour.
 - **States.** Default, hover, active section, focus.
@@ -1240,7 +1244,8 @@ with named values; there are no colour-named variants.
 #### SegmentedControl
 
 - **Purpose and props.** Switch between mutually exclusive views of the same data. Props:
-  `items` (each `{ value, label, disabled? }`), `value`, `onChange`, `name`, `label` or
+  `items` (each `{ value, label, disabled?, reason? }`; `reason` says why an option is
+  unavailable, on hover and as the option's description), `value`, `onChange`, `name`, `label` or
   `ariaLabel`, `size`.
 - **Anatomy.** A joined row of options in one boundary; the selected option has an
   `accent-tint` fill, `accent-text` label and an inset `accent-fill` bar along its
@@ -1396,7 +1401,8 @@ with named values; there are no colour-named variants.
 - **Anatomy.** An SVG on a square grid drawn with a stroke of `focus-ring-width` in rendered
   pixels; colour is `currentColor`. Size comes from the icon tokens. Glyphs come from an
   open-licensed set and are imported one at a time; consumers use `Icon` by name and never the
-  set directly.
+  set directly. Names include `sparkle`, for an assistant, and `previous` and `next`, for stepping
+  through a set.
 - **Accessibility.** Decorative by default (`aria-hidden`); an icon that carries meaning
   takes a `title`, which becomes its accessible name.
 
@@ -1468,7 +1474,8 @@ with named values; there are no colour-named variants.
 
 - **Purpose and props.** A `Card` that frames a chart. Props: `title`, `supportText`,
   `asOf`, `headingLevel`, `actions`, `id`, `expandable`, `className`, and the chart as
-  children.
+  children, or a function that returns the chart and is told whether the card is expanded (so
+  an expanded chart can be given more height).
 - **Anatomy.** `CardHeader` with title and support text; an actions slot (download, view as
   table, expand); the chart on a `data-surface` panel; a footer line with the as-of date and
   source.
