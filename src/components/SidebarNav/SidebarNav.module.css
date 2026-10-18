@@ -47,6 +47,12 @@
   transition: background var(--syn-motion-fast) var(--syn-easing-balanced);
 }
 
+.itemCollapsed {
+  /* Centred in the rail, so the icons' axis does not depend on any size. */
+  justify-content: center;
+  padding-inline: 0;
+}
+
 .item:hover {
   background: var(--syn-color-surface-raised);
 }
@@ -77,6 +83,16 @@
   background: var(--syn-color-surface-sunken);
   color: var(--syn-color-text-secondary);
   font: var(--syn-type-caption-weight) var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-type-caption-family);
+}
+
+.badgeMark {
+  position: absolute;
+  top: var(--syn-space-2);
+  inset-inline-end: var(--syn-space-2);
+  width: var(--syn-space-2);
+  height: var(--syn-space-2);
+  border-radius: 50%;
+  background: var(--syn-color-accent-fill);
 }
 
 .tip {

@@ -60,6 +60,12 @@ export const AnUnavailableOptionSaysWhy: Story = {
     // The reason is on hover and is read out with the option.
     await expect(option).toHaveAccessibleDescription('Cumulative totals are not available for this selection');
     await expect(option.closest('label')).toHaveAttribute('title', 'Cumulative totals are not available for this selection');
+    // Touch has no hover, so the reason is also visible text under the group.
+    const text = within(canvasElement).getByText('Cumulative totals are not available for this selection');
+    const box = text.getBoundingClientRect();
+    await expect(box.width).toBeGreaterThan(20);
+    await expect(box.height).toBeGreaterThan(8);
+    await expect(getComputedStyle(text).clipPath).toBe('none');
   },
 };
 
