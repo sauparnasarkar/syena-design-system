@@ -18,6 +18,8 @@ export interface ChartSeries {
   kind?: SeriesKind;
   /** Drawn dashed, with its band, and marked as a projection in the tooltip. */
   projected?: boolean;
+  /** A dashed line that is not a projection: for telling two lines of one series colour apart. */
+  dashed?: boolean;
   axis?: 'y' | 'y2';
   /** An interval around the line, drawn as a filled band at the band opacity. */
   band?: { low: number[]; high: number[]; label: string };
@@ -111,7 +113,7 @@ function buildTraces(t: ChartTokens, series: ChartSeries[], hidden: Set<number>,
       // Points that are not joined: each reading stands alone, as in a relationship between two measures.
       traces.push({ type: 'scatter', mode: 'markers', name, x: s.x, y: s.y, marker: { color: colour, size: 4 * t.strokeWidth }, cliponaxis: false, ...axis } as Data);
     } else {
-      traces.push({ type: 'scatter', mode: 'lines', name, x: s.x, y: s.y, line: { color: colour, ...(s.projected ? { dash: projectionDash(t) } : {}) }, ...axis } as Data);
+      traces.push({ type: 'scatter', mode: 'lines', name, x: s.x, y: s.y, line: { color: colour, ...(s.projected || s.dashed ? { dash: projectionDash(t) } : {}) }, ...axis } as Data);
     }
   });
   return traces;
@@ -127,7 +129,7 @@ function KeyMark({ series, colour, t }: { series: ChartSeries; colour: string; t
   if (series.kind === 'marker') return <span className={styles.dot} style={{ background: colour }} aria-hidden="true" />;
   return (
     <svg className={styles.line} viewBox="0 0 20 12" aria-hidden="true">
-      <line x1="0" x2="20" y1="6" y2="6" strokeWidth={t.strokeWidth} strokeDasharray={series.projected ? `${3 * t.strokeWidth} ${2 * t.strokeWidth}` : undefined} style={{ stroke: colour }} />
+      <line x1="0" x2="20" y1="6" y2="6" strokeWidth={t.strokeWidth} strokeDasharray={series.projected || series.dashed ? `${3 * t.strokeWidth} ${2 * t.strokeWidth}` : undefined} style={{ stroke: colour }} />
     </svg>
   );
 }

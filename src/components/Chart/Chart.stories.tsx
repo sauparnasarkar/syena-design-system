@@ -274,6 +274,16 @@ export const AGapInTheValuesBreaksTheLine: Story = {
   },
 };
 
+export const ADashedLineIsNotAProjection: Story = {
+  args: { series: [{ name: 'Share of the total', x: [2000, 2010, 2020], y: [1, 2, 3], slot: 1 }, { name: 'Share of the year', x: [2000, 2010, 2020], y: [2, 2.5, 2.8], slot: 1, dashed: true }], ariaLabel: 'Two lines in one colour, one dashed. Illustrative.' },
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    // Dashed on the chart, and named as it is: no "(projection)" is added.
+    await waitFor(() => expect([...canvasElement.querySelectorAll('.scatterlayer .lines path')].some((p) => (getComputedStyle(p).strokeDasharray ?? 'none') !== 'none')).toBe(true));
+    await expect(within(canvasElement).getByRole('button', { name: 'Share of the year' })).toBeInTheDocument();
+  },
+};
+
 export const SeveralReferenceLines: Story = {
   args: { series: lineSeries.slice(0, 2), referenceX: [{ x: 2000, label: 'Start' }, { x: 2030, label: 'Milestone' }] },
   play: async ({ canvasElement }) => {
