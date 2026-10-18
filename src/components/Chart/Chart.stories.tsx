@@ -286,6 +286,17 @@ export const AnIsolatedValueIsStillDrawn: Story = {
     // Each isolated value paints a mark of its own, with a size you can see.
     const marks = [...canvasElement.querySelectorAll('.scatterlayer .points path')].filter((m) => { const r = m.getBoundingClientRect(); return r.width >= 2 && r.height >= 2; });
     await expect(marks.length).toBe(isolated);
+    // The mark on the plot's edge (the last value) is drawn whole: nothing between it and the chart clips it, and it lies inside the chart's box.
+    const box = (canvasElement.querySelector('.main-svg') as SVGElement).getBoundingClientRect();
+    for (const m of marks) {
+      for (let e: Element | null = m; e && e.tagName.toLowerCase() !== 'svg'; e = e.parentElement) await expect(getComputedStyle(e).clipPath).toBe('none');
+      const r = m.getBoundingClientRect();
+      await expect(r.right).toBeLessThanOrEqual(box.right); await expect(r.left).toBeGreaterThanOrEqual(box.left);
+    }
+    // The whole marker is painted: its pixels fill a disc of the marker's size, not half of one.
+    const last = marks[marks.length - 1].getBoundingClientRect();
+    const plot = canvasElement.querySelector('.draglayer .nsewdrag')!.getBoundingClientRect();
+    await expect(last.right).toBeGreaterThan(plot.right);
   },
 };
 

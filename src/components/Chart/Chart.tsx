@@ -116,7 +116,7 @@ function buildTraces(t: ChartTokens, series: ChartSeries[], hidden: Set<number>,
       // A value with a gap on both sides has no line to carry it, so it gets a mark of its own; the rest are marked by the line.
       const alone = s.y.map((v, k) => v !== null && s.y[k - 1] == null && s.y[k + 1] == null);
       traces.push({
-        type: 'scatter', mode: alone.some(Boolean) ? 'lines+markers' : 'lines', name, x: s.x, y: s.y,
+        type: 'scatter', mode: alone.some(Boolean) ? 'lines+markers' : 'lines', name, x: s.x, y: s.y, cliponaxis: false,
         line: { color: colour, ...(s.projected || s.dashed ? { dash: projectionDash(t) } : {}) },
         ...(alone.some(Boolean) ? { marker: { color: colour, size: alone.map((a) => (a ? 3 * t.strokeWidth : 0)) } } : {}),
         ...axis,
