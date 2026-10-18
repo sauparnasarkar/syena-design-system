@@ -113,7 +113,14 @@ function buildTraces(t: ChartTokens, series: ChartSeries[], hidden: Set<number>,
       // Points that are not joined: each reading stands alone, as in a relationship between two measures.
       traces.push({ type: 'scatter', mode: 'markers', name, x: s.x, y: s.y, marker: { color: colour, size: 4 * t.strokeWidth }, cliponaxis: false, ...axis } as Data);
     } else {
-      traces.push({ type: 'scatter', mode: 'lines', name, x: s.x, y: s.y, line: { color: colour, ...(s.projected || s.dashed ? { dash: projectionDash(t) } : {}) }, ...axis } as Data);
+      // A value with a gap on both sides has no line to carry it, so it gets a mark of its own; the rest are marked by the line.
+      const alone = s.y.map((v, k) => v !== null && s.y[k - 1] == null && s.y[k + 1] == null);
+      traces.push({
+        type: 'scatter', mode: alone.some(Boolean) ? 'lines+markers' : 'lines', name, x: s.x, y: s.y,
+        line: { color: colour, ...(s.projected || s.dashed ? { dash: projectionDash(t) } : {}) },
+        ...(alone.some(Boolean) ? { marker: { color: colour, size: alone.map((a) => (a ? 3 * t.strokeWidth : 0)) } } : {}),
+        ...axis,
+      } as Data);
     }
   });
   return traces;

@@ -274,6 +274,21 @@ export const AGapInTheValuesBreaksTheLine: Story = {
   },
 };
 
+// A line-only trace draws nothing for a value with no neighbour on either side. Every value that is not null must paint something.
+export const AnIsolatedValueIsStillDrawn: Story = {
+  args: { series: [{ name: 'Scattered readings', x: [2000, 2001, 2002, 2003, 2004, 2005, 2006], y: [1, 2, 3, null, 5, null, 7] }], ariaLabel: 'Seven years, with two values that have no neighbour. Illustrative.' },
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    await waitFor(() => expect(canvasElement.querySelectorAll('.scatterlayer .lines path').length).toBeGreaterThan(0));
+    const y = [1, 2, 3, null, 5, null, 7];
+    const isolated = y.filter((v, i) => v !== null && y[i - 1] == null && y[i + 1] == null).length;
+    await expect(isolated).toBe(2);
+    // Each isolated value paints a mark of its own, with a size you can see.
+    const marks = [...canvasElement.querySelectorAll('.scatterlayer .points path')].filter((m) => { const r = m.getBoundingClientRect(); return r.width >= 2 && r.height >= 2; });
+    await expect(marks.length).toBe(isolated);
+  },
+};
+
 export const ADashedLineIsNotAProjection: Story = {
   args: { series: [{ name: 'Share of the total', x: [2000, 2010, 2020], y: [1, 2, 3], slot: 1 }, { name: 'Share of the year', x: [2000, 2010, 2020], y: [2, 2.5, 2.8], slot: 1, dashed: true }], ariaLabel: 'Two lines in one colour, one dashed. Illustrative.' },
   play: async ({ canvasElement }) => {
