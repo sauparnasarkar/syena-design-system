@@ -39,6 +39,7 @@ function Item({ item, current, collapsed, onItemClick }: { item: NavItem; curren
       {item.icon ? <Icon name={item.icon} /> : null}
       <span className={collapsed ? styles.labelHidden : styles.label}>{item.label}</span>
       {item.badge && !collapsed ? <span className={styles.count}>{item.badge}</span> : null}
+      {item.badge && collapsed ? <span className={styles.badgeMark} aria-hidden="true" /> : null}
       {item.count != null && !collapsed ? <span className={styles.count}>{item.count}</span> : null}
       {collapsed ? <span className={styles.tip} aria-hidden="true">{item.badge ? `${item.label} (${item.badge})` : item.label}</span> : null}
     </>

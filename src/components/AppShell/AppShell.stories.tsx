@@ -22,11 +22,11 @@ const modules = ['Key figures', 'Trend', 'Composition', 'Comparison'].map((name)
   </section>
 ));
 
-function Example({ compact, slots }: { compact?: boolean; slots?: boolean }) {
+function Example({ compact, slots, groups = navGroups }: { compact?: boolean; slots?: boolean; groups?: typeof navGroups }) {
   return (
     <AppShell
       compact={compact}
-      rail={<Rail logo={placeholderMark} productName="Climate analysis" groups={navGroups} footerItems={navFooter} current="country" onItemClick={(_item, event) => event.preventDefault()} actions={slots ? <button type="button">Ask the agent</button> : undefined} utilities={slots ? <button type="button">Theme</button> : undefined} />}
+      rail={<Rail logo={placeholderMark} productName="Climate analysis" groups={groups} footerItems={navFooter} current="country" onItemClick={(_item, event) => event.preventDefault()} actions={slots ? <button type="button">Ask the agent</button> : undefined} utilities={slots ? <button type="button">Theme</button> : undefined} />}
       topBar={<TopBar logo={placeholderMark} title="Country profile" summary="Example country · 1990 to 2024" />}
       analysisBar={
         <AnalysisBar title="Country profile" purpose="How one country's emissions have changed and where current policy leads.">
@@ -76,6 +76,28 @@ export const Wide: Story = {
 };
 
 export const WideTidewater: Story = { tags: ['desktop-only'], render: () => <Example compact={false} />, globals: { theme: 'tidewater' } };
+
+// More destinations than a short phone can show: the destinations scroll, and the utilities stay inside the drawer.
+const manyGroups = [{ id: 'many', label: 'Many', items: Array.from({ length: 30 }, (_, i) => ({ id: `d${i}`, label: `Destination ${i + 1}`, href: `#d${i}`, icon: 'overview' as const })) }];
+
+export const CompactDrawerKeepsUtilitiesInView: Story = {
+  render: () => <Example compact slots groups={manyGroups} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Open navigation' }));
+    const drawer = await canvas.findByRole('dialog', { name: 'Navigation' });
+    const theme = within(drawer).getByRole('button', { name: 'Theme' });
+    const box = drawer.getBoundingClientRect();
+    const r = theme.getBoundingClientRect();
+    await expect(box.bottom).toBeLessThanOrEqual(window.innerHeight + 1);
+    await expect(r.bottom).toBeLessThanOrEqual(box.bottom + 1);
+    await expect(r.top).toBeGreaterThanOrEqual(box.top);
+    // The drawer itself does not scroll; its list of destinations does.
+    await expect(drawer.scrollHeight).toBeLessThanOrEqual(drawer.clientHeight + 1);
+    const list = within(drawer).getByRole('link', { name: 'Destination 1' }).closest('nav')!.querySelector('[class*="destinations"]')!;
+    await expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
+  },
+};
 
 export const CompactDrawerShowsRailSlots: Story = {
   render: () => <Example compact slots />,

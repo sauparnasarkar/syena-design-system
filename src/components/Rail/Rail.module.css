@@ -35,8 +35,23 @@
   color: var(--syn-color-text-primary);
 }
 
+.collapsed .brand {
+  /* The mark and the icons below it share one vertical axis. */
+  padding-inline: calc(var(--syn-space-2) + (var(--syn-icon-medium) - var(--syn-space-6)) / 2);
+}
+
 .name {
   font: var(--syn-type-title-sm-weight) var(--syn-type-text-lg-size) / var(--syn-type-title-sm-line) var(--syn-type-title-sm-family);
+}
+
+.destinations {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.destinationsFree {
+  display: contents;
 }
 
 .actions {
@@ -52,9 +67,12 @@
   margin-top: auto;
 }
 
+/* Whatever a utility draws stays inside the rail, expanded or collapsed. */
 .utilities {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
   padding: 0 var(--syn-space-1);
 }
 

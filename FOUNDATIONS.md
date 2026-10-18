@@ -1081,7 +1081,7 @@ with named values; there are no colour-named variants.
   shell read its state: the top bar's buttons open the drawer and the sheet without wiring, and
   the rail knows it is in a drawer.
 - **Anatomy.** A two-column layout: rail, then a column of analysis bar, scrolling canvas
-  and strip. Below `bp-compact` the rail is replaced by `TopBar` and a drawer.
+  and strip. Below `bp-compact` the rail is replaced by `TopBar` and a drawer; in the drawer only the list of destinations scrolls, so the utilities at the foot stay in view at any height.
   The shell is at least the height of the visible viewport (dynamic viewport units, with the plain viewport as the fallback, so a phone's collapsing address bar cannot leave a stale gap) and keeps
   clear of the device's safe areas when installed to a home screen.
 - **States.** Rail expanded or collapsed; drawer open or closed; strip panel open or closed.
@@ -1118,7 +1118,7 @@ with named values; there are no colour-named variants.
   empty by default; its items each take their own required mark and name), `ariaLabel`, `groups`, `footerItems`, `collapsed`,
   `onCollapsedChange`, `onItemClick`, `current`, `actions` (a persistent action under the mark, for example the entry to an assistant) and `utilities`
   (at the foot, above the collapse control, for example a theme switch). Each slot is a node, or a function told whether the rail is collapsed so it can show an
-  icon only. Both are in the drawer at compact widths.
+  icon only. Both are in the drawer at compact widths. Whatever a utility draws stays inside the rail. A collapsed rail shows a small mark on an item that has a badge, and the badge stays in its name.
 - **Anatomy.** Optional product-switcher slot, the app-supplied mark, the actions slot, grouped destinations (`SidebarNav`), foot
   with the utilities slot and the collapse control. Search, notifications and a user menu are not part of the shell.
 - **States.** Expanded, collapsed; per destination: default, hover, current, focus.
@@ -1250,7 +1250,7 @@ with named values; there are no colour-named variants.
 
 - **Purpose and props.** Switch between mutually exclusive views of the same data. Props:
   `items` (each `{ value, label, disabled?, reason? }`; `reason` says why an option is
-  unavailable, on hover and as the option's description), `value`, `onChange`, `name`, `label` or
+  unavailable: on hover, as the option's description and as visible text under the group, since touch has no hover), `value`, `onChange`, `name`, `label` or
   `ariaLabel`, `size`.
 - **Anatomy.** A joined row of options in one boundary; the selected option has an
   `accent-tint` fill, `accent-text` label and an inset `accent-fill` bar along its
@@ -1461,7 +1461,7 @@ with named values; there are no colour-named variants.
   `yTitle`, `y2Title`, `y2TickFormat`, `ariaLabel`, `showLegend`, `height`,
   `stackedAreaMode`, `barmode`, `orientation`, `projectionFrom`, `referenceX`, `annotations`,
   `yRange`; `referenceX` is one reference line or a list. A series may be `dashed` (a dashed line that is not a projection, so two lines of one colour can be told apart; it is not marked as a projection). A series' values may be `null`, which
-  leaves a gap (the line breaks and is never joined across it). A series has a `kind` (`line`, `bar`, `area` or `marker`), and optionally `projected`,
+  leaves a gap (the line breaks and is never joined across it); a value with a gap on both sides gets a mark of its own, since a line cannot carry it. A series has a `kind` (`line`, `bar`, `area` or `marker`), and optionally `projected`,
   `band`, `axis`, `slot`, `signed` and `signLabels`, and `colorValues`, `colorDomain`, `colorLabel`
   and `formatColorValue`.
 - **Series kinds.** `marker` draws points that are not joined, for a relationship between two

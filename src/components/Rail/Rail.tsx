@@ -39,7 +39,10 @@ export function Rail({ logo, productName, productSwitcher, actions, utilities, g
         {productName && !isCollapsed ? <span className={styles.name}>{productName}</span> : null}
       </div>
       {actions ? <div className={styles.actions}>{typeof actions === 'function' ? actions(isCollapsed) : actions}</div> : null}
-      <SidebarNav groups={groups} footerItems={footerItems} current={current} collapsed={isCollapsed} onItemClick={(item, event) => { onItemClick?.(item, event); if (drawer) shell?.setNavigationOpen(false); }} />
+      {/* In the drawer only the destinations scroll, so the utilities stay in view; a collapsed rail needs its tooltips to overflow. */}
+      <div className={drawer ? styles.destinations : styles.destinationsFree}>
+        <SidebarNav groups={groups} footerItems={footerItems} current={current} collapsed={isCollapsed} onItemClick={(item, event) => { onItemClick?.(item, event); if (drawer) shell?.setNavigationOpen(false); }} />
+      </div>
       <div className={styles.foot}>
         {utilities ? <div className={styles.utilities}>{typeof utilities === 'function' ? utilities(isCollapsed) : utilities}</div> : null}
         {drawer ? null : (

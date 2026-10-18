@@ -60,7 +60,7 @@ export const ActionsUtilitiesAndBadge: Story = {
     footerItems: undefined,
     current: 'overview',
     actions: (collapsed: boolean) => <button type="button" aria-label="Ask the agent">{collapsed ? '?' : 'Ask the agent'}</button>,
-    utilities: <button type="button">Theme</button>,
+    utilities: (collapsed: boolean) => <button type="button" aria-label="Theme" style={{ whiteSpace: 'nowrap' }}>{collapsed ? 'T' : 'Theme: light or dark'}</button>,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -75,6 +75,21 @@ export const ActionsUtilitiesAndBadge: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Collapse navigation' }));
     await expect(canvas.getByRole('button', { name: 'Ask the agent' })).toHaveTextContent('?');
     await expect(canvas.getByRole('link', { name: 'Correlation (NEW)' })).toBeInTheDocument();
+    // Nothing of the utilities paints outside the rail.
+    const rail = canvas.getByRole('navigation', { name: 'Primary' }).getBoundingClientRect();
+    const theme = canvas.getByRole('button', { name: 'Theme' });
+    const box = theme.parentElement!.getBoundingClientRect();
+    await expect(box.right).toBeLessThanOrEqual(rail.right + 0.5);
+    await expect(theme.scrollWidth).toBeLessThanOrEqual(theme.clientWidth + 1);
+    // The badge leaves a visible mark, not only a name.
+    const mark = canvas.getByRole('link', { name: 'Correlation (NEW)' }).querySelector('[class*="badgeMark"]') as HTMLElement;
+    await expect(mark).not.toBeNull();
+    await expect(mark.getBoundingClientRect().width).toBeGreaterThanOrEqual(4);
+    // The logo and the icons share one vertical axis.
+    const centre = (el: Element) => { const r = el.getBoundingClientRect(); return r.left + r.width / 2; };
+    const logo = canvas.getByRole('img', { name: placeholderMark.name });
+    const icon = canvas.getByRole('link', { name: 'Overview' }).querySelector('svg')!;
+    await expect(Math.abs(centre(logo) - centre(icon))).toBeLessThanOrEqual(1);
   },
 };
 
