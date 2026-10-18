@@ -50,6 +50,19 @@ export const DisabledOption: Story = {
   },
 };
 
+export const AnUnavailableOptionSaysWhy: Story = {
+  render: () => (
+    <SegmentedControl ariaLabel="Mode" name="mode" value="a" onChange={() => undefined} items={[{ value: 'a', label: 'Absolute' }, { value: 'c', label: 'Cumulative', disabled: true, reason: 'Cumulative totals are not available for this selection' }]} />
+  ),
+  play: async ({ canvasElement }) => {
+    const option = within(canvasElement).getByRole('radio', { name: 'Cumulative' });
+    await expect(option).toBeDisabled();
+    // The reason is on hover and is read out with the option.
+    await expect(option).toHaveAccessibleDescription('Cumulative totals are not available for this selection');
+    await expect(option.closest('label')).toHaveAttribute('title', 'Cumulative totals are not available for this selection');
+  },
+};
+
 export const WithAriaLabelOnly: Story = {
   render: () => <Controlled label={undefined} ariaLabel="Metric" />,
   play: async ({ canvasElement }) => {

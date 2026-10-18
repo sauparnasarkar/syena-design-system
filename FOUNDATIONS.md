@@ -1149,8 +1149,12 @@ with named values; there are no colour-named variants.
 #### JumpLinks and scrollToJumpTarget
 
 - **Purpose and props.** In-page navigation between sections of a long view. Props:
-  `items` (id, label), `activeId`. `scrollToJumpTarget(id)` scrolls a section into view
-  below the sticky analysis bar.
+  `items` (id, label, and optionally `onBeforeJump` and `topSection`), `activeId`, `onSelect`.
+  `scrollToJumpTarget(id)` scrolls a section into view below the sticky analysis bar; with
+  `skipIfVisible` a target already fully in view is left where it is. `onBeforeJump` runs first
+  (for example to open the panel the target is in) and the jump waits for it and for the page to
+  settle. The first item, and any item marked `topSection`, does not scroll when its section is
+  already fully in view (focus still moves).
 - **Anatomy.** A horizontal list of links in `text-sm`; the active link has an underline of
   `accent-fill` two focus-ring widths thick and `text-primary` colour.
 - **States.** Default, hover, active section, focus.
@@ -1240,7 +1244,8 @@ with named values; there are no colour-named variants.
 #### SegmentedControl
 
 - **Purpose and props.** Switch between mutually exclusive views of the same data. Props:
-  `items` (each `{ value, label, disabled? }`), `value`, `onChange`, `name`, `label` or
+  `items` (each `{ value, label, disabled?, reason? }`; `reason` says why an option is
+  unavailable, on hover and as the option's description), `value`, `onChange`, `name`, `label` or
   `ariaLabel`, `size`.
 - **Anatomy.** A joined row of options in one boundary; the selected option has an
   `accent-tint` fill, `accent-text` label and an inset `accent-fill` bar along its
@@ -1396,7 +1401,8 @@ with named values; there are no colour-named variants.
 - **Anatomy.** An SVG on a square grid drawn with a stroke of `focus-ring-width` in rendered
   pixels; colour is `currentColor`. Size comes from the icon tokens. Glyphs come from an
   open-licensed set and are imported one at a time; consumers use `Icon` by name and never the
-  set directly.
+  set directly. Names include `sparkle`, for an assistant, and `previous` and `next`, for stepping
+  through a set.
 - **Accessibility.** Decorative by default (`aria-hidden`); an icon that carries meaning
   takes a `title`, which becomes its accessible name.
 
@@ -1406,8 +1412,9 @@ with named values; there are no colour-named variants.
 
 #### KpiStat
 
-- **Purpose and props.** One headline figure with context. Props: `label`, `value`, `delta`,
-  `deltaDirection`, `tone`, `card`.
+- **Purpose and props.** One headline figure with context. Props: `label`, `value` (a number,
+  text, or an element that writes the number itself), `delta`, `deltaDirection`, `tone`, `note`
+  (a plain line that is not a change, such as "of 192 countries"), `card`.
 - **Anatomy.** Label (`caption`, `text-muted`); value (`figure-md`, `text-primary`) with its
   unit in `figure-unit-md`; delta line: a direction glyph, the signed change, and the comparison
   period in `text-sm`. `card` wraps it in a card.
@@ -1423,8 +1430,9 @@ with named values; there are no colour-named variants.
 
 #### Table
 
-- **Purpose and props.** A simple, static table for short lists. Props: `columns`, `rows`,
-  `size`, `striped`, `rowBorders`, `withBorder`, `caption`.
+- **Purpose and props.** A simple, static table for short lists. Props: `columns` (each
+  `{ key, header, unit?, numeric?, wrap?, render? }`; `header` may be inline content, and a `wrap`
+  column wraps running text), `rows`, `size`, `striped`, `rowBorders`, `withBorder`, `caption`.
 - **Anatomy and states.** As the table specification in §6.2; `Table` is the lightweight
   variant without sorting or virtualisation. The caption is shown above the table, outside
   its scrolling region, and names both. `groups` adds a group header row.
@@ -1434,7 +1442,7 @@ with named values; there are no colour-named variants.
 #### DataTable
 
 - **Purpose and props.** A sortable, scrollable data grid built on the grid library. Props:
-  `columns`, `rows`.
+  `columns`, `rows`. A column whose values are all numbers is right-aligned without being told.
 - **Anatomy and states.** As §6.2, including the grid theme derived from tokens. The first
   column is pinned and the others share the remaining width, so the last column meets the
   right edge of the header and of the container. Props also include `caption`, `loading`,
@@ -1447,7 +1455,8 @@ with named values; there are no colour-named variants.
 - **Purpose and props.** A themed chart on the plotting library. Props: `series`, `xTitle`,
   `yTitle`, `y2Title`, `y2TickFormat`, `ariaLabel`, `showLegend`, `height`,
   `stackedAreaMode`, `barmode`, `orientation`, `projectionFrom`, `referenceX`, `annotations`,
-  `yRange`. A series has a `kind` (`line`, `bar`, `area` or `marker`), and optionally `projected`,
+  `yRange`; `referenceX` is one reference line or a list. A series may be `dashed` (a dashed line that is not a projection, so two lines of one colour can be told apart; it is not marked as a projection). A series' values may be `null`, which
+  leaves a gap (the line breaks and is never joined across it). A series has a `kind` (`line`, `bar`, `area` or `marker`), and optionally `projected`,
   `band`, `axis`, `slot`, `signed` and `signLabels`, and `colorValues`, `colorDomain`, `colorLabel`
   and `formatColorValue`.
 - **Series kinds.** `marker` draws points that are not joined, for a relationship between two
@@ -1468,7 +1477,8 @@ with named values; there are no colour-named variants.
 
 - **Purpose and props.** A `Card` that frames a chart. Props: `title`, `supportText`,
   `asOf`, `headingLevel`, `actions`, `id`, `expandable`, `className`, and the chart as
-  children.
+  children, or a function that returns the chart and is told whether the card is expanded (so
+  an expanded chart can be given more height).
 - **Anatomy.** `CardHeader` with title and support text; an actions slot (download, view as
   table, expand); the chart on a `data-surface` panel; a footer line with the as-of date and
   source.
@@ -1525,8 +1535,11 @@ with named values; there are no colour-named variants.
 
 - **Purpose and props.** Tiles whose area is a value, for parts of a whole with many parts. Props:
   `items` (`id`, `label`, `value`, optional `group` and `colorValue`), `ariaLabel`, `valueLabel`,
-  `unit`, `formatValue`, `colorBy` (`group` or `value`), `colorDomain`, `colorLabel`,
-  `formatColorValue`, `height`.
+  `unit`, `formatValue`, `colorBy` (`group` or `value`), `colorDomain`, `diverging`, `colorLabel`,
+  `formatColorValue`, `height`, `onSelect`, `selectedId`. `diverging` colours by value on the
+  diverging ramp, symmetrical about zero, for a change. With `onSelect` every tile is a button
+  (named by what it shows, or by its reading where it has no room for text) and the chosen one
+  is outlined, for choosing a tile where hover is not available.
 - **Anatomy.** Squarified layout: tiles are packed in rows along the shorter side of the space left,
   each row closed when another tile would make the worst aspect ratio worse; area is exactly
   proportional to value and the tiles fill the panel. Colour by group takes the categorical
@@ -1579,7 +1592,8 @@ with named values; there are no colour-named variants.
 #### Figure
 
 - **Purpose and props.** A number set in the figure face. Props: `size` (`sm`, `md`, `lg`, for
-  the `figure-*` roles), `value` (a number, or text already formatted), `unit`, `unitLabel` (the
+  the `figure-*` roles), `value` (a number, text already formatted, or an element that writes
+  the number itself), `unit`, `unitLabel` (the
   unit spelled for screen readers), `decimals`, `locale`, `tone`, `signed`. Negative values use
   the true minus character.
 - **Anatomy.** The value in the figure face with tabular, lining numerals; the unit baseline-aligned

@@ -6,6 +6,8 @@ export interface SegmentedItem {
   value: string;
   label: string;
   disabled?: boolean;
+  /** Why the option is unavailable, shown on hover and read out with the option. */
+  reason?: string;
 }
 
 export interface SegmentedControlProps {
@@ -30,12 +32,14 @@ export function SegmentedControl({ items, value, onChange, name, label, ariaLabe
       {label ? <span id={labelId} className={controls.label}>{label}</span> : null}
       <div role="radiogroup" aria-labelledby={label ? labelId : undefined} aria-label={label ? undefined : ariaLabel} className={[styles.group, size === 'small' ? styles.small : ''].join(' ')}>
         {items.map((item) => (
-          <label key={item.value} className={styles.option}>
-            <input type="radio" className={styles.input} name={group} value={item.value} checked={item.value === value} disabled={item.disabled} onChange={() => onChange(item.value)} />
+          <label key={item.value} className={styles.option} title={item.reason}>
+            <input type="radio" className={styles.input} name={group} value={item.value} checked={item.value === value} disabled={item.disabled} aria-describedby={item.reason ? `${group}-${item.value}-reason` : undefined} onChange={() => onChange(item.value)} />
             <span className={[controls.box, styles.face, size === 'small' ? controls.small : ''].join(' ')}>{item.label}</span>
           </label>
         ))}
       </div>
+      {/* Outside the options, so an option's name stays its label; each is read out as that option's description. */}
+      {items.filter((item) => item.reason).map((item) => <span key={item.value} id={`${group}-${item.value}-reason`} className={styles.reason}>{item.reason}</span>)}
     </div>
   );
 }

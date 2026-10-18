@@ -32,8 +32,8 @@ export interface ChartCardProps {
   onRetry?: () => void;
   id?: string;
   className?: string;
-  /** The `Chart`. */
-  children: ReactNode;
+  /** The `Chart`, or a function that returns it and is told whether the card is expanded (to give an expanded chart more height). */
+  children: ReactNode | ((expanded: boolean) => ReactNode);
 }
 
 function Frame({ expanded, onClose, label, children }: { expanded: boolean; onClose: () => void; label: string; children: ReactNode }) {
@@ -72,7 +72,7 @@ export function ChartCard({ title, supportText, headingLevel = 3, source, asOf, 
       {state === 'loading' ? <div className={styles.panel} role="status" aria-busy="true" aria-label={`Loading ${title}`}><div className={styles.skeleton}>{[0, 1, 2, 3, 4].map((i) => <span key={i} className={styles.bar} style={{ height: `${30 + i * 12}%` }} />)}</div></div> : null}
       {state === 'empty' ? <div className={styles.panel}><p className={styles.message}>{emptyMessage}</p></div> : null}
       {state === 'error' ? <div className={styles.panel}><InlineAlert variant="error" title="Error" onDismiss={undefined}>{errorMessage}</InlineAlert>{onRetry ? <div className={styles.retry}><Button size="small" onClick={onRetry}>Try again</Button></div> : null}</div> : null}
-      {state === 'ready' ? (table && tableView ? <div className={styles.tableView}>{tableView}</div> : <div className={styles.panel}>{children}</div>) : null}
+      {state === 'ready' ? (table && tableView ? <div className={styles.tableView}>{tableView}</div> : <div className={styles.panel}>{typeof children === 'function' ? children(expanded) : children}</div>) : null}
     </>
   );
   return (

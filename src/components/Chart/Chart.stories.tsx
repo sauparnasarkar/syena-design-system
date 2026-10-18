@@ -263,6 +263,62 @@ export const MarkersAreNotJoined: Story = {
   },
 };
 
+export const AGapInTheValuesBreaksTheLine: Story = {
+  args: { series: [{ name: 'With a gap', x: [2000, 2001, 2002, 2003, 2004, 2005], y: [1, 2, 3, null, null, 6] }], ariaLabel: 'Six values with a gap in the middle. Illustrative.' },
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    await waitFor(() => expect(canvasElement.querySelectorAll('.scatterlayer .lines path').length).toBeGreaterThan(0));
+    // The line is in two pieces, one before the gap and one after: it is never joined across it.
+    const moves = [...canvasElement.querySelectorAll('.scatterlayer .lines path')].reduce((n, p) => n + (p.getAttribute('d')!.match(/M/g)?.length ?? 0), 0);
+    await expect(moves).toBe(2);
+  },
+};
+
+// A line-only trace draws nothing for a value with no neighbour on either side. Every value that is not null must paint something.
+export const AnIsolatedValueIsStillDrawn: Story = {
+  args: { series: [{ name: 'Scattered readings', x: [2000, 2001, 2002, 2003, 2004, 2005, 2006], y: [1, 2, 3, null, 5, null, 7] }], ariaLabel: 'Seven years, with two values that have no neighbour. Illustrative.' },
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    await waitFor(() => expect(canvasElement.querySelectorAll('.scatterlayer .lines path').length).toBeGreaterThan(0));
+    const y = [1, 2, 3, null, 5, null, 7];
+    const isolated = y.filter((v, i) => v !== null && y[i - 1] == null && y[i + 1] == null).length;
+    await expect(isolated).toBe(2);
+    // Each isolated value paints a mark of its own, with a size you can see.
+    const marks = [...canvasElement.querySelectorAll('.scatterlayer .points path')].filter((m) => { const r = m.getBoundingClientRect(); return r.width >= 2 && r.height >= 2; });
+    await expect(marks.length).toBe(isolated);
+    // The mark on the plot's edge (the last value) is drawn whole: nothing between it and the chart clips it, and it lies inside the chart's box.
+    const box = (canvasElement.querySelector('.main-svg') as SVGElement).getBoundingClientRect();
+    for (const m of marks) {
+      for (let e: Element | null = m; e && e.tagName.toLowerCase() !== 'svg'; e = e.parentElement) await expect(getComputedStyle(e).clipPath).toBe('none');
+      const r = m.getBoundingClientRect();
+      await expect(r.right).toBeLessThanOrEqual(box.right); await expect(r.left).toBeGreaterThanOrEqual(box.left);
+    }
+    // The whole marker is painted: its pixels fill a disc of the marker's size, not half of one.
+    const last = marks[marks.length - 1].getBoundingClientRect();
+    const plot = canvasElement.querySelector('.draglayer .nsewdrag')!.getBoundingClientRect();
+    await expect(last.right).toBeGreaterThan(plot.right);
+  },
+};
+
+export const ADashedLineIsNotAProjection: Story = {
+  args: { series: [{ name: 'Share of the total', x: [2000, 2010, 2020], y: [1, 2, 3], slot: 1 }, { name: 'Share of the year', x: [2000, 2010, 2020], y: [2, 2.5, 2.8], slot: 1, dashed: true }], ariaLabel: 'Two lines in one colour, one dashed. Illustrative.' },
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    // Dashed on the chart, and named as it is: no "(projection)" is added.
+    await waitFor(() => expect([...canvasElement.querySelectorAll('.scatterlayer .lines path')].some((p) => (getComputedStyle(p).strokeDasharray ?? 'none') !== 'none')).toBe(true));
+    await expect(within(canvasElement).getByRole('button', { name: 'Share of the year' })).toBeInTheDocument();
+  },
+};
+
+export const SeveralReferenceLines: Story = {
+  args: { series: lineSeries.slice(0, 2), referenceX: [{ x: 2000, label: 'Start' }, { x: 2030, label: 'Milestone' }] },
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    await waitFor(() => expect(svgText(canvasElement)).toContain('Start'));
+    await expect(svgText(canvasElement)).toContain('Milestone');
+  },
+};
+
 export const TableOfTheValues: Story = {
   args: { series: lineSeries.slice(0, 2) },
   play: async ({ canvasElement }) => {

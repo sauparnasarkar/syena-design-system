@@ -119,6 +119,19 @@ export const GridIsAsTallAsItsRows: Story = {
   },
 };
 
+export const ANumberColumnIsRightAlignedWithoutBeingToldSo: Story = {
+  args: { columns: columns.map(({ numeric: _numeric, ...rest }) => rest) },
+  play: async ({ canvasElement }) => {
+    await ready(canvasElement);
+    const header = within(canvasElement).getByText('2024').closest('.ag-header-cell') as HTMLElement;
+    const cell = canvasElement.querySelector(`.ag-grid-scrolling-rows .ag-row [col-id="${header.getAttribute('col-id')}"]`) as HTMLElement;
+    await expect(getComputedStyle(cell).textAlign).toBe('right');
+    // The label column, whose values are text, is not.
+    const label = canvasElement.querySelector('.ag-grid-pinned-left-cells .ag-cell') as HTMLElement;
+    await expect(getComputedStyle(label).textAlign).not.toBe('right');
+  },
+};
+
 export const NumbersAndHeadersAreRightAligned: Story = {
   play: async ({ canvasElement }) => {
     await ready(canvasElement);

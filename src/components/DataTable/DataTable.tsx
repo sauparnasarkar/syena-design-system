@@ -13,7 +13,7 @@ export interface DataTableColumn<Row> {
   header: string;
   /** Written after the header, once, instead of in every cell. */
   unit?: string;
-  /** Right-aligned in the figure face, header included. */
+  /** Right-aligned in the figure face, header included. When left out, a column whose values are all numbers is numeric. */
   numeric?: boolean;
   /** Stays in view when the table scrolls sideways. The first column is pinned by default. */
   pinned?: boolean;
@@ -70,8 +70,8 @@ function WrappedLabel({ valueFormatted, value }: ICellRendererParams) {
   return <span className={styles.label}>{String(valueFormatted ?? value ?? '')}</span>;
 }
 
-const cellText = <Row extends Record<string, unknown>>(col: DataTableColumn<Row>, row: Row) => {
-  const value = row[col.key];
+const cellText = <Row extends object>(col: DataTableColumn<Row>, row: Row) => {
+  const value = (row as Record<string, unknown>)[col.key];
   if (col.format) return col.format(value, row);
   return col.numeric && typeof value === 'number' ? value.toLocaleString('en-GB') : String(value ?? '');
 };
@@ -81,7 +81,13 @@ const cellText = <Row extends Record<string, unknown>>(col: DataTableColumn<Row>
  * least two number columns show beside it; the others take their content width and share the rest, so
  * the last column meets the right edge. Numbers and their headers are right-aligned in the figure face.
  */
-export function DataTable<Row extends Record<string, unknown>>({ columns, rows, caption, maxVisibleRows = 10, loading, emptyMessage = 'Nothing to show.', emptyAction, onRowSelected }: DataTableProps<Row>) {
+export function DataTable<Row extends object>({ columns: given, rows, caption, maxVisibleRows = 10, loading, emptyMessage = 'Nothing to show.', emptyAction, onRowSelected }: DataTableProps<Row>) {
+  // A column that does not say whether it is numeric is, when every value in it that is there is a number.
+  const columns = useMemo(() => given.map((col) => {
+    if (col.numeric !== undefined) return col;
+    const values = rows.map((r) => (r as Record<string, unknown>)[col.key]).filter((v) => v !== null && v !== undefined && v !== '');
+    return { ...col, numeric: values.length > 0 && values.every((v) => typeof v === 'number') };
+  }), [given, rows]);
   const captionId = useId();
   const t = useResolvedTokens(tokenNames);
   const [wrap, width] = useWidth<HTMLDivElement>();

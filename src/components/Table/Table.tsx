@@ -4,11 +4,14 @@ import styles from './Table.module.css';
 
 export interface TableColumn<Row> {
   key: keyof Row & string;
-  header: string;
+  /** The column's name: text, or inline content. */
+  header: ReactNode;
   /** Written under the header, once, instead of in every cell. */
   unit?: string;
   /** Right-aligned, in the figure face. */
   numeric?: boolean;
+  /** Long text wraps within the column instead of keeping to one line. */
+  wrap?: boolean;
   /** How a cell is written; the raw value by default. */
   render?: (row: Row) => ReactNode;
 }
@@ -24,6 +27,8 @@ export interface TableProps<Row> {
   rows: Row[];
   /** What the table holds and the period. Shown above the table, outside its scrolling area, and names it. */
   caption: string;
+  /** Keeps the caption for assistive technology but does not show it, when the surrounding text already says what the table holds. */
+  hideCaption?: boolean;
   /** The column whose cells are row headers. The first by default. */
   rowHeaderKey?: keyof Row & string;
   groups?: TableColumnGroup[];
@@ -39,13 +44,13 @@ export interface TableProps<Row> {
  * A static table for short lists. The caption sits above the scrolling area, the first column stays
  * in view when the table scrolls sideways, and edge shadows show that there is more to see.
  */
-export function Table<Row extends Record<string, unknown>>({ columns, rows, caption, rowHeaderKey, groups, size = 'default', striped, rowBorders = true, withBorder = true, selectedIndex }: TableProps<Row>) {
+export function Table<Row extends object>({ columns, rows, caption, rowHeaderKey, hideCaption, groups, size = 'default', striped, rowBorders = true, withBorder = true, selectedIndex }: TableProps<Row>) {
   const id = useId();
   const header = rowHeaderKey ?? columns[0]?.key;
-  const cell = (row: Row, col: TableColumn<Row>) => (col.render ? col.render(row) : (row[col.key] as ReactNode));
+  const cell = (row: Row, col: TableColumn<Row>) => (col.render ? col.render(row) : ((row as Record<string, unknown>)[col.key] as ReactNode));
   return (
     <div className={[styles.wrap, withBorder ? styles.bordered : ''].filter(Boolean).join(' ')}>
-      <p id={id} className={styles.caption}>{caption}</p>
+      <p id={id} className={hideCaption ? styles.srOnly : styles.caption}>{caption}</p>
       <div role="region" aria-labelledby={id} tabIndex={0} className={styles.scroll}>
         <table aria-labelledby={id} className={[styles.table, size === 'small' ? styles.small : '', striped ? styles.striped : '', rowBorders ? styles.rowBorders : ''].filter(Boolean).join(' ')}>
           <thead>
@@ -56,7 +61,7 @@ export function Table<Row extends Record<string, unknown>>({ columns, rows, capt
             ) : null}
             <tr>
               {columns.map((col) => (
-                <th key={col.key} scope="col" className={col.numeric ? styles.numeric : undefined}>
+                <th key={col.key} scope="col" className={[col.numeric ? styles.numeric : '', col.wrap ? styles.running : ''].filter(Boolean).join(' ') || undefined}>
                   {col.header}
                   {col.unit ? <span className={styles.unit}>{col.unit}</span> : null}
                 </th>
@@ -67,9 +72,9 @@ export function Table<Row extends Record<string, unknown>>({ columns, rows, capt
             {rows.map((row, r) => (
               <tr key={r} className={r === selectedIndex ? styles.selected : undefined} aria-selected={selectedIndex === undefined ? undefined : r === selectedIndex}>
                 {columns.map((col) => (col.key === header ? (
-                  <th key={col.key} scope="row" className={col.numeric ? styles.numeric : undefined}>{cell(row, col)}</th>
+                  <th key={col.key} scope="row" className={[col.numeric ? styles.numeric : '', col.wrap ? styles.running : ''].filter(Boolean).join(' ') || undefined}>{cell(row, col)}</th>
                 ) : (
-                  <td key={col.key} className={col.numeric ? styles.numeric : undefined}>{cell(row, col)}</td>
+                  <td key={col.key} className={[col.numeric ? styles.numeric : '', col.wrap ? styles.running : ''].filter(Boolean).join(' ') || undefined}>{cell(row, col)}</td>
                 )))}
               </tr>
             ))}
