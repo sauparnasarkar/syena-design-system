@@ -1082,6 +1082,8 @@ with named values; there are no colour-named variants.
   the rail knows it is in a drawer.
 - **Anatomy.** A two-column layout: rail, then a column of analysis bar, scrolling canvas
   and strip. Below `bp-compact` the rail is replaced by `TopBar` and a drawer.
+  The shell is at least the height of the visible viewport (dynamic viewport units, with the plain viewport as the fallback, so a phone's collapsing address bar cannot leave a stale gap) and keeps
+  clear of the device's safe areas when installed to a home screen.
 - **States.** Rail expanded or collapsed; drawer open or closed; strip panel open or closed.
 - **Tokens.** Layout `rail-width-*`, `bar-height`, `content-max`; layers `sticky`, `rail`,
   `overlay`; surfaces `base`, `sunken`.
@@ -1114,9 +1116,11 @@ with named values; there are no colour-named variants.
   or `node`, plus a `name`; no default), `productName` (written beside the mark when
   expanded), `productSwitcher` (an optional slot above the mark,
   empty by default; its items each take their own required mark and name), `ariaLabel`, `groups`, `footerItems`, `collapsed`,
-  `onCollapsedChange`, `onItemClick`, `current`.
-- **Anatomy.** Optional product-switcher slot, the app-supplied mark, grouped destinations (`SidebarNav`), foot
-  with the collapse control. Search, notifications and a user menu are not part of the shell.
+  `onCollapsedChange`, `onItemClick`, `current`, `actions` (a persistent action under the mark, for example the entry to an assistant) and `utilities`
+  (at the foot, above the collapse control, for example a theme switch). Each slot is a node, or a function told whether the rail is collapsed so it can show an
+  icon only. Both are in the drawer at compact widths.
+- **Anatomy.** Optional product-switcher slot, the app-supplied mark, the actions slot, grouped destinations (`SidebarNav`), foot
+  with the utilities slot and the collapse control. Search, notifications and a user menu are not part of the shell.
 - **States.** Expanded, collapsed; per destination: default, hover, current, focus.
 - **Tokens.** `surface-sunken`, `border-default`, `accent-tint`, `accent-text`,
   `text-secondary`, `type-overline-*` for group labels, `layout-rail-width-*`.
@@ -1138,7 +1142,8 @@ with named values; there are no colour-named variants.
 #### SidebarNav
 
 - **Purpose and props.** A grouped list of destinations. Props: `groups` (each with an id, a
-  label and items; an item has an id, a label, an optional `href`, `icon` and `count`),
+  label and items; an item has an id, a label, an optional `href`, `icon`, `count` and `badge`, a short word such as NEW that is part of the item's name; a group with an empty
+  label has no heading and is not labelled by one),
   `footerItems`, `current`, `collapsed`, `onItemClick`, `className`. The compact drawer is the
   shell's, so the older open and toggle props are gone.
 - **Anatomy.** Group label, then a list of items: icon, label, optional count badge.

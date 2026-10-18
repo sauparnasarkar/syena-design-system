@@ -39,8 +39,23 @@
   font: var(--syn-type-title-sm-weight) var(--syn-type-text-lg-size) / var(--syn-type-title-sm-line) var(--syn-type-title-sm-family);
 }
 
+.actions {
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--syn-space-1);
+}
+
 .foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--syn-space-2);
   margin-top: auto;
+}
+
+.utilities {
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--syn-space-1);
 }
 
 .toggle {

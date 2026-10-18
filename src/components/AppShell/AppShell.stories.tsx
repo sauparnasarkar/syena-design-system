@@ -22,11 +22,11 @@ const modules = ['Key figures', 'Trend', 'Composition', 'Comparison'].map((name)
   </section>
 ));
 
-function Example({ compact }: { compact?: boolean }) {
+function Example({ compact, slots }: { compact?: boolean; slots?: boolean }) {
   return (
     <AppShell
       compact={compact}
-      rail={<Rail logo={placeholderMark} productName="Climate analysis" groups={navGroups} footerItems={navFooter} current="country" onItemClick={(_item, event) => event.preventDefault()} />}
+      rail={<Rail logo={placeholderMark} productName="Climate analysis" groups={navGroups} footerItems={navFooter} current="country" onItemClick={(_item, event) => event.preventDefault()} actions={slots ? <button type="button">Ask the agent</button> : undefined} utilities={slots ? <button type="button">Theme</button> : undefined} />}
       topBar={<TopBar logo={placeholderMark} title="Country profile" summary="Example country · 1990 to 2024" />}
       analysisBar={
         <AnalysisBar title="Country profile" purpose="How one country's emissions have changed and where current policy leads.">
@@ -76,6 +76,17 @@ export const Wide: Story = {
 };
 
 export const WideTidewater: Story = { tags: ['desktop-only'], render: () => <Example compact={false} />, globals: { theme: 'tidewater' } };
+
+export const CompactDrawerShowsRailSlots: Story = {
+  render: () => <Example compact slots />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Open navigation' }));
+    const drawer = await canvas.findByRole('dialog', { name: 'Navigation' });
+    await expect(within(drawer).getByRole('button', { name: 'Ask the agent' })).toBeInTheDocument();
+    await expect(within(drawer).getByRole('button', { name: 'Theme' })).toBeInTheDocument();
+  },
+};
 
 export const CompactDrawerAndSheet: Story = {
   render: () => <Example compact />,

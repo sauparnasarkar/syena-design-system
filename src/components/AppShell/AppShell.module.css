@@ -1,6 +1,9 @@
 .app {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
+  box-sizing: border-box;
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
   background: var(--syn-color-surface-base);
   color: var(--syn-color-text-secondary);
 }

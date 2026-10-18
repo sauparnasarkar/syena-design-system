@@ -8,7 +8,7 @@ export { resolveToken, resolveTokens, tokenVariable } from './theme/resolveToken
 export type { ThemeName } from './generated/tokens';
 export { ProductMark, type ProductMarkSource } from './components/ProductMark/ProductMark';
 export { SidebarNav, type NavGroup, type NavItem, type SidebarNavProps } from './components/SidebarNav/SidebarNav';
-export { Rail, type RailProps } from './components/Rail/Rail';
+export { Rail, type RailProps, type RailSlot } from './components/Rail/Rail';
 export { TopBar, type TopBarProps } from './components/TopBar/TopBar';
 export { AnalysisBar, type AnalysisBarProps } from './components/AnalysisBar/AnalysisBar';
 export { SourceStrip, type SourceStripProps } from './components/SourceStrip/SourceStrip';
