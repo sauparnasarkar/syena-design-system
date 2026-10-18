@@ -134,7 +134,7 @@
 }
 
 /* A column of running text wraps, in a column no narrower than a field. */
-.table .wrap {
+.table .running {
   min-width: var(--syn-layout-field-min);
   white-space: normal;
 }

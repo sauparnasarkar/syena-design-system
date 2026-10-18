@@ -61,7 +61,7 @@ export function Table<Row extends object>({ columns, rows, caption, rowHeaderKey
             ) : null}
             <tr>
               {columns.map((col) => (
-                <th key={col.key} scope="col" className={[col.numeric ? styles.numeric : '', col.wrap ? styles.wrap : ''].filter(Boolean).join(' ') || undefined}>
+                <th key={col.key} scope="col" className={[col.numeric ? styles.numeric : '', col.wrap ? styles.running : ''].filter(Boolean).join(' ') || undefined}>
                   {col.header}
                   {col.unit ? <span className={styles.unit}>{col.unit}</span> : null}
                 </th>
@@ -72,9 +72,9 @@ export function Table<Row extends object>({ columns, rows, caption, rowHeaderKey
             {rows.map((row, r) => (
               <tr key={r} className={r === selectedIndex ? styles.selected : undefined} aria-selected={selectedIndex === undefined ? undefined : r === selectedIndex}>
                 {columns.map((col) => (col.key === header ? (
-                  <th key={col.key} scope="row" className={[col.numeric ? styles.numeric : '', col.wrap ? styles.wrap : ''].filter(Boolean).join(' ') || undefined}>{cell(row, col)}</th>
+                  <th key={col.key} scope="row" className={[col.numeric ? styles.numeric : '', col.wrap ? styles.running : ''].filter(Boolean).join(' ') || undefined}>{cell(row, col)}</th>
                 ) : (
-                  <td key={col.key} className={[col.numeric ? styles.numeric : '', col.wrap ? styles.wrap : ''].filter(Boolean).join(' ') || undefined}>{cell(row, col)}</td>
+                  <td key={col.key} className={[col.numeric ? styles.numeric : '', col.wrap ? styles.running : ''].filter(Boolean).join(' ') || undefined}>{cell(row, col)}</td>
                 )))}
               </tr>
             ))}

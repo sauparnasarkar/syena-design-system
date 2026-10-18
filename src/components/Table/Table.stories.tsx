@@ -88,6 +88,28 @@ export const ALongTextColumnWraps: Story = {
   },
 };
 
+const longText = 'A long description that runs to several words and would, kept on one line, make the table scroll sideways for no good reason at all, so it wraps into as many lines as it needs and the row grows to hold every one of them.';
+
+export const ARowGrowsToHoldItsWrappedText: Story = {
+  decorators: [(Story) => <div style={{ width: 'min(100%, 28rem)', padding: 'var(--syn-space-3)' }}><Story /></div>],
+  args: { columns: [{ key: 'step', header: 'Step' }, { key: 'detail', header: 'Detail', wrap: true }], rows: [{ step: 'One', detail: longText }], caption: 'Steps' } as never,
+  play: async ({ canvasElement }) => {
+    const cell = within(canvasElement).getByText(/A long description/);
+    await expect(getComputedStyle(cell).display).toBe('table-cell');
+    const line = parseFloat(getComputedStyle(cell).lineHeight);
+    // The text is several lines tall, and the cell and its row are at least as tall as the text, so nothing is clipped.
+    const range = document.createRange(); range.selectNodeContents(cell);
+    const text = range.getBoundingClientRect().height;
+    await expect(text).toBeGreaterThan(line * 2.5);
+    await expect(cell.getBoundingClientRect().height).toBeGreaterThanOrEqual(text);
+    await expect(cell.scrollHeight).toBeLessThanOrEqual(cell.clientHeight);
+    const row = cell.closest('tr')!.getBoundingClientRect();
+    await expect(row.height).toBeGreaterThanOrEqual(text);
+    const region = canvasElement.querySelector('[role="region"]')!;
+    await expect(region.scrollHeight).toBeLessThanOrEqual(region.clientHeight + 1);
+  },
+};
+
 export const ACaptionCanBeKeptForReadersWithoutShowingIt: Story = {
   args: { hideCaption: true },
   play: async ({ canvasElement }) => {
