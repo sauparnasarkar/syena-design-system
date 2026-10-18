@@ -1131,7 +1131,7 @@ with named values; there are no colour-named variants.
 
 - **Purpose and props.** The bar shown below `bp-compact`. Props: `logo` (required, as for
   `Rail`), `title`,
-  `onOpenNavigation`, `onOpenControls`, `actions`.
+  `onOpenNavigation`, `onOpenControls`, `showControls` (on by default; off for a view with no controls, which removes the button), `actions`.
 - **Anatomy.** Navigation button, view title, analysis-controls button; optional actions.
   Height `bar-height`; buttons are `control-height-touch` square.
 - **States.** Navigation open; controls open.

@@ -17,10 +17,12 @@ export interface TopBarProps {
   onOpenControls?: () => void;
   navigationOpen?: boolean;
   controlsOpen?: boolean;
+  /** Shows the analysis-controls button. Turn it off for a view that has no controls to open. */
+  showControls?: boolean;
   actions?: ReactNode;
 }
 
-export function TopBar({ logo, title, summary, onOpenNavigation, onOpenControls, navigationOpen, controlsOpen, actions }: TopBarProps) {
+export function TopBar({ logo, title, summary, onOpenNavigation, onOpenControls, navigationOpen, controlsOpen, showControls = true, actions }: TopBarProps) {
   const shell = useShell();
   return (
     <header className={styles.bar} data-syn-sticky="top">
@@ -33,9 +35,11 @@ export function TopBar({ logo, title, summary, onOpenNavigation, onOpenControls,
         {summary ? <p className={styles.summary}>{summary}</p> : null}
       </div>
       {actions}
-      <button type="button" className={styles.button} aria-label="Open analysis controls" aria-expanded={controlsOpen ?? shell?.controlsOpen ?? false} onClick={onOpenControls ?? (() => shell?.setControlsOpen(true))}>
-        <Icon name="filters" />
-      </button>
+      {showControls ? (
+        <button type="button" className={styles.button} aria-label="Open analysis controls" aria-expanded={controlsOpen ?? shell?.controlsOpen ?? false} onClick={onOpenControls ?? (() => shell?.setControlsOpen(true))}>
+          <Icon name="filters" />
+        </button>
+      ) : null}
     </header>
   );
 }

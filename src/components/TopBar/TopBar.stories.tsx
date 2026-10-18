@@ -30,4 +30,13 @@ export const ButtonsAreTouchSized: Story = {
   },
 };
 
+export const WithoutControls: Story = {
+  args: { showControls: false },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('button', { name: 'Open navigation' })).toBeInTheDocument();
+    await expect(canvas.queryByRole('button', { name: 'Open analysis controls' })).toBeNull();
+  },
+};
+
 export const Tidewater: Story = { globals: { theme: 'tidewater' } };
