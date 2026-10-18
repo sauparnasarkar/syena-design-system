@@ -47,6 +47,12 @@
   transition: background var(--syn-motion-fast) var(--syn-easing-balanced);
 }
 
+.itemCollapsed {
+  /* Centred in the rail, so the icons' axis does not depend on any size. */
+  justify-content: center;
+  padding-inline: 0;
+}
+
 .item:hover {
   background: var(--syn-color-surface-raised);
 }

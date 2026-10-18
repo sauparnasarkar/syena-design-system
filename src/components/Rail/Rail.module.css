@@ -36,8 +36,9 @@
 }
 
 .collapsed .brand {
-  /* The mark and the icons below it share one vertical axis. */
-  padding-inline: calc(var(--syn-space-2) + (var(--syn-icon-medium) - var(--syn-space-6)) / 2);
+  /* Centred like the icons below it, so they share one vertical axis whatever the sizes. */
+  justify-content: center;
+  padding-inline: 0;
 }
 
 .name {

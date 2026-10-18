@@ -45,7 +45,7 @@ function Item({ item, current, collapsed, onItemClick }: { item: NavItem; curren
     </>
   );
   const common = {
-    className: styles.item,
+    className: collapsed ? `${styles.item} ${styles.itemCollapsed}` : styles.item,
     'aria-current': isCurrent ? ('page' as const) : undefined,
     // A collapsed item shows no badge, so its name carries it.
     'aria-label': collapsed && item.badge ? `${item.label} (${item.badge})` : undefined,

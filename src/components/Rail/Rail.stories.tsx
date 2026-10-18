@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { navFooter, navGroups, placeholderMark } from '../storyFixtures';
 import { Rail } from './Rail';
 
@@ -85,7 +85,8 @@ export const ActionsUtilitiesAndBadge: Story = {
     const mark = canvas.getByRole('link', { name: 'Correlation (NEW)' }).querySelector('[class*="badgeMark"]') as HTMLElement;
     await expect(mark).not.toBeNull();
     await expect(mark.getBoundingClientRect().width).toBeGreaterThanOrEqual(4);
-    // The logo and the icons share one vertical axis.
+    // The logo and the icons share one vertical axis, once the rail has finished changing width.
+    await waitFor(async () => { const w = canvas.getByRole('navigation', { name: 'Primary' }).getBoundingClientRect().width; await new Promise((r) => setTimeout(r, 400)); await expect(canvas.getByRole('navigation', { name: 'Primary' }).getBoundingClientRect().width).toBe(w); }, { timeout: 5000 });
     const centre = (el: Element) => { const r = el.getBoundingClientRect(); return r.left + r.width / 2; };
     const logo = canvas.getByRole('img', { name: placeholderMark.name });
     const icon = canvas.getByRole('link', { name: 'Overview' }).querySelector('svg')!;
