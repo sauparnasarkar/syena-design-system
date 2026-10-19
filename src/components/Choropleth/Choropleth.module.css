@@ -26,6 +26,11 @@
 }
 
 /* The country under the pointer, for a reader who is pointing; the table is the text alternative. */
+.caption {
+  align-self: stretch;
+  text-align: center;
+}
+
 .readout {
   min-height: var(--syn-type-text-sm-line);
   color: var(--syn-data-text);

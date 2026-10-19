@@ -1,5 +1,5 @@
 import { geoContains, geoNaturalEarth1, geoPath } from 'd3-geo';
-import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
 import { coded } from '../../charts/map/countries';
 import { HeatLegend } from '../../charts/map/HeatLegend';
 import { MapControls } from '../../charts/map/MapControls';
@@ -22,6 +22,8 @@ export interface ChoroplethProps {
   unit?: string;
   /** Countries to outline, for example the ones the reader has selected. Restyling the outline never resets the view. */
   outline?: string[];
+  /** Content drawn directly under the picture and above the legend, for example the year in view. */
+  caption?: ReactNode;
 }
 
 const heatNames = ['data-heat-1', 'data-heat-2', 'data-heat-3', 'data-heat-4', 'data-heat-5', 'data-heat-6', 'data-heat-7'] as const;
@@ -38,7 +40,7 @@ const home: View = { k: 1, x: 0, y: 0 };
  * A flat world map that colours countries by value on the heat scale, drawn on a canvas from resolved tokens.
  * It zooms, pans and resets with buttons, the keyboard or a drag, and its values are also a table.
  */
-export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDomain, formatValue = formatTick, unit, outline = [] }: ChoroplethProps) {
+export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDomain, formatValue = formatTick, unit, outline = [], caption }: ChoroplethProps) {
   const [box, width] = useWidth<HTMLDivElement>();
   const canvas = useRef<HTMLCanvasElement>(null);
   const t = useResolvedTokens(tokenNames);
@@ -146,6 +148,8 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
         ) : null}
         {tableView ? null : <p className={styles.readout} aria-hidden="true">{hover ?? ' '}</p>}
       </div>
+      {caption ? <div className={styles.caption}>{caption}</div> : null}
+      <HeatLegend label={valueLabel} domain={domain} formatValue={formatValue} />
       <MapControls
         subject="map"
         onZoomIn={() => zoomAbout(zoomStep)}
@@ -166,7 +170,6 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
           </tbody>
         </table>
       </div>
-      <HeatLegend label={valueLabel} domain={domain} formatValue={formatValue} />
     </figure>
   );
 }

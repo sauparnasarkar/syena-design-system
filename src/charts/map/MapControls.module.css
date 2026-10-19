@@ -31,17 +31,10 @@
   padding: 0 var(--syn-space-3);
   border: var(--syn-layout-border-hairline) solid var(--syn-data-text-muted);
   border-radius: var(--syn-radius-control);
-  background: transparent;
+  background: var(--syn-data-surface);
   color: var(--syn-data-text);
   font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
   cursor: pointer;
-}
-
-@media (pointer: coarse) {
-  .button {
-    min-width: var(--syn-layout-control-height-touch);
-    min-height: var(--syn-layout-control-height-touch);
-  }
 }
 
 .button:hover:not(:disabled) {
