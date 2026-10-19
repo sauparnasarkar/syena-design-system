@@ -27,7 +27,7 @@
   gap: var(--syn-layout-gutter);
   width: 100%;
   max-width: var(--syn-layout-content-max);
-  padding: var(--syn-space-5) var(--syn-space-6) var(--syn-space-7);
+  padding: var(--syn-space-5) var(--syn-space-6) var(--syn-space-6);
 }
 
 .canvas:focus {

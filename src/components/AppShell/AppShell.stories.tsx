@@ -169,3 +169,32 @@ export const CompactDrawerAndSheet: Story = {
 };
 
 export const CompactTidewater: Story = { render: () => <Example compact />, globals: { theme: 'tidewater' } };
+
+export const TheStripTakesNoRoomAndNeverCoversContent: Story = {
+  tags: ['desktop-only'],
+  render: () => <Example compact={false} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const main = canvas.getByRole('main');
+    const column = main.parentElement as HTMLElement;
+    const footer = canvasElement.querySelector('footer') as HTMLElement;
+    const strip = canvas.getByRole('complementary', { name: 'Sources and methodology' }).firstElementChild as HTMLElement;
+    const probe = document.createElement('span');
+    probe.style.paddingBottom = 'var(--syn-space-6)';
+    document.body.appendChild(probe);
+    const room = parseFloat(getComputedStyle(probe).paddingBottom);
+    probe.remove();
+    // Nothing is held in the page below the footer, and the canvas ends with one step of space.
+    await expect(Math.abs(footer.getBoundingClientRect().bottom - column.getBoundingClientRect().bottom)).toBeLessThanOrEqual(1);
+    await expect(parseFloat(getComputedStyle(main).paddingBottom)).toBe(room);
+    // The strip floats over the bottom edge of the view while the page is read ...
+    window.scrollTo(0, 0);
+    await waitFor(() => expect(Math.abs(strip.getBoundingClientRect().bottom - window.innerHeight)).toBeLessThanOrEqual(1));
+    // ... and at the very end it rests in the canvas's own bottom space, above the footer, covering no content.
+    window.scrollTo(0, document.documentElement.scrollHeight);
+    await waitFor(() => expect(Math.abs(strip.getBoundingClientRect().bottom - footer.getBoundingClientRect().top)).toBeLessThanOrEqual(1));
+    const last = main.querySelector('section:last-of-type') as HTMLElement;
+    await expect(strip.getBoundingClientRect().top).toBeGreaterThanOrEqual(last.getBoundingClientRect().bottom - 0.5);
+    window.scrollTo(0, 0);
+  },
+};

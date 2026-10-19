@@ -55,6 +55,44 @@
   font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
 }
 
+.readoutCorner {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  max-width: 100%;
+  margin: 0;
+  padding: 0 var(--syn-space-2);
+  border-radius: var(--syn-radius-control);
+  background: var(--syn-data-surface);
+  color: var(--syn-data-text);
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+  pointer-events: none;
+}
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--syn-space-2) var(--syn-space-4);
+}
+
+.foot > :first-child {
+  flex: 1 1 var(--syn-layout-field-min);
+  min-width: 0;
+}
+
+.ramp.rampInline {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--syn-space-3);
+}
+
+.ramp.rampInline .rampRow {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .controls {
   display: flex;
   justify-content: center;

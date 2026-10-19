@@ -18,7 +18,10 @@ export interface SourceStripProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-/** The source and methodology strip: always visible, with a disclosure for the detail. */
+/**
+ * The source and methodology strip: always visible, with a disclosure for the detail. It holds no room in the page: it floats over the
+ * bottom edge of the view and, at the end of the page, rests in the canvas's own bottom space, above the footer.
+ */
 export function SourceStrip({ summary, compactSummary = 'Sources', sources, definitions, methodNotes, open, defaultOpen = false, onOpenChange }: SourceStripProps) {
   const [own, setOwn] = useState(defaultOpen);
   const isOpen = open ?? own;
@@ -38,7 +41,8 @@ export function SourceStrip({ summary, compactSummary = 'Sources', sources, defi
     return () => document.removeEventListener('keydown', onKey);
   }, [isOpen]);
   return (
-    <aside ref={strip} aria-label="Sources and methodology" className={styles.strip} data-syn-sticky="bottom">
+    <aside ref={strip} aria-label="Sources and methodology" className={styles.strip}>
+      <div className={styles.body} data-syn-sticky="bottom">
       {isOpen ? (
         <div id={panel} className={styles.panel}>
           <section className={styles.column}><h2 className={styles.heading}>Sources</h2>{sources}</section>
@@ -51,6 +55,7 @@ export function SourceStrip({ summary, compactSummary = 'Sources', sources, defi
         <button type="button" className={styles.button} aria-expanded={isOpen} aria-controls={isOpen ? panel : undefined} onClick={() => set(!isOpen)}>
           Methodology
         </button>
+      </div>
       </div>
     </aside>
   );

@@ -41,6 +41,8 @@ export interface TreemapProps {
   onSelect?: (id: string) => void;
   /** The chosen tile, marked on the chart. */
   selectedId?: string;
+  /** A shorter figure: the pointed-at tile is read out over the tiles' bottom corner, and the colour key and the table switch share one row. */
+  compact?: boolean;
 }
 
 const catNames = ['data-cat-1', 'data-cat-2', 'data-cat-3', 'data-cat-4', 'data-cat-5', 'data-cat-6', 'data-cat-7', 'data-cat-8'] as const;
@@ -53,7 +55,7 @@ const plain = (v: number) => v.toLocaleString('en-GB');
  * A treemap: tiles whose area is the value, coloured by group or by a second value. Labels show where a tile has room
  * and are always in the table view, which is also the text alternative.
  */
-export function Treemap({ items, ariaLabel, valueLabel, unit, formatValue = plain, colorBy = 'group', colorDomain, diverging = false, colorLabel, formatColorValue = plain, height = 320, onSelect, selectedId }: TreemapProps) {
+export function Treemap({ items, ariaLabel, valueLabel, unit, formatValue = plain, colorBy = 'group', colorDomain, diverging = false, colorLabel, formatColorValue = plain, height = 320, onSelect, selectedId, compact = false }: TreemapProps) {
   const [box, width] = useWidth<HTMLDivElement>();
   const t = useResolvedTokens(tokenNames);
   const [tableView, setTableView] = useState(false);
@@ -85,6 +87,28 @@ export function Treemap({ items, ariaLabel, valueLabel, unit, formatValue = plai
   const rows = useMemo(() => [...items].sort((a, b) => b.value - a.value), [items]);
   const describe = (i: TreemapItem) => `${i.label}: ${[formatValue(i.value), unit].filter(Boolean).join(' ')}${colorBy === 'value' && i.colorValue !== undefined ? `, ${formatColorValue(i.colorValue)}` : ''}`;
 
+  const controls = (
+    <div className={styles.controls}>
+      <PanelButton icon="table" pressed={tableView} onClick={() => setTableView((v) => !v)}>Table view</PanelButton>
+    </div>
+  );
+  const key = colorBy === 'group' && t ? (
+    <ul className={styles.legend} aria-label="Groups">
+      {groups.map((g, k) => (
+        <li key={g}><span className={styles.swatch} style={{ background: k < catNames.length ? t[catNames[k]] : t['data-other'] }} aria-hidden="true" />{g}</li>
+      ))}
+    </ul>
+  ) : colorBy === 'value' ? (
+    <div className={[styles.ramp, compact ? styles.rampInline : ''].filter(Boolean).join(' ')}>
+      <span>{colorLabel ?? 'Colour value'}</span>
+      <div className={styles.rampRow}>
+        <span>{formatColorValue(lo)}</span>
+        <span className={[styles.bar, diverging ? styles.diverging : ''].filter(Boolean).join(' ')} aria-hidden="true" />
+        <span>{formatColorValue(hi)}</span>
+      </div>
+    </div>
+  ) : null;
+
   return (
     <figure className={styles.treemap}>
       <div ref={box} className={[styles.stage, tableView ? styles.stageOff : ''].join(' ')} style={{ height: tableView ? 0 : height }} aria-hidden={tableView || undefined}>
@@ -114,11 +138,10 @@ export function Treemap({ items, ariaLabel, valueLabel, unit, formatValue = plai
             })}
           </div>
         ) : null}
+        {compact && !tableView && hover ? <p className={styles.readoutCorner} aria-hidden="true">{hover}</p> : null}
       </div>
-      {tableView ? null : <p className={styles.readout} aria-hidden="true">{hover ?? ' '}</p>}
-      <div className={styles.controls}>
-        <PanelButton icon="table" pressed={tableView} onClick={() => setTableView((v) => !v)}>Table view</PanelButton>
-      </div>
+      {tableView || compact ? null : <p className={styles.readout} aria-hidden="true">{hover ?? ' '}</p>}
+      {compact ? null : controls}
       <div className={tableView ? styles.tableView : styles.hidden} {...(tableView ? { role: 'region', 'aria-label': 'Table of values', tabIndex: 0 } : {})}>
         <table id={tableId}>
           <caption>{ariaLabel}</caption>
@@ -142,23 +165,7 @@ export function Treemap({ items, ariaLabel, valueLabel, unit, formatValue = plai
           </tbody>
         </table>
       </div>
-      {colorBy === 'group' && t ? (
-        <ul className={styles.legend} aria-label="Groups">
-          {groups.map((g, k) => (
-            <li key={g}><span className={styles.swatch} style={{ background: k < catNames.length ? t[catNames[k]] : t['data-other'] }} aria-hidden="true" />{g}</li>
-          ))}
-        </ul>
-      ) : null}
-      {colorBy === 'value' ? (
-        <div className={styles.ramp}>
-          <span>{colorLabel ?? 'Colour value'}</span>
-          <div className={styles.rampRow}>
-            <span>{formatColorValue(lo)}</span>
-            <span className={[styles.bar, diverging ? styles.diverging : ''].filter(Boolean).join(' ')} aria-hidden="true" />
-            <span>{formatColorValue(hi)}</span>
-          </div>
-        </div>
-      ) : null}
+      {compact ? <div className={styles.foot}>{key}{controls}</div> : key}
     </figure>
   );
 }

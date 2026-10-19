@@ -1,5 +1,5 @@
 import type { Annotations, Data, Layout, Shape } from 'plotly.js';
-import { useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { blendStops } from '../../charts/map/heat';
 import { projectionDash, seriesColour } from '../../charts/palette';
 import { Icon } from '../Icon/Icon';
@@ -48,6 +48,8 @@ export interface ChartProps {
   ariaLabel: string;
   showLegend?: boolean;
   height?: number;
+  /** The height is that of the legend and the plot together, the plot taking what the legend leaves, instead of the plot's alone. */
+  legendWithinHeight?: boolean;
   /** How area series combine. */
   stackedAreaMode?: 'stack' | 'percent';
   /** How bars combine. `percent` stacks them to the full height so each bar shows shares of its total; say so in the axis title. */
@@ -143,10 +145,22 @@ function KeyMark({ series, colour, t }: { series: ChartSeries; colour: string; t
 
 /** A themed chart: observed series solid, projections dashed with a band, a legend of toggle buttons, direct labels when there is room. */
 export function Chart(props: ChartProps) {
-  const { series, xTitle, yTitle, y2Title, y2TickFormat, ariaLabel, showLegend = true, height = 320, barmode, orientation, stackedAreaMode, projectionFrom, referenceX, annotations, yRange } = props;
+  const { series, xTitle, yTitle, y2Title, y2TickFormat, ariaLabel, showLegend = true, height = 320, legendWithinHeight = false, barmode, orientation, stackedAreaMode, projectionFrom, referenceX, annotations, yRange } = props;
   const t = useChartTokens();
   const [hidden, setHidden] = useState<Set<number>>(new Set());
   const [ref, width] = useWidth<HTMLDivElement>();
+  const legendRef = useRef<HTMLUListElement>(null);
+  const [legendRoom, setLegendRoom] = useState(0);
+  // The legend and the gap under it, when the legend is to share the height with the plot.
+  useLayoutEffect(() => {
+    const el = legendRef.current;
+    if (!legendWithinHeight || !el) { setLegendRoom(0); return undefined; }
+    const measure = () => setLegendRoom(Math.ceil(el.getBoundingClientRect().height + (parseFloat(getComputedStyle(el.parentElement!).rowGap) || 0)));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [legendWithinHeight, showLegend, series, t, width]);
 
   const toggle = (i: number) => setHidden((prev) => {
     const next = new Set(prev);
@@ -231,7 +245,7 @@ export function Chart(props: ChartProps) {
   return (
     <div ref={ref} className={styles.chart}>
       {showLegend && t ? (
-        <ul className={styles.legend} aria-label="Legend">
+        <ul ref={legendRef} className={styles.legend} aria-label="Legend">
           {series.map((s, i) => (s.signed ? null : (
             <li key={`${s.name}-${i}`}>
               <button type="button" className={[styles.key, hidden.has(i) ? styles.off : ''].join(' ')} aria-pressed={!hidden.has(i)} onClick={() => toggle(i)}>
@@ -255,7 +269,7 @@ export function Chart(props: ChartProps) {
           ))}
         </ul>
       ) : null}
-      {spec ? <PlotlyChart data={spec.traces} layout={spec.layout} ariaLabel={ariaLabel} height={height} /> : null}
+      {spec ? <PlotlyChart data={spec.traces} layout={spec.layout} ariaLabel={ariaLabel} height={legendWithinHeight ? Math.max(120, height - legendRoom) : height} /> : null}
       {ramped.map((s) => {
         const [lo, hi] = colourRange(s);
         const format = s.formatColorValue ?? ((v: number) => v.toLocaleString('en-GB'));
