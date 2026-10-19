@@ -16,13 +16,14 @@ const control = (label: string, value: string) => (
   </label>
 );
 
-const modules = ['Key figures', 'Trend', 'Composition', 'Comparison'].map((name) => (
+const modulesOf = (suffix: string) => ['Key figures', 'Trend', 'Composition', 'Comparison'].map((base) => base + suffix).map((name) => (
   <section key={name} aria-label={name} style={{ minHeight: '40vh', padding: 'var(--syn-space-4)', border: 'var(--syn-layout-border-hairline) solid var(--syn-color-border-default)', borderRadius: 'var(--syn-radius-card)', background: 'var(--syn-color-surface-raised)' }}>
     <h2 style={{ font: 'var(--syn-type-title-sm-weight) var(--syn-type-title-sm-size) / var(--syn-type-title-sm-line) var(--syn-type-title-sm-family)' }}>{name}</h2>
   </section>
 ));
+const modules = modulesOf('');
 
-function Example({ compact, slots, groups = navGroups }: { compact?: boolean; slots?: boolean; groups?: typeof navGroups }) {
+function Example({ compact, slots, tall, groups = navGroups }: { compact?: boolean; slots?: boolean; tall?: boolean; groups?: typeof navGroups }) {
   return (
     <AppShell
       compact={compact}
@@ -36,7 +37,7 @@ function Example({ compact, slots, groups = navGroups }: { compact?: boolean; sl
       strip={<SourceStrip summary="Source: example dataset · Period 1990 to 2024 · As of October 2026" methodNotes={<p>Method notes.</p>} />}
       footer={<Footer copyright="© 2026 Example organisation" links={[{ label: 'Privacy', href: '#privacy' }]} />}
     >
-      {modules}
+      {tall ? [' one', ' two', ' three'].map((n) => <div key={n} style={{ display: 'contents' }}>{modulesOf(n)}</div>) : modules}
       <BackToTop targetId="content" />
     </AppShell>
   );
@@ -195,6 +196,33 @@ export const TheStripTakesNoRoomAndNeverCoversContent: Story = {
     await waitFor(() => expect(Math.abs(strip.getBoundingClientRect().bottom - footer.getBoundingClientRect().top)).toBeLessThanOrEqual(1));
     const last = main.querySelector('section:last-of-type') as HTMLElement;
     await expect(strip.getBoundingClientRect().top).toBeGreaterThanOrEqual(last.getBoundingClientRect().bottom - 0.5);
+    window.scrollTo(0, 0);
+  },
+};
+
+export const BackToTopStaysClearOfTheStripWhereverItIs: Story = {
+  tags: ['desktop-only'],
+  render: () => <Example compact={false} tall />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const strip = canvas.getByRole('complementary', { name: 'Sources and methodology' }).firstElementChild as HTMLElement;
+    const clear = async () => {
+      const button = await waitFor(() => canvas.getByRole('button', { name: 'Back to top' }));
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const a = button.getBoundingClientRect();
+      const b = strip.getBoundingClientRect();
+      // No overlap with the strip, and a press on the lower part of the button reaches the button, not the strip's own button.
+      await expect(a.bottom <= b.top + 0.5 || a.top >= b.bottom - 0.5 || a.right <= b.left || a.left >= b.right).toBe(true);
+      const hit = document.elementFromPoint(a.left + a.width / 2, a.bottom - 3);
+      await expect(hit === button || button.contains(hit)).toBe(true);
+    };
+    // While the page is read the strip floats at the bottom edge of the view ...
+    window.scrollTo(0, window.innerHeight * 1.5);
+    await clear();
+    // ... and at the very end it rests above the footer, so the button rises with it.
+    window.scrollTo(0, document.documentElement.scrollHeight);
+    await waitFor(() => expect(Math.abs(strip.getBoundingClientRect().bottom - (canvasElement.querySelector('footer') as HTMLElement).getBoundingClientRect().top)).toBeLessThanOrEqual(1));
+    await clear();
     window.scrollTo(0, 0);
   },
 };

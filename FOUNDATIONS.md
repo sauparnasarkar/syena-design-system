@@ -1172,8 +1172,10 @@ with named values; there are no colour-named variants.
 
 - **Purpose and props.** Returns to the top of the canvas after long scrolling. Props:
   `targetId`, `avoidSelector` (an element it must not overlap, such as the prompt bar).
-- **Anatomy.** A `radius-pill` icon button at the lower right of the canvas, above the
-  strip; appears after one viewport of scrolling.
+- **Anatomy.** A `radius-pill` icon button at the lower right of the canvas; appears after one
+  viewport of scrolling. It rises by the measured distance of anything pinned to the bottom (the
+  strip, a pinned prompt bar) from the bottom of the view, wherever that is just now, so it never
+  sits on it, at the end of the page included.
 - **States.** Hidden, visible, hover, focus.
 - **Tokens.** `surface-overlay`, `border-emphasis`, `elevation-2`, `layer-sticky`.
 - **Accessibility.** A button named *Back to top*; moves focus to `targetId`.
