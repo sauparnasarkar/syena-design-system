@@ -52,7 +52,7 @@ export function HeatLegend({ label, domain, formatValue = formatTick, noDataLabe
   return (
     <div className={styles.legend}>
       {inline ? null : <span className={styles.label}>{label}, log scale</span>}
-      <div className={styles.row}>
+      <div className={[styles.row, inline ? styles.rowInline : ''].filter(Boolean).join(' ')}>
         {inline ? <span className={styles.label}>{label}, log scale</span> : null}
         <div className={styles.scale}>
           <span className={styles.bar} aria-hidden="true" />

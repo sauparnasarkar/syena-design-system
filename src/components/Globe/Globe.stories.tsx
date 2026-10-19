@@ -234,3 +234,14 @@ export const NotCompactKeepsTheCaptionBelowAndAReadoutRow: Story = {
     await expect(within(canvasElement).getByText(/37,398 MtCO₂/).getBoundingClientRect().top).toBeGreaterThanOrEqual(box.bottom);
   },
 };
+
+export const CompactLegendStaysOnOneRowWhereTheScaleIsNarrow: Story = {
+  args: { autoRotate: false, size: 340, compact: true, valueLabel: 'CO₂ (MtCO₂)' },
+  decorators: [page],
+  play: async ({ canvasElement }) => {
+    const legend = canvasElement.querySelector('[class*="_legend_"]') as HTMLElement;
+    // The name, the scale and the no-data key share one row, so the legend is about one tick-row tall.
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    await expect(legend.getBoundingClientRect().height).toBeLessThanOrEqual(36);
+  },
+};
