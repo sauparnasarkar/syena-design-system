@@ -1,7 +1,7 @@
 .button {
   position: fixed;
   inset-inline-end: var(--syn-space-5);
-  inset-block-end: calc(var(--syn-layout-control-height) + var(--syn-space-4));
+  inset-block-end: var(--syn-space-4);
   z-index: var(--syn-layer-sticky);
   display: flex;
   align-items: center;

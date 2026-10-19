@@ -20,12 +20,19 @@ export function BackToTop({ targetId, avoidSelector }: BackToTopProps) {
     const update = () => {
       setVisible(window.scrollY > window.innerHeight);
       const avoid = avoidSelector ? document.querySelector(avoidSelector) : null;
-      setLift(avoid ? avoid.getBoundingClientRect().height : 0);
+      // Clear of whatever is pinned to the bottom, wherever it is just now: its distance from the bottom of the view, not a fixed offset.
+      const pinned = [...document.querySelectorAll('[data-syn-sticky="bottom"]')].map((el) => {
+        const box = el.getBoundingClientRect();
+        return box.height > 0 && box.top < window.innerHeight && box.bottom > 0 ? window.innerHeight - box.top : 0;
+      });
+      setLift(Math.max(avoid ? avoid.getBoundingClientRect().height : 0, ...pinned));
     };
     update();
     window.addEventListener('scroll', update, { passive: true });
     window.addEventListener('resize', update);
-    return () => { window.removeEventListener('scroll', update); window.removeEventListener('resize', update); };
+    const resized = new ResizeObserver(update);
+    document.querySelectorAll('[data-syn-sticky="bottom"]').forEach((el) => resized.observe(el));
+    return () => { window.removeEventListener('scroll', update); window.removeEventListener('resize', update); resized.disconnect(); };
   }, [avoidSelector]);
 
   if (!visible) return null;
@@ -35,7 +42,7 @@ export function BackToTop({ targetId, avoidSelector }: BackToTopProps) {
     if (target) { if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1'); target.focus({ preventScroll: true }); }
   };
   return (
-    <button type="button" className={styles.button} style={{ marginBlockEnd: lift }} onClick={go}>
+    <button type="button" className={styles.button} style={{ insetBlockEnd: `calc(var(--syn-space-4) + ${lift}px)` }} onClick={go}>
       <Icon name="up" />
       <span className={styles.label}>Back to top</span>
     </button>

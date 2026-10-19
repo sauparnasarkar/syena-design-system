@@ -1081,7 +1081,7 @@ with named values; there are no colour-named variants.
   shell read its state: the top bar's buttons open the drawer and the sheet without wiring, and
   the rail knows it is in a drawer.
 - **Anatomy.** A two-column layout: rail, then a column of analysis bar, scrolling canvas
-  and strip. Below `bp-compact` the rail is replaced by `TopBar` and a drawer; in the drawer only the list of destinations scrolls, so the utilities at the foot stay in view at any height.
+  and strip. The strip holds no room in the page: it floats over the bottom edge of the view and, at the end of the page, rests in the canvas's own bottom space above the footer, covering no content; the canvas ends with one step of space. Below `bp-compact` the rail is replaced by `TopBar` and a drawer; in the drawer only the list of destinations scrolls, so the utilities at the foot stay in view at any height.
   The shell is at least the height of the visible viewport (dynamic viewport units, with the plain viewport as the fallback, so a phone's collapsing address bar cannot leave a stale gap) and keeps
   clear of the device's safe areas when installed to a home screen.
 - **States.** Rail expanded or collapsed; drawer open or closed; strip panel open or closed.
@@ -1172,8 +1172,10 @@ with named values; there are no colour-named variants.
 
 - **Purpose and props.** Returns to the top of the canvas after long scrolling. Props:
   `targetId`, `avoidSelector` (an element it must not overlap, such as the prompt bar).
-- **Anatomy.** A `radius-pill` icon button at the lower right of the canvas, above the
-  strip; appears after one viewport of scrolling.
+- **Anatomy.** A `radius-pill` icon button at the lower right of the canvas; appears after one
+  viewport of scrolling. It rises by the measured distance of anything pinned to the bottom (the
+  strip, a pinned prompt bar) from the bottom of the view, wherever that is just now, so it never
+  sits on it, at the end of the page included.
 - **States.** Hidden, visible, hover, focus.
 - **Tokens.** `surface-overlay`, `border-emphasis`, `elevation-2`, `layer-sticky`.
 - **Accessibility.** A button named *Back to top*; moves focus to `targetId`.
@@ -1458,7 +1460,7 @@ with named values; there are no colour-named variants.
 #### Chart
 
 - **Purpose and props.** A themed chart on the plotting library. Props: `series`, `xTitle`,
-  `yTitle`, `y2Title`, `y2TickFormat`, `ariaLabel`, `showLegend`, `height`,
+  `yTitle`, `y2Title`, `y2TickFormat`, `ariaLabel`, `showLegend`, `height`, `legendWithinHeight` (the height is the legend's and the plot's together),
   `stackedAreaMode`, `barmode`, `orientation`, `projectionFrom`, `referenceX`, `annotations`,
   `yRange`; `referenceX` is one reference line or a list. A series may be `dashed` (a dashed line that is not a projection, so two lines of one colour can be told apart; it is not marked as a projection). A series' values may be `null`, which
   leaves a gap (the line breaks and is never joined across it); a value with a gap on both sides gets a mark of its own, since a line cannot carry it. A series has a `kind` (`line`, `bar`, `area` or `marker`), and optionally `projected`,
@@ -1547,7 +1549,7 @@ with named values; there are no colour-named variants.
 - **Purpose and props.** Tiles whose area is a value, for parts of a whole with many parts. Props:
   `items` (`id`, `label`, `value`, optional `group` and `colorValue`), `ariaLabel`, `valueLabel`,
   `unit`, `formatValue`, `colorBy` (`group` or `value`), `colorDomain`, `diverging`, `colorLabel`,
-  `formatColorValue`, `height`, `onSelect`, `selectedId`. `diverging` colours by value on the
+  `formatColorValue`, `height`, `onSelect`, `selectedId`, `compact`. `compact` reads the pointed-at tile out over the tiles' bottom corner (no row is held for it) and puts the colour key and the table switch on one row. `diverging` colours by value on the
   diverging ramp, symmetrical about zero, for a change. With `onSelect` every tile is a button
   (named by what it shows, or by its reading where it has no room for text) and the chosen one
   is outlined, for choosing a tile where hover is not available.

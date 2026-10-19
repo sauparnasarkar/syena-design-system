@@ -15,6 +15,8 @@ const byGroup: TreemapItem[] = top.map(([code, value], i) => ({ id: code, label:
 
 const frame = (width = 'min(100%, 56rem)') => (Story: () => ReactElement) => <div style={{ padding: 'var(--syn-space-4)', width, background: 'var(--syn-data-surface)' }}><Story /></div>;
 
+const extras = (el: HTMLElement) => (el.querySelector('figure') as HTMLElement).getBoundingClientRect().height - (el.querySelector('[role="img"]') as HTMLElement).parentElement!.getBoundingClientRect().height;
+
 const meta: Meta<typeof Treemap> = {
   title: 'Data/Treemap',
   component: Treemap,
@@ -168,3 +170,25 @@ export const NarrowKeepsEveryTileInside: Story = {
 
 export const Tidewater: Story = { globals: { theme: 'tidewater' } };
 export const Night: Story = { globals: { theme: 'night' } };
+
+export const CompactKeepsEverythingButTheTilesToOneRow: Story = {
+  args: { items: byValue, colorBy: 'value', colorLabel: 'Reduction by 2040, %', height: 300, compact: true },
+  play: async ({ canvasElement }) => {
+    await painted(canvasElement);
+    // The colour key and the table switch share one row under the tiles.
+    await expect(extras(canvasElement)).toBeLessThanOrEqual(48);
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole('button', { name: 'Table view' });
+    const key = canvasElement.querySelector('[class*="_ramp_"] > span') as HTMLElement;
+    await expect(Math.abs(key.getBoundingClientRect().top + key.getBoundingClientRect().height / 2 - (button.getBoundingClientRect().top + button.getBoundingClientRect().height / 2))).toBeLessThanOrEqual(8);
+    // Pointing at a tile reads it out over the tiles, without moving anything.
+    const before = button.getBoundingClientRect().top;
+    const tile = tilesOf(canvasElement)[0];
+    tile.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+    await userEvent.hover(tile);
+    const readout = await waitFor(() => { const el = canvasElement.querySelector('[class*="_readoutCorner_"]') as HTMLElement; expect(el?.textContent).toMatch(/MtCO₂/); return el; });
+    const stage = tile.parentElement!.getBoundingClientRect();
+    await expect(readout.getBoundingClientRect().bottom).toBeLessThanOrEqual(stage.bottom + 1);
+    await expect(button.getBoundingClientRect().top).toBe(before);
+  },
+};

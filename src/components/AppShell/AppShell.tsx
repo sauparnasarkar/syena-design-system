@@ -66,8 +66,8 @@ export function AppShell({ rail, topBar, analysisBar, strip, children, footer, n
         <div className={styles.column}>
           {compact ? null : analysisBar}
           <main id="content" tabIndex={-1} className={styles.canvas}>{children}</main>
-          {footer}
           {strip}
+          {footer}
         </div>
         {compact && navOpen ? <Overlay label="Navigation" side="start" onClose={() => state.setNavigationOpen(false)}>{rail}</Overlay> : null}
         {compact && ctrlOpen ? <Overlay label="Analysis controls" side="top" onClose={() => state.setControlsOpen(false)}>{analysisBar}</Overlay> : null}

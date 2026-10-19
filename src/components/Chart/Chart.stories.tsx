@@ -331,3 +331,22 @@ export const TableOfTheValues: Story = {
 };
 
 export const NightAndTidewater: Story = { args: { series: lineSeries, projectionFrom: 2024 }, globals: { theme: 'tidewater' } };
+
+export const LegendCanShareTheHeightWithThePlot: Story = {
+  args: { series: lineSeries, projectionFrom: 2024, height: 300, legendWithinHeight: true },
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    const figure = canvasElement.querySelector('[class*="_chart_"]') as HTMLElement;
+    // The legend and the plot together are the height asked for, not the plot alone.
+    await waitFor(() => expect(Math.abs(figure.getBoundingClientRect().height - 300)).toBeLessThanOrEqual(2));
+  },
+};
+
+export const LegendAboveThePlotByDefault: Story = {
+  args: { series: lineSeries, projectionFrom: 2024, height: 300 },
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    const figure = canvasElement.querySelector('[class*="_chart_"]') as HTMLElement;
+    await expect(figure.getBoundingClientRect().height).toBeGreaterThan(300 + 20);
+  },
+};
