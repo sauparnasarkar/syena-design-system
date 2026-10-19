@@ -8,6 +8,11 @@ function Controlled(props: Partial<SliderProps>) {
   return <div style={{ padding: 'var(--syn-space-5)', width: 'min(100%, var(--syn-layout-module-min))' }}><Slider label="Year" min={1990} max={2050} step={1} {...props} value={value} onChange={setValue} /></div>;
 }
 
+const gap = (canvasElement: HTMLElement) => {
+  const slider = within(canvasElement).getByRole('slider', { name: 'Year' });
+  return slider.getBoundingClientRect().top - within(canvasElement).getByText('Year').getBoundingClientRect().bottom;
+};
+
 const meta: Meta<typeof Slider> = { title: 'Controls/Slider', component: Slider };
 export default meta;
 type Story = StoryObj<typeof Slider>;
@@ -52,3 +57,33 @@ export const Disabled: Story = {
 };
 
 export const Tidewater: Story = { render: () => <Controlled showValue showRangeLabels showThumbValue />, globals: { theme: 'tidewater' } };
+
+export const KeepsNoRoomForABubbleThatIsNotShown: Story = {
+  render: () => <Controlled showRangeLabels />,
+  play: async ({ canvasElement }) => {
+    // Label, then the track a small step below it; the bubble's room is only held when there is a bubble.
+    await expect(gap(canvasElement)).toBeLessThanOrEqual(24);
+  },
+};
+
+export const KeepsRoomForTheBubbleWhenShown: Story = {
+  render: () => <Controlled showThumbValue />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const bubble = canvasElement.querySelector('[class*="_bubble_"]') as HTMLElement;
+    await expect(bubble.getBoundingClientRect().top).toBeGreaterThanOrEqual(canvas.getByText('Year').getBoundingClientRect().bottom - 1);
+    await expect(bubble.getBoundingClientRect().bottom).toBeLessThanOrEqual(canvas.getByRole('slider', { name: 'Year' }).getBoundingClientRect().top + 1);
+  },
+};
+
+export const LabelCanBeHiddenAndStaysTheName: Story = {
+  render: () => <Controlled labelHidden showRangeLabels />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const slider = canvas.getByRole('slider', { name: 'Year' });
+    const label = canvas.getByText('Year').getBoundingClientRect();
+    // Not drawn, still its accessible name, and no row held for it.
+    await expect(label.width).toBeLessThanOrEqual(1);
+    await expect(slider.getBoundingClientRect().top - canvasElement.firstElementChild!.getBoundingClientRect().top).toBeLessThanOrEqual(32);
+  },
+};

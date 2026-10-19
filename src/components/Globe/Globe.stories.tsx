@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test';
 import { expectHintBalanced, expectLegendFits } from '../../charts/map/legendChecks';
 import { illustrativeEmissions } from '../../specimens/countryValues';
 import { Globe } from './Globe';
@@ -194,5 +194,43 @@ export const ControlsAreCompactAndReadableOnThePage: Story = {
       const fill = getComputedStyle(button).backgroundColor;
       await expect(/rgba?\(0, 0, 0, 0\)/.test(fill)).toBe(false);
     }
+  },
+};
+
+export const CompactOverlaysTheCaptionAndReadoutAndSharesTheLegendRow: Story = {
+  args: { autoRotate: false, size: 300, compact: true, valueLabel: 'CO₂ (MtCO₂)', caption: <span>2024 · 37,398 MtCO₂</span> },
+  decorators: [page],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const picture = globe(canvasElement);
+    const box = picture.getBoundingClientRect();
+    // The caption sits on the picture's top-left corner, not above it.
+    const caption = canvas.getByText(/37,398 MtCO₂/).getBoundingClientRect();
+    await expect(Math.abs(caption.left - box.left)).toBeLessThanOrEqual(1);
+    await expect(Math.abs(caption.top - box.top)).toBeLessThanOrEqual(1);
+    // The legend follows the picture closely: no row is held back for the read-out.
+    const legendLabel = canvas.getByText('CO₂ (MtCO₂), log scale');
+    await expect(legendLabel.getBoundingClientRect().top - box.bottom).toBeLessThanOrEqual(12);
+    // The legend's name shares a row with its scale.
+    const bar = canvasElement.querySelector('[class*="_bar_"]') as HTMLElement;
+    await expect(legendLabel.getBoundingClientRect().bottom).toBeGreaterThan(bar.getBoundingClientRect().top);
+    await expect(legendLabel.getBoundingClientRect().right).toBeLessThanOrEqual(bar.getBoundingClientRect().left + 1);
+    // Pointing at a country names it on the picture without moving anything.
+    const before = canvas.getByRole('button', { name: 'Reset view' }).getBoundingClientRect().top;
+    fireEvent.pointerMove(picture, { clientX: box.left + box.width / 2, clientY: box.top + box.height / 2 });
+    const readout = await waitFor(() => { const el = canvasElement.querySelector('[class*="_readoutCorner_"]') as HTMLElement; expect(el?.textContent).toMatch(/:/); return el; });
+    const r = readout.getBoundingClientRect();
+    await expect(r.bottom).toBeLessThanOrEqual(box.bottom + 1);
+    await expect(r.top).toBeGreaterThanOrEqual(box.top);
+    await expect(canvas.getByRole('button', { name: 'Reset view' }).getBoundingClientRect().top).toBe(before);
+  },
+};
+
+export const NotCompactKeepsTheCaptionBelowAndAReadoutRow: Story = {
+  args: { autoRotate: false, size: 300, caption: <span>2024 · 37,398 MtCO₂</span> },
+  decorators: [page],
+  play: async ({ canvasElement }) => {
+    const box = globe(canvasElement).getBoundingClientRect();
+    await expect(within(canvasElement).getByText(/37,398 MtCO₂/).getBoundingClientRect().top).toBeGreaterThanOrEqual(box.bottom);
   },
 };
