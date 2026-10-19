@@ -107,10 +107,11 @@
     "statExponent": 1,
     "fieldExponent": -0.5,
     "breakpointExponents": {
-      "compact": 4,
+      "compact": 5,
       "regular": 7,
       "wide": 9
-    }
+    },
+    "pageGutterShare": 0.05
   },
   "motion": {
     "frameMs": 16.6667,

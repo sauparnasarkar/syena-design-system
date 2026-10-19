@@ -347,6 +347,7 @@ rail-width-expanded    = round(rail-width-collapsed + N · c · b + 2 · space(3
                          lowercase advance of the UI face (measured, above)
 bar-height             = control-height + 2 · space(3)
 gutter                 = space(4)
+page-gutter            = round(W / 20)                      the page's side margin on a phone
 module-min             = round(rail-width-expanded · σ³)    narrowest a module is allowed to be
 stat-min               = round(rail-width-expanded · σ)     narrowest a key-figure tile is allowed to be
 field-min              = round(rail-width-expanded · σ^−½)  narrowest a labelled field is allowed to be
@@ -363,6 +364,7 @@ content-max            = bp-wide                            widest the content a
 | `rail-width-expanded` | 218 px | 13.625 |
 | `bar-height` | 56 px | 3.5 |
 | `gutter` | 14 px | 0.875 |
+| `page-gutter` | 16 px | 1 |
 | `module-min` | 377 px | 23.5625 |
 | `stat-min` | 262 px | 16.375 |
 | `field-min` | 199 px | 12.4375 |
@@ -425,18 +427,18 @@ carry information (a loading indicator, for example) switch to a non-moving alte
 Breakpoints grow geometrically from the reflow floor, using the layout ratio:
 
 ```
-bp(e) = round(W · σᵉ)          compact: e = 4,  regular: e = 7,  wide: e = 9
+bp(e) = round(W · σᵉ)          compact: e = 5,  regular: e = 7,  wide: e = 9
 ```
 
 Below `compact` the navigation rail becomes a drawer; between `compact` and `regular` the
 rail is collapsed to icons; from `regular` it is expanded; `wide` allows a third column.
 The layout must reflow without horizontal scrolling down to `W` (320 px), and every control
-stays reachable there.
+stays reachable there. A window of 768 px, a common tablet width held upright, is laid out compact; that is why `compact` sits at e = 5, not e = 4.
 
 <!-- generated:breakpoint-table -->
 | Token | Value | rem |
 |---|---|---|
-| `bp-compact` | 664 px | 41.5 |
+| `bp-compact` | 796 px | 49.75 |
 | `bp-regular` | 1147 px | 71.6875 |
 | `bp-wide` | 1651 px | 103.1875 |
 <!-- /generated:breakpoint-table -->

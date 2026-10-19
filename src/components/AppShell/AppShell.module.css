@@ -35,7 +35,8 @@
 }
 
 .compact .canvas {
-  padding: var(--syn-space-4) var(--syn-space-3) var(--syn-space-6);
+  /* A phone's page gutter; the footer and the strip use the same, so their text starts on one line. */
+  padding: var(--syn-space-4) var(--syn-layout-page-gutter) var(--syn-space-6);
 }
 
 .skip {

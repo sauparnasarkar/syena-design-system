@@ -24,6 +24,11 @@
   padding: 0 var(--syn-space-6);
 }
 
+.phoneLine,
+.phonePanel {
+  padding-inline: var(--syn-layout-page-gutter);
+}
+
 .text {
   overflow: hidden;
   text-overflow: ellipsis;

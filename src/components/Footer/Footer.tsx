@@ -1,3 +1,4 @@
+import { useShell } from '../AppShell/ShellContext';
 import styles from './Footer.module.css';
 
 export interface FooterLink {
@@ -11,8 +12,9 @@ export interface FooterProps {
 }
 
 export function Footer({ copyright, links }: FooterProps) {
+  const phone = useShell()?.compact === true;
   return (
-    <footer className={styles.footer}>
+    <footer className={[styles.footer, phone ? styles.phone : ''].filter(Boolean).join(' ')}>
       <p>{copyright}</p>
       {links?.length ? (
         <ul className={styles.links}>
