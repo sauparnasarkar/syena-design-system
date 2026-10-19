@@ -5,6 +5,10 @@
   gap: var(--syn-space-3);
   max-width: 100%;
   margin: 0;
+  /* The globe is drawn on the data panel wherever it sits, so its caption, legend and controls read on the page too. */
+  padding: var(--syn-space-2);
+  border-radius: var(--syn-radius-card);
+  background: var(--syn-data-surface);
   color: var(--syn-data-text);
 }
 
@@ -27,6 +31,11 @@
 }
 
 /* The country under the pointer, for a reader who is pointing; the table is the text alternative. */
+.caption {
+  align-self: stretch;
+  text-align: center;
+}
+
 .readout {
   min-height: var(--syn-type-text-sm-line);
   color: var(--syn-data-text);

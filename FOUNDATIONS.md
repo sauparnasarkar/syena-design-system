@@ -1498,16 +1498,20 @@ with named values; there are no colour-named variants.
 - **Purpose and props.** A globe coloured by a country-level value on the heat scale (§3.6).
   Props: `values` (by alpha-3 code), `valueLabel` (what the value is and its unit), `ariaLabel`,
   `domain` (default 0.01 to 10,000, on a log axis), `unit`, `formatValue`, `autoRotate`, `center`,
-  `size`. A year is the parent's: it passes the values for the year in view.
+  `size`, `caption`. A year is the parent's: it passes the values for the year in view, and may
+  pass a `caption` (the year and total, say) that is drawn directly under the globe.
 - **Anatomy.** The globe on `data-surface`, country borders in the same colour; a hover
-  read-out (country, value and unit, or *No data*); controls below it (zoom in, zoom out, *Reset
-  view*, *Table view*) and a one-line keyboard hint; the heat legend: a bar with a tick at every
-  power of ten and the outlined no-data swatch. Missing values are one flat `data-no-data`.
+  read-out (country, value and unit, or *No data*); the caption, if any; the heat legend: a bar
+  with a tick at every power of ten and the outlined no-data swatch; then the controls (zoom in,
+  zoom out, *Reset view*, *Table view*) and a one-line keyboard hint, so the legend is seen before
+  the controls. The figure carries the data panel itself, so everything in it reads on a page of
+  either theme. Missing values are one flat `data-no-data`.
 - **States.** Turning (until the pointer or focus is on it, a control or key has been used, or
   motion is reduced), paused, zoomed, table view (the globe is replaced by the table of values).
 - **Behaviour.** Arrow keys turn, `+` and `−` zoom, `0` or Home resets; dragging turns. Zoom
-  stops at 1× and 6×, and the zoom buttons are disabled at the stops. The controls are drawn in
-  the data panel's colours, since the panel is dark in both themes.
+  stops at 1× and 6×, and the zoom buttons are disabled at the stops. The controls are compact
+  (the small control height, not the touch height) and filled with the panel's colour and drawn
+  in the panel's text colour, so they read as buttons on any background.
 - **Tokens.** `data-heat-*`, `data-no-data`, `data-surface`, `data-gridline`, `data-text`,
   `data-text-muted`. The canvas takes every colour from these tokens, re-read when the theme
   changes.
@@ -1522,7 +1526,9 @@ with named values; there are no colour-named variants.
   example the ones selected; changing it never resets the zoom).
 - **Anatomy, states, behaviour and accessibility.** As the globe: a natural-earth projection
   fitted to the width, zoom to 8×, drag or arrow keys to pan within the map, the same controls,
-  hint, legend, no-data treatment and table view.
+  hint, legend, no-data treatment and table view, and the same optional `caption`. The legend
+  comes before the controls. Unlike the globe, the map is drawn on the data panel of its
+  card, not on a panel of its own.
 - **Tokens.** As the globe, plus `data-text` for the outline.
 
 #### YearControl

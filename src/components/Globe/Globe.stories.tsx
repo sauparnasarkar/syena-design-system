@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { expectHintBalanced, expectLegendFits } from '../../charts/map/legendChecks';
@@ -149,3 +150,49 @@ export const NarrowThinsTheLegendAndBalancesTheHint: Story = {
 
 export const Tidewater: Story = { args: { autoRotate: false }, globals: { theme: 'tidewater' } };
 export const Night: Story = { args: { autoRotate: false }, globals: { theme: 'night' } };
+
+const luminance = (css: string) => {
+  const [r, g, b] = channels(css).map((c) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const contrast = (a: string, b: string) => { const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x); return (hi + 0.05) / (lo + 0.05); };
+/** The colour behind an element: its own background, or the nearest ancestor's that is not transparent. */
+const backdrop = (el: HTMLElement) => {
+  for (let n: HTMLElement | null = el; n; n = n.parentElement) { const c = getComputedStyle(n).backgroundColor; if (!/rgba?\(0, 0, 0, 0\)|transparent/.test(c)) return c; }
+  return 'var(--syn-color-surface-base)';
+};
+
+const page = (Story: () => ReactElement) => <div style={{ padding: 'var(--syn-space-4)', background: 'var(--syn-color-surface-base)', color: 'var(--syn-color-text-primary)' }}><Story /></div>;
+
+export const CaptionThenLegendThenControls: Story = {
+  args: { autoRotate: false, size: 260, caption: <span>1990 · 22,899 MtCO₂</span> },
+  decorators: [page],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const top = (el: Element) => el.getBoundingClientRect().top;
+    const caption = canvas.getByText(/22,899 MtCO₂/);
+    const legend = canvas.getByText('No data');
+    const reset = canvas.getByRole('button', { name: 'Reset view' });
+    await expect(globe(canvasElement).getBoundingClientRect().bottom).toBeLessThanOrEqual(top(caption) + 1);
+    await expect(top(caption)).toBeLessThan(top(legend));
+    await expect(top(legend)).toBeLessThan(top(reset));
+  },
+};
+
+export const ControlsAreCompactAndReadableOnThePage: Story = {
+  args: { autoRotate: false, size: 260 },
+  decorators: [page],
+  globals: { theme: 'tidewater' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    for (const name of ['Reset view', 'Table view']) {
+      const button = canvas.getByRole('button', { name });
+      await expect(button).toBeEnabled();
+      await expect(button.getBoundingClientRect().height).toBeLessThanOrEqual(36);
+      await expect(contrast(getComputedStyle(button).color, backdrop(button))).toBeGreaterThanOrEqual(4.5);
+      // Drawn as a button on the page: a fill or an outline that is itself visible against what is behind it.
+      const fill = getComputedStyle(button).backgroundColor;
+      await expect(/rgba?\(0, 0, 0, 0\)/.test(fill)).toBe(false);
+    }
+  },
+};
