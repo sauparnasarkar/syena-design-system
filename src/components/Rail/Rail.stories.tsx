@@ -94,4 +94,42 @@ export const ActionsUtilitiesAndBadge: Story = {
   },
 };
 
+export const BrandLinksToTheStartPage: Story = {
+  args: { brandHref: '#home' },
+  render: (args) => {
+    const [collapsed, setCollapsed] = useState(false);
+    return <Rail {...args} collapsed={collapsed} onCollapsedChange={setCollapsed} />;
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // Expanded: the link is named by the mark and the product name it contains.
+    await expect(canvas.getByRole('link', { name: /Climate analysis/ })).toHaveAttribute('href', '#home');
+    await userEvent.click(canvas.getByRole('button', { name: 'Collapse navigation' }));
+    // Collapsed: the name is not written anywhere, so the link carries it as its accessible name and as a tooltip.
+    const home = await canvas.findByRole('link', { name: 'Climate analysis' });
+    await expect(home).toHaveAttribute('href', '#home');
+    const tip = home.querySelector('[class*="tip"]') as HTMLElement;
+    await expect(tip).not.toBeNull();
+    await expect(tip).toHaveTextContent('Climate analysis');
+    await expect(getComputedStyle(tip).opacity).toBe('0');
+    // Keyboard focus shows the tooltip.
+    await userEvent.tab();
+    home.focus();
+    await expect(home).toHaveFocus();
+    await waitFor(() => expect(getComputedStyle(tip).opacity).toBe('1'));
+    // Once the rail has finished narrowing, the tooltip sits beside the mark and reaches out past the rail's edge.
+    await waitFor(async () => { const w = canvas.getByRole('navigation', { name: 'Primary' }).getBoundingClientRect().width; await new Promise((r) => setTimeout(r, 400)); await expect(canvas.getByRole('navigation', { name: 'Primary' }).getBoundingClientRect().width).toBe(w); }, { timeout: 5000 });
+    const rail = canvas.getByRole('navigation', { name: 'Primary' }).getBoundingClientRect();
+    const box = tip.getBoundingClientRect();
+    await expect(box.left).toBeGreaterThanOrEqual(canvas.getByRole('img', { name: placeholderMark.name }).getBoundingClientRect().right);
+    await expect(box.right).toBeGreaterThan(rail.right);
+  },
+};
+
+export const BrandIsPlainWithoutALink: Story = {
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).queryByRole('link', { name: /Climate analysis|Example product/ })).toBeNull();
+  },
+};
+
 export const Tidewater: Story = { globals: { theme: 'tidewater' } };

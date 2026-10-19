@@ -41,6 +41,44 @@
   padding-inline: 0;
 }
 
+.brandLink {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--syn-space-3);
+  border-radius: var(--syn-radius-control);
+  color: inherit;
+  text-decoration: none;
+}
+
+.tip {
+  position: absolute;
+  inset-inline-start: calc(100% + var(--syn-space-2));
+  top: 50%;
+  z-index: var(--syn-layer-overlay);
+  padding: var(--syn-space-1) var(--syn-space-2);
+  border-radius: var(--syn-radius-control);
+  background: var(--syn-color-surface-inverse);
+  color: var(--syn-color-text-inverse);
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity var(--syn-motion-fast) var(--syn-easing-balanced);
+}
+
+.collapsed .brandLink {
+  /* As wide as the rail's content box, so the tooltip starts beside the rail like the items' do. */
+  flex: 1 1 auto;
+  justify-content: center;
+}
+
+.brandLink:hover .tip,
+.brandLink:focus-visible .tip {
+  opacity: 1;
+}
+
 .name {
   font: var(--syn-type-title-sm-weight) var(--syn-type-text-lg-size) / var(--syn-type-title-sm-line) var(--syn-type-title-sm-family);
 }

@@ -1114,7 +1114,7 @@ with named values; there are no colour-named variants.
 
 - **Purpose and props.** Primary navigation. Props: `logo` (required: the app's mark as `src`
   or `node`, plus a `name`; no default), `productName` (written beside the mark when
-  expanded), `productSwitcher` (an optional slot above the mark,
+  expanded), `brandHref` and `onBrandClick` (the mark and name become a link to the start page; collapsed, the product name is the link's accessible name and shows as a tooltip on hover and focus), `productSwitcher` (an optional slot above the mark,
   empty by default; its items each take their own required mark and name), `ariaLabel`, `groups`, `footerItems`, `collapsed`,
   `onCollapsedChange`, `onItemClick`, `current`, `actions` (a persistent action under the mark, for example the entry to an assistant) and `utilities`
   (at the foot, above the collapse control, for example a theme switch). Each slot is a node, or a function told whether the rail is collapsed so it can show an
