@@ -9,6 +9,8 @@ export interface HeatLegendProps {
   /** How a tick is written. */
   formatValue?: (value: number) => string;
   noDataLabel?: string;
+  /** The name shares a row with the scale instead of sitting above it. */
+  inline?: boolean;
 }
 
 /**
@@ -16,7 +18,7 @@ export interface HeatLegendProps {
  * narrow for every label, labels are thinned (every other tick, then every third, …), always keeping both ends; the
  * first label starts at the bar's start and the last ends at its end, so no label runs past the bar.
  */
-export function HeatLegend({ label, domain, formatValue = formatTick, noDataLabel = 'No data' }: HeatLegendProps) {
+export function HeatLegend({ label, domain, formatValue = formatTick, noDataLabel = 'No data', inline = false }: HeatLegendProps) {
   const ticks = logTicks(domain);
   const textKey = ticks.map(formatValue).join('|');
   const list = useRef<HTMLUListElement>(null);
@@ -49,8 +51,9 @@ export function HeatLegend({ label, domain, formatValue = formatTick, noDataLabe
   const shown = new Set(kept ?? ticks.map((_, i) => i));
   return (
     <div className={styles.legend}>
-      <span className={styles.label}>{label}, log scale</span>
-      <div className={styles.row}>
+      {inline ? null : <span className={styles.label}>{label}, log scale</span>}
+      <div className={[styles.row, inline ? styles.rowInline : ''].filter(Boolean).join(' ')}>
+        {inline ? <span className={styles.label}>{label}, log scale</span> : null}
         <div className={styles.scale}>
           <span className={styles.bar} aria-hidden="true" />
           <ul ref={list} className={styles.ticks}>

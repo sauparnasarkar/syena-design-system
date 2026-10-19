@@ -13,6 +13,8 @@ export interface SliderProps {
   /** Show the current value beside the label. */
   showValue?: boolean;
   showRangeLabels?: boolean;
+  /** The label is not drawn but stays the slider's name, for a slider whose purpose is plain from what is beside it. */
+  labelHidden?: boolean;
   /** Show a bubble with the value above the thumb. */
   showThumbValue?: boolean;
   /** Written after the value and spoken with it ("2050 years"); also in the value text. */
@@ -26,7 +28,7 @@ const percent = (value: number, min: number, max: number) => ((value - min) / (m
 /** Page keys jump by this many steps. */
 export const PAGE_STEPS = 10;
 
-export function Slider({ label, min, max, step = 1, value, onChange, showValue, showRangeLabels, showThumbValue, unit, formatValue = String, disabled }: SliderProps) {
+export function Slider({ label, min, max, step = 1, value, onChange, showValue, showRangeLabels, labelHidden, showThumbValue, unit, formatValue = String, disabled }: SliderProps) {
   const id = useId();
   const fill = percent(value, min, max);
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -37,11 +39,11 @@ export function Slider({ label, min, max, step = 1, value, onChange, showValue, 
   };
   return (
     <div className={controls.field}>
-      <div className={styles.head}>
-        <label htmlFor={id} className={controls.label}>{label}</label>
+      <div className={labelHidden && !showValue ? styles.headHidden : styles.head}>
+        <label htmlFor={id} className={labelHidden ? styles.hiddenLabel : controls.label}>{label}</label>
         {showValue ? <Figure size="sm" value={formatValue(value)} unit={unit} tone="primary" /> : null}
       </div>
-      <div className={styles.track}>
+      <div className={showThumbValue ? styles.trackWithBubble : styles.track}>
         <input
           id={id}
           type="range"

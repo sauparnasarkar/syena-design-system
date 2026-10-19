@@ -12,7 +12,7 @@ export interface RailProps extends Pick<SidebarNavProps, 'groups' | 'footerItems
   logo: ProductMarkSource;
   /** The product name written beside the mark when the rail is expanded. */
   productName?: string;
-  /** Where the mark and name lead, usually the start page. The mark becomes a link; when the rail is collapsed the product name is its accessible name and shows as a tooltip on hover and keyboard focus. */
+  /** Where the mark and name lead, usually the start page. The mark becomes a link; when the rail is collapsed the mark's name, in full, is its accessible name and shows as a tooltip, so the written `productName` may be shorter on hover and keyboard focus. */
   brandHref?: string;
   /** Called when the brand link is activated, for an app that navigates without a page load. It also closes the drawer. */
   onBrandClick?: (event: MouseEvent) => void;
@@ -50,11 +50,11 @@ export function Rail({ logo, productName, brandHref, onBrandClick, productSwitch
             href={brandHref}
             className={styles.brandLink}
             // Collapsed, the name is written nowhere, so the link carries it.
-            aria-label={isCollapsed ? (productName ?? logo.name) : undefined}
+            aria-label={isCollapsed ? logo.name : undefined}
             onClick={(event) => { onBrandClick?.(event); if (drawer) shell?.setNavigationOpen(false); }}
           >
             {brandBody}
-            {isCollapsed ? <span className={styles.tip} aria-hidden="true">{productName ?? logo.name}</span> : null}
+            {isCollapsed ? <span className={styles.tip} aria-hidden="true">{logo.name}</span> : null}
           </a>
         ) : brandBody}
       </div>

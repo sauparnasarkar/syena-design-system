@@ -13,6 +13,7 @@
 }
 
 .stage {
+  position: relative;
   max-width: 100%;
 }
 
@@ -41,6 +42,28 @@
   color: var(--syn-data-text);
   font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
   text-align: center;
+}
+
+.corner {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  color: var(--syn-data-text);
+  pointer-events: none;
+}
+
+/* Over the picture's bottom corner, where the sphere does not reach; it only exists while a country is pointed at, so nothing moves. */
+.readoutCorner {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  max-width: 100%;
+  padding: 0 var(--syn-space-2);
+  border-radius: var(--syn-radius-control);
+  background: var(--syn-data-surface);
+  color: var(--syn-data-text);
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+  pointer-events: none;
 }
 
 .hidden {

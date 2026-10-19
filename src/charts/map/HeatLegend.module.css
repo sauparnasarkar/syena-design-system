@@ -18,6 +18,15 @@
   gap: var(--syn-space-3) var(--syn-space-5);
 }
 
+.row.rowInline {
+  flex-wrap: nowrap;
+  gap: var(--syn-space-3);
+}
+
+.rowInline .scale {
+  flex: 1 1 0;
+}
+
 .scale {
   position: relative;
   flex: 1 1 var(--syn-layout-field-min);

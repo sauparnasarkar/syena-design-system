@@ -26,8 +26,10 @@ export interface GlobeProps {
   unit?: string;
   /** The side of the square drawing area in pixels. */
   size?: number;
-  /** Content drawn directly under the picture and above the legend, for example the year in view. */
+  /** Content drawn directly under the picture and above the legend, for example the year in view. With `compact` it is drawn on the picture's top-left corner instead. */
   caption?: ReactNode;
+  /** A shorter figure for a wide setting: the caption and the pointed-at country are drawn on the picture's corners, and the legend's name shares a row with its scale. */
+  compact?: boolean;
 }
 
 const heatNames = ['data-heat-1', 'data-heat-2', 'data-heat-3', 'data-heat-4', 'data-heat-5', 'data-heat-6', 'data-heat-7'] as const;
@@ -44,7 +46,7 @@ const maxTilt = 70;
  * A globe that colours countries by value on the heat scale, drawn on a canvas from resolved tokens.
  * It turns, zooms and resets with buttons, the keyboard or a drag, and its values are also a table.
  */
-export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, autoRotate = true, center = defaultCenter, formatValue = formatTick, unit, size = 360, caption }: GlobeProps) {
+export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, autoRotate = true, center = defaultCenter, formatValue = formatTick, unit, size = 360, caption, compact = false }: GlobeProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const t = useResolvedTokens(tokenNames);
   const reduced = useReducedMotion();
@@ -162,10 +164,11 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
           onFocus={() => setPaused(true)}
           onBlur={() => setPaused(false)}
         />
-        {tableView ? null : <p className={styles.readout} aria-hidden="true">{hover ?? ' '}</p>}
+        {compact && caption && !tableView ? <div className={styles.corner}>{caption}</div> : null}
+        {tableView ? null : compact ? (hover ? <p className={styles.readoutCorner} aria-hidden="true">{hover}</p> : null) : <p className={styles.readout} aria-hidden="true">{hover ?? ' '}</p>}
       </div>
-      {caption ? <div className={styles.caption}>{caption}</div> : null}
-      <HeatLegend label={valueLabel} domain={domain} formatValue={formatValue} />
+      {caption && !compact ? <div className={styles.caption}>{caption}</div> : null}
+      <HeatLegend label={valueLabel} domain={domain} formatValue={formatValue} inline={compact} />
       <MapControls
         subject="globe"
         onZoomIn={() => zoomBy(zoomStep)}

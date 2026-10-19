@@ -1114,7 +1114,7 @@ with named values; there are no colour-named variants.
 
 - **Purpose and props.** Primary navigation. Props: `logo` (required: the app's mark as `src`
   or `node`, plus a `name`; no default), `productName` (written beside the mark when
-  expanded), `brandHref` and `onBrandClick` (the mark and name become a link to the start page; collapsed, the product name is the link's accessible name and shows as a tooltip on hover and focus), `productSwitcher` (an optional slot above the mark,
+  expanded), `brandHref` and `onBrandClick` (the mark and name become a link to the start page; collapsed, the mark's name, in full, is the link's accessible name and shows as a tooltip on hover and focus, so the written `productName` may be shorter), `productSwitcher` (an optional slot above the mark,
   empty by default; its items each take their own required mark and name), `ariaLabel`, `groups`, `footerItems`, `collapsed`,
   `onCollapsedChange`, `onItemClick`, `current`, `actions` (a persistent action under the mark, for example the entry to an assistant) and `utilities`
   (at the foot, above the collapse control, for example a theme switch). Each slot is a node, or a function told whether the rail is collapsed so it can show an
@@ -1275,8 +1275,8 @@ with named values; there are no colour-named variants.
 #### Slider
 
 - **Purpose and props.** Choose one number in a range. Props: `label`, `min`, `max`, `step`,
-  `value`, `onChange`, `showValue`, `showRangeLabels`, `showThumbValue`, `unit`, `disabled`.
-- **Anatomy.** Label and value above; a track of `space(1)` thickness with the filled part
+  `value`, `onChange`, `showValue`, `showRangeLabels`, `labelHidden` (the label is not drawn but stays the name), `showThumbValue`, `unit`, `disabled`.
+- **Anatomy.** Label and value above (no row at all when the label is hidden and no value is shown); room above the track only when the value bubble is shown; a track of `space(1)` thickness with the filled part
   in `accent-fill`; a thumb of `space(5)` diameter; optional min and max labels below and a
   value bubble above the thumb.
 - **States.** Default, hover, dragging, focus, disabled.
@@ -1498,8 +1498,8 @@ with named values; there are no colour-named variants.
 - **Purpose and props.** A globe coloured by a country-level value on the heat scale (§3.6).
   Props: `values` (by alpha-3 code), `valueLabel` (what the value is and its unit), `ariaLabel`,
   `domain` (default 0.01 to 10,000, on a log axis), `unit`, `formatValue`, `autoRotate`, `center`,
-  `size`, `caption`. A year is the parent's: it passes the values for the year in view, and may
-  pass a `caption` (the year and total, say) that is drawn directly under the globe.
+  `size`, `caption`, `compact`. A year is the parent's: it passes the values for the year in view, and may
+  pass a `caption` (the year and total, say) that is drawn directly under the globe. With `compact`, for a wide setting, the caption is drawn on the picture's top-left corner instead, the pointed-at country on its bottom-left corner (only while one is pointed at, so no row is held back), and the legend's name shares a row with its scale.
 - **Anatomy.** The globe on `data-surface`, country borders in the same colour; a hover
   read-out (country, value and unit, or *No data*); the caption, if any; the heat legend: a bar
   with a tick at every power of ten and the outlined no-data swatch; then the controls (zoom in,

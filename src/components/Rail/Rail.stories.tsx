@@ -105,12 +105,12 @@ export const BrandLinksToTheStartPage: Story = {
     // Expanded: the link is named by the mark and the product name it contains.
     await expect(canvas.getByRole('link', { name: /Climate analysis/ })).toHaveAttribute('href', '#home');
     await userEvent.click(canvas.getByRole('button', { name: 'Collapse navigation' }));
-    // Collapsed: the name is not written anywhere, so the link carries it as its accessible name and as a tooltip.
-    const home = await canvas.findByRole('link', { name: 'Climate analysis' });
+    // Collapsed: the name is not written anywhere, so the link carries the mark's name, in full, as its accessible name and as a tooltip. The written name may be shorter than it.
+    const home = await canvas.findByRole('link', { name: placeholderMark.name });
     await expect(home).toHaveAttribute('href', '#home');
     const tip = home.querySelector('[class*="tip"]') as HTMLElement;
     await expect(tip).not.toBeNull();
-    await expect(tip).toHaveTextContent('Climate analysis');
+    await expect(tip).toHaveTextContent(placeholderMark.name);
     await expect(getComputedStyle(tip).opacity).toBe('0');
     // Keyboard focus shows the tooltip.
     await userEvent.tab();
