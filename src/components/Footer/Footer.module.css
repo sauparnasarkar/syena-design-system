@@ -10,6 +10,10 @@
   font: var(--syn-type-caption-weight) var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-type-caption-family);
 }
 
+.phone {
+  padding-inline: var(--syn-layout-page-gutter);
+}
+
 .links {
   display: flex;
   flex-wrap: wrap;

@@ -226,3 +226,20 @@ export const BackToTopStaysClearOfTheStripWhereverItIs: Story = {
     window.scrollTo(0, 0);
   },
 };
+
+export const PhoneGutterIsOneWidthForCanvasFooterAndStrip: Story = {
+  render: () => <Example compact />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const probe = document.createElement('span');
+    probe.style.paddingLeft = 'var(--syn-layout-page-gutter)';
+    document.body.appendChild(probe);
+    const gutter = parseFloat(getComputedStyle(probe).paddingLeft);
+    probe.remove();
+    const left = (el: Element) => parseFloat(getComputedStyle(el).paddingLeft);
+    await expect(left(canvas.getByRole('main'))).toBe(gutter);
+    await expect(left(canvasElement.querySelector('footer') as HTMLElement)).toBe(gutter);
+    const line = canvas.getByRole('complementary', { name: 'Sources and methodology' }).querySelector('[class*="_line_"]') as HTMLElement;
+    await expect(left(line)).toBe(gutter);
+  },
+};

@@ -34,7 +34,7 @@
     "layout": {
       "elements": [
         "control-height", "control-height-sm", "control-height-touch", "rail-width-collapsed", "rail-width-expanded",
-        "bar-height", "gutter", "module-min", "stat-min", "field-min", "content-max", "border-hairline", "focus-ring-width"
+        "bar-height", "gutter", "page-gutter", "module-min", "stat-min", "field-min", "content-max", "border-hairline", "focus-ring-width"
       ]
     },
     "elevation": { "numbers": true, "elements": [] },

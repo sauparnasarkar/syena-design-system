@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { useShell } from '../AppShell/ShellContext';
 import styles from './SourceStrip.module.css';
 
 export interface SourceStripProps {
@@ -26,6 +27,7 @@ export function SourceStrip({ summary, compactSummary = 'Sources', sources, defi
   const [own, setOwn] = useState(defaultOpen);
   const isOpen = open ?? own;
   const compact = useIsMobile();
+  const phone = useShell()?.compact === true;
   const panel = useId();
   const set = (next: boolean) => { setOwn(next); onOpenChange?.(next); };
   const strip = useRef<HTMLElement>(null);
@@ -44,13 +46,13 @@ export function SourceStrip({ summary, compactSummary = 'Sources', sources, defi
     <aside ref={strip} aria-label="Sources and methodology" className={styles.strip}>
       <div className={styles.body} data-syn-sticky="bottom">
       {isOpen ? (
-        <div id={panel} className={styles.panel}>
+        <div id={panel} className={[styles.panel, phone ? styles.phonePanel : ''].filter(Boolean).join(' ')}>
           <section className={styles.column}><h2 className={styles.heading}>Sources</h2>{sources}</section>
           <section className={styles.column}><h2 className={styles.heading}>Definitions</h2>{definitions}</section>
           <section className={styles.column}><h2 className={styles.heading}>Method notes</h2>{methodNotes}</section>
         </div>
       ) : null}
-      <div className={styles.line}>
+      <div className={[styles.line, phone ? styles.phoneLine : ''].filter(Boolean).join(' ')}>
         <span className={styles.text}>{compact ? compactSummary : summary}</span>
         <button type="button" className={styles.button} aria-expanded={isOpen} aria-controls={isOpen ? panel : undefined} onClick={() => set(!isOpen)}>
           Methodology

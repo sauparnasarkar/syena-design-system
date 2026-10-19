@@ -129,6 +129,7 @@ export function computeScales(inputs, metrics) {
     'rail-width-expanded': railExpandedPx,
     'bar-height': barHeightPx,
     gutter: gutterPx,
+    'page-gutter': whole(inputs.layout.reflowFloorPx * inputs.layout.pageGutterShare),
     'module-min': whole(railExpandedPx * sigma ** inputs.layout.moduleExponent),
     'stat-min': whole(railExpandedPx * sigma ** inputs.layout.statExponent),
     'field-min': whole(railExpandedPx * sigma ** inputs.layout.fieldExponent),
