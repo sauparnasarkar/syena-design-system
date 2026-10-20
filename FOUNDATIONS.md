@@ -1105,7 +1105,7 @@ with named values; there are no colour-named variants.
 - **SourceStrip.** Props: `summary`, `compactSummary` (*Sources* by default), `sources`,
   `definitions`, `methodNotes`, and `open` / `defaultOpen` / `onOpenChange`. Sticky at the
   bottom; the disclosure button exposes `aria-expanded` and `aria-controls`, and Escape closes
-  the panel.
+  the panel. In the compact shell (a phone) the strip tucks into a small tab at the start edge once the page has been scrolled on by a few dozen pixels from where it was last shown, so the page has the whole view; it is back in full at the very end of the page, where it rests above the footer, or when the tab is pressed, and it never tucks while its panel is open. The tab keeps the strip's place at the bottom, so *BackToTop* still clears it. Wide screens are unchanged.
 
 #### ProductMark
 

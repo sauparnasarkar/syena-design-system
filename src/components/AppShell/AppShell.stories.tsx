@@ -243,3 +243,74 @@ export const PhoneGutterIsOneWidthForCanvasFooterAndStrip: Story = {
     await expect(left(line)).toBe(gutter);
   },
 };
+
+const stripOf = (canvasElement: HTMLElement) => within(canvasElement).getByRole('complementary', { name: 'Sources and methodology' });
+const tabOf = (canvasElement: HTMLElement) => within(stripOf(canvasElement)).queryByRole('button', { name: 'Show sources and methodology' });
+const lineButtonOf = (canvasElement: HTMLElement) => within(stripOf(canvasElement)).queryByRole('button', { name: 'Methodology' });
+
+export const OnAPhoneTheStripTucksIntoATabWhileScrollingAndReturnsAtTheEnd: Story = {
+  render: () => <Example compact tall />,
+  play: async ({ canvasElement }) => {
+    window.scrollTo(0, 0);
+    await waitFor(() => expect(lineButtonOf(canvasElement)).not.toBeNull());
+    // Reading on: the line gives way to a small tab, so the page has the whole view.
+    window.scrollTo(0, window.innerHeight);
+    await waitFor(() => expect(tabOf(canvasElement)).not.toBeNull());
+    await expect(lineButtonOf(canvasElement)).toBeNull();
+    const body = stripOf(canvasElement).firstElementChild as HTMLElement;
+    await expect(body.getBoundingClientRect().width).toBeLessThan(window.innerWidth / 2);
+    // At the end of the page it is back in full, resting above the footer.
+    window.scrollTo(0, document.documentElement.scrollHeight);
+    await waitFor(() => expect(lineButtonOf(canvasElement)).not.toBeNull());
+    await expect(tabOf(canvasElement)).toBeNull();
+    window.scrollTo(0, 0);
+  },
+};
+
+export const TheTabBringsTheStripBackOnRequestAndAnOpenPanelStays: Story = {
+  render: () => <Example compact tall />,
+  play: async ({ canvasElement }) => {
+    window.scrollTo(0, window.innerHeight);
+    const tab = await waitFor(() => { const t = tabOf(canvasElement); expect(t).not.toBeNull(); return t as HTMLElement; });
+    await userEvent.click(tab);
+    const open = await waitFor(() => { const b = lineButtonOf(canvasElement); expect(b).not.toBeNull(); return b as HTMLElement; });
+    await userEvent.click(open);
+    await expect(open).toHaveAttribute('aria-expanded', 'true');
+    // A panel that is open is being read: scrolling on does not tuck it away.
+    window.scrollTo(0, window.innerHeight * 2);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    await expect(within(stripOf(canvasElement)).getByRole('heading', { name: 'Sources' })).toBeVisible();
+    await expect(tabOf(canvasElement)).toBeNull();
+    await userEvent.click(open);
+    window.scrollTo(0, 0);
+  },
+};
+
+export const OnAWideScreenTheStripStaysAsItIs: Story = {
+  tags: ['desktop-only'],
+  render: () => <Example compact={false} tall />,
+  play: async ({ canvasElement }) => {
+    window.scrollTo(0, window.innerHeight * 1.5);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    await expect(lineButtonOf(canvasElement)).not.toBeNull();
+    await expect(tabOf(canvasElement)).toBeNull();
+    window.scrollTo(0, 0);
+  },
+};
+
+export const BackToTopClearsTheTabToo: Story = {
+  render: () => <Example compact tall />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    window.scrollTo(0, window.innerHeight * 1.5);
+    await waitFor(() => expect(tabOf(canvasElement)).not.toBeNull());
+    const button = await waitFor(() => canvas.getByRole('button', { name: 'Back to top' }));
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const a = button.getBoundingClientRect();
+    const b = (stripOf(canvasElement).firstElementChild as HTMLElement).getBoundingClientRect();
+    await expect(a.bottom <= b.top + 0.5 || a.top >= b.bottom - 0.5 || a.right <= b.left || a.left >= b.right).toBe(true);
+    const hit = document.elementFromPoint(a.left + a.width / 2, a.bottom - 3);
+    await expect(hit === button || button.contains(hit)).toBe(true);
+    window.scrollTo(0, 0);
+  },
+};
