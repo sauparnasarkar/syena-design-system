@@ -363,3 +363,34 @@ export const EveryControlIsThereWhateverThePointer: Story = {
     await expect(coarseRules().filter((rule) => /_(buttons|button|controls)_/.test(rule.selectorText) && /^(none|hidden)$/.test(rule.style.display || rule.style.visibility))).toHaveLength(0);
   },
 };
+
+// A label rides the surface, so how far it drifts across the middle of the picture in a measured time is the turn rate.
+const turnRate = async (canvasElement: HTMLElement, text: string, size: number, latitude: number) => {
+  const label = await within(canvasElement).findByText(text);
+  const x = () => label.getBoundingClientRect().left + label.getBoundingClientRect().width / 2;
+  const startX = x();
+  const start = performance.now();
+  await new Promise((resolve) => { setTimeout(resolve, 1500); });
+  const radians = (x() - startX) / ((size / 2 - 2) * Math.cos((latitude * Math.PI) / 180));
+  return Math.abs((radians * 180) / Math.PI) / ((performance.now() - start) / 1000);
+};
+
+export const ATurnPeriodOfThirtySecondsTurnsTwelveDegreesASecond: Story = {
+  args: { autoRotate: true, turnPeriod: 30, size: 300, center: [78, 22], labels: [{ id: 'IND', text: 'India 3,200' }] },
+  decorators: [page],
+  play: async ({ canvasElement }) => {
+    const rate = await turnRate(canvasElement, 'India 3,200', 300, 22);
+    await expect(rate).toBeGreaterThan(10);
+    await expect(rate).toBeLessThan(14);
+  },
+};
+
+export const WithoutATurnPeriodTheGlobeTurnsSixDegreesASecond: Story = {
+  args: { autoRotate: true, size: 300, center: [78, 22], labels: [{ id: 'IND', text: 'India 3,200' }] },
+  decorators: [page],
+  play: async ({ canvasElement }) => {
+    const rate = await turnRate(canvasElement, 'India 3,200', 300, 22);
+    await expect(rate).toBeGreaterThan(5);
+    await expect(rate).toBeLessThan(7);
+  },
+};
