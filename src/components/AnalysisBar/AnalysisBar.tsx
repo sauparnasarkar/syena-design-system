@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { MenuPlacement } from '../SelectBase/menuPlacement';
 import { useShell } from '../AppShell/ShellContext';
 import styles from './AnalysisBar.module.css';
 
@@ -24,7 +23,7 @@ export function AnalysisBar({ title, purpose, children, sheetTitle = 'Filters' }
         {compact ? <h2 className={styles.title}>{sheetTitle}</h2> : <h1 className={styles.title}>{title}</h1>}
         {purpose ? <p className={styles.purpose}>{purpose}</p> : null}
       </div>
-      {children ? <div className={styles.controls}><MenuPlacement.Provider value={compact ? 'inline' : 'floating'}>{children}</MenuPlacement.Provider></div> : null}
+      {children ? <div className={styles.controls} data-syn-menu={compact ? 'inline' : undefined}>{children}</div> : null}
     </section>
   );
 }
