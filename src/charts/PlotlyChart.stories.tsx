@@ -1,6 +1,6 @@
 import type { Data } from 'plotly.js';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, waitFor } from 'storybook/test';
+import { expect, waitFor, within } from 'storybook/test';
 import { anomaly, emitters, observed, scenarios, composition, compositionNames } from '../specimens/data';
 import { divergingColour, projectionDash, seriesColour } from './palette';
 import { PlotlyChart } from './PlotlyChart';
@@ -71,3 +71,19 @@ export const DivergingNight: Story = { render: make(diverging, DIV), play: rende
 export const DivergingTidewater: Story = { render: make(diverging, DIV), play: rendered, globals: { theme: 'tidewater' } };
 export const CategoricalNight: Story = { render: make(categorical, CAT), play: rendered, globals: { theme: 'night' } };
 export const CategoricalTidewater: Story = { render: make(categorical, CAT), play: rendered, globals: { theme: 'tidewater' } };
+
+export const AFailedDrawSaysSoAndOffersAReload: StoryObj<typeof PlotlyChart> = {
+  render: () => (
+    <div style={{ padding: 'var(--syn-space-4)', width: 'min(100%, 900px)' }}>
+      {/* A trace that throws when it is read makes the draw reject, as a chart that fails to load does. */}
+      <PlotlyChart data={[{ type: 'scatter', get x(): never { throw new Error('unreadable'); }, y: [1, 2] } as unknown as Data]} ariaLabel="A chart that cannot be drawn" height={200} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const alert = await within(canvasElement).findByRole('alert', undefined, { timeout: 8000 });
+    await expect(alert).toHaveTextContent(/chart failed to load/i);
+    await expect(within(canvasElement).getByRole('button', { name: 'Reload' })).toBeEnabled();
+    // Not a blank panel: the failed chart is no longer announced as a picture.
+    await expect(canvasElement.querySelector('[role="img"]')).toBeNull();
+  },
+};
