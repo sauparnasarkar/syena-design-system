@@ -15,6 +15,23 @@
   font: var(--syn-type-caption-weight) var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-type-caption-family);
 }
 
+/* Tucked on a phone: only a small tab at the start edge, so the page has the whole view. */
+.body.tucked {
+  inset-inline: var(--syn-layout-page-gutter) auto;
+  width: fit-content;
+  border-start-start-radius: var(--syn-radius-control);
+  border-start-end-radius: var(--syn-radius-control);
+}
+
+.tab {
+  display: block;
+  min-height: var(--syn-space-6);
+  padding: 0 var(--syn-space-3);
+  color: var(--syn-color-text-link);
+  font: inherit;
+  text-decoration: underline;
+}
+
 .line {
   display: flex;
   align-items: center;
