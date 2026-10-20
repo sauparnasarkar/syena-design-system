@@ -297,3 +297,27 @@ export const NarrowScrollsInsideItsRegionAndKeepsTheFirstColumn: Story = {
 
 export const Tidewater: Story = { globals: { theme: 'tidewater' } };
 export const Night: Story = { globals: { theme: 'night' } };
+
+export const ATableThatScrollsSaysSoBesideItsCaption: Story = {
+  tags: ['both-scrollbar-modes'],
+  decorators: [frame('min(100%, 390px)')],
+  play: async ({ canvasElement }) => {
+    await ready(canvasElement);
+    const viewport = canvasElement.querySelector('.ag-body-horizontal-scroll-viewport') as HTMLElement;
+    await waitFor(() => expect(viewport.scrollWidth).toBeGreaterThan(viewport.clientWidth));
+    const hint = await within(canvasElement).findByText(/scroll sideways/i);
+    // Between the caption and the grid, outside the scrolling area, so it stays in view as the columns move.
+    const grid = canvasElement.querySelector('.ag-root-wrapper') as HTMLElement;
+    await expect(hint.getBoundingClientRect().bottom).toBeLessThanOrEqual(grid.getBoundingClientRect().top + 1);
+    await expect(grid.contains(hint)).toBe(false);
+  },
+};
+
+export const ATableThatFitsDoesNotMentionScrolling: Story = {
+  decorators: [frame('min(100%, 62rem)')],
+  play: async ({ canvasElement }) => {
+    await ready(canvasElement);
+    await waitFor(() => expect(canvasElement.querySelector('.ag-root-wrapper')).not.toBeNull());
+    await expect(within(canvasElement).queryByText(/scroll sideways/i)).toBeNull();
+  },
+};
