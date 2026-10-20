@@ -38,7 +38,7 @@
   box-shadow: var(--syn-elevation-2);
 }
 
-.inline {
+:global([data-syn-menu="inline"]) .popup {
   position: static;
   box-shadow: none;
 }

@@ -1137,7 +1137,9 @@ with named values; there are no colour-named variants.
   `layer-rail`, one layer above `layer-sticky`, so a menu opened in it reaches down over a row
   pinned beneath it (jump links, a year row) instead of opening behind it. In the sheet a select's
   list opens inline, in the flow under its field, so the sheet makes room and the controls after it
-  move down (a floated list was cut off by the scrolling sheet); Escape then closes the list only,
+  move down (a floated list was cut off by the scrolling sheet). Which selects those are is decided by
+  where they sit in the page, not by where they were written: the bar marks its controls area, and a
+  page that portals its controls into the bar gets the same behaviour; Escape then closes the list only,
   and a second Escape closes the sheet. The
   navigation drawer and the sheet each have a visible close control at the top; Escape and a
   tap on the dimmed area close them too, and focus returns to the button that opened them.

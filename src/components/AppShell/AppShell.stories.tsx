@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AnalysisBar } from '../AnalysisBar/AnalysisBar';
 import { MultiSelect } from '../MultiSelect/MultiSelect';
 import { Select } from '../Select/Select';
@@ -385,5 +386,41 @@ export const EscapeInTheSheetClosesTheOpenListAndLeavesTheSheetOpen: Story = {
     // A second Escape, with nothing open, closes the sheet.
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(within(canvasElement).queryByRole('dialog', { name: 'Analysis controls' })).toBeNull());
+  },
+};
+
+/** The products fill the bar from the page: the controls are rendered by the page and portalled into a slot in the bar, so they sit in the bar's DOM but not in its React tree. */
+function SheetWithPortalledMenus() {
+  const [slot, setSlot] = useState<HTMLElement | null>(null);
+  const [chosen, setChosen] = useState<string[]>(['c0', 'c1']);
+  const [year, setYear] = useState('2024');
+  return (
+    <AppShell
+      compact
+      rail={<Rail logo={placeholderMark} productName="Climate analysis" groups={navGroups} footerItems={navFooter} current="country" onItemClick={(_item, event) => event.preventDefault()} />}
+      topBar={<TopBar logo={placeholderMark} title="Overview" summary="Example" />}
+      analysisBar={<AnalysisBar title="Overview" purpose="Where emissions are."><div ref={setSlot} style={{ display: 'contents' }} /></AnalysisBar>}
+      strip={<SourceStrip summary="Source: example" methodNotes={<p>Notes.</p>} />}
+    >
+      {slot ? createPortal(<><MultiSelect label="Countries" options={countries} value={chosen} onChange={setChosen} maxSelected={10} /><Select label="Year" options={yearOptions} value={year} onChange={setYear} suppressSearch /></>, slot) : null}
+      {modules}
+    </AppShell>
+  );
+}
+
+export const MenusPortalledIntoTheSheetOpenInlineAndEscapeClosesOnlyTheList: Story = {
+  render: () => <SheetWithPortalledMenus />,
+  play: async ({ canvasElement }) => {
+    const sheet = await openSheet(canvasElement);
+    const trigger = await within(sheet).findByRole('combobox', { name: /Countries/ });
+    const yearTrigger = within(sheet).getByRole('combobox', { name: /Year/ });
+    const before = yearTrigger.getBoundingClientRect().top;
+    await userEvent.click(trigger);
+    const list = await within(sheet).findByRole('listbox');
+    await expect(getComputedStyle(list.parentElement as HTMLElement).position).not.toBe('absolute');
+    await waitFor(() => expect(yearTrigger.getBoundingClientRect().top).toBeGreaterThan(before + 100));
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(within(sheet).queryByRole('listbox')).toBeNull());
+    await expect(within(canvasElement).getByRole('dialog', { name: 'Analysis controls' })).toBeInTheDocument();
   },
 };
