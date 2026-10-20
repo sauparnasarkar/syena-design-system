@@ -1863,7 +1863,10 @@ without a reload.
 - Cell text is `text-sm`. Header text is `text-sm` at weight 600 in `text-muted`; the unit
   under a header is `caption` in `text-muted`.
 - Numeric cells are set in the figure face, right-aligned, with the same number of decimals
-  down a column. Text cells are left-aligned. Dates are left-aligned in the figure face.
+  down a column: the column's `decimals` if it gives them, otherwise the most any value in it
+  has (6.70 beside 2.15, never 6.7). Thousands are separated and a negative number uses the true
+  minus, as in `Figure`. A column with its own `format` is written as that says. Text cells are
+  left-aligned. Dates are left-aligned in the figure face.
 - Units live in the header, not in every cell.
 
 #### Header hierarchy
