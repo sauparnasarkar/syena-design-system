@@ -178,6 +178,7 @@ export function DataTable<Row extends object>({ columns: given, rows, caption, m
   return (
     <div ref={wrap} className={styles.wrap}>
       <p id={captionId} className={styles.caption}>{caption}</p>
+      {columnDefs?.scrolls ? <p className={styles.caption}>Scroll sideways to see every column.</p> : null}
       {columnDefs ? (
         <ThemedGrid<Row> rowData={rows} columnDefs={columnDefs.defs} suppressHorizontalScroll={!columnDefs.scrolls} ariaLabelledBy={captionId} ariaLabel={caption} fitRows={fits && rows.length > 0} height={rows.length === 0 ? rowHeight * 5 : rowHeight * (maxVisibleRows + 1)} loading={loading} onReady={setApi} noRowsOverlayComponent={empty} onRowSelected={onRowSelected} />
       ) : null}

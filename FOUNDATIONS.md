@@ -1866,6 +1866,8 @@ The header row is sticky at the top of the table's scroll region on `surface-sun
   assistive technology.
 - The table scrolls inside its own region (a labelled, focusable scroll container) so the
   page never scrolls in two directions; at 320 px width the first column stays visible.
+  A table that scrolls sideways says so, in a line under its caption and outside the scrolling area:
+  a scrollbar that is hidden until it is touched is no cue, and a cut-off column is easily missed.
 - Copy: selecting cells and copying yields tab-separated values with headers and units.
 
 #### Narrow widths
