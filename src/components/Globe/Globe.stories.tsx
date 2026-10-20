@@ -245,3 +245,121 @@ export const CompactLegendStaysOnOneRowWhereTheScaleIsNarrow: Story = {
     await expect(legend.getBoundingClientRect().height).toBeLessThanOrEqual(36);
   },
 };
+
+/** A real tap: a press and release in one place, as a finger does, with no pointer moving over the globe first. */
+const tap = (picture: HTMLElement, x: number, y: number, pointerType = 'touch') => {
+  const at = { clientX: x, clientY: y, pointerType, pointerId: 7, isPrimary: true };
+  fireEvent.pointerDown(picture, at);
+  fireEvent.pointerUp(picture, at);
+};
+const readoutText = (root: HTMLElement) => (root.querySelector('[class*="_readout"]') as HTMLElement | null)?.textContent?.trim() ?? '';
+
+export const TapSelectsACountryAndShowsItsReadout: Story = {
+  args: { autoRotate: false, size: 300, center: [78, 22] },
+  decorators: [page],
+  play: async ({ canvasElement }) => {
+    const picture = globe(canvasElement);
+    const box = picture.getBoundingClientRect();
+    const middle = [box.left + box.width / 2, box.top + box.height / 2] as const;
+    await expect(readoutText(canvasElement)).toBe('');
+    // A tap names the country under it and its value, though no pointer ever hovered.
+    tap(picture, ...middle);
+    await waitFor(() => expect(readoutText(canvasElement)).toMatch(/^India: /));
+    // The same figure the table gives.
+    await expect(readoutText(canvasElement)).toContain(String(illustrativeEmissions.IND).replace(/\B(?=(\d{3})+(?!\d))/g, ','));
+    // A tap on the sea, beside the sphere, clears it.
+    tap(picture, box.left + 2, box.top + 2);
+    await waitFor(() => expect(readoutText(canvasElement)).toBe(''));
+  },
+};
+
+export const ADragTurnsTheGlobeAndSelectsNothing: Story = {
+  args: { autoRotate: false, size: 300, center: [78, 22] },
+  decorators: [page],
+  play: async ({ canvasElement }) => {
+    const picture = globe(canvasElement);
+    const box = picture.getBoundingClientRect();
+    const x = box.left + box.width / 2;
+    const y = box.top + box.height / 2;
+    const at = (dx: number) => ({ clientX: x + dx, clientY: y, pointerType: 'touch', pointerId: 7, isPrimary: true });
+    const start = picture.toDataURL();
+    fireEvent.pointerDown(picture, at(0));
+    fireEvent.pointerMove(picture, at(30));
+    fireEvent.pointerUp(picture, at(30));
+    await waitFor(() => expect(picture.toDataURL()).not.toBe(start));
+    await expect(readoutText(canvasElement)).toBe('');
+  },
+};
+
+export const TapReadoutStaysUntilAnotherTapAndEscapeClears: Story = {
+  args: { autoRotate: false, size: 300, center: [78, 22] },
+  decorators: [page],
+  play: async ({ canvasElement }) => {
+    const picture = globe(canvasElement);
+    const box = picture.getBoundingClientRect();
+    tap(picture, box.left + box.width / 2, box.top + box.height / 2);
+    await waitFor(() => expect(readoutText(canvasElement)).toMatch(/^India: /));
+    picture.focus();
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(readoutText(canvasElement)).toBe(''));
+  },
+};
+
+export const LabelsNameTheCountriesTheyAreGiven: Story = {
+  args: { autoRotate: false, size: 300, center: [78, 22], labels: [{ id: 'IND', text: 'India 3,200' }, { id: 'USA', text: 'United States 4,900' }, { id: 'ZZZ', text: 'Nowhere' }] },
+  decorators: [page],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const box = globe(canvasElement).getBoundingClientRect();
+    // India faces the viewer, so its label is on the picture near the middle, readable on the panel.
+    const label = await canvas.findByText('India 3,200');
+    const r = label.getBoundingClientRect();
+    await expect(Math.abs(r.left + r.width / 2 - (box.left + box.width / 2))).toBeLessThanOrEqual(box.width * 0.15);
+    await expect(Math.abs(r.top + r.height / 2 - (box.top + box.height / 2))).toBeLessThanOrEqual(box.height * 0.15);
+    await expect(contrast(getComputedStyle(label).color, backdrop(label))).toBeGreaterThanOrEqual(4.5);
+    // The far side of the globe and a code with no shape are not drawn.
+    await expect(canvas.queryByText('United States 4,900')).toBeNull();
+    await expect(canvas.queryByText('Nowhere')).toBeNull();
+    // Turning the globe brings the far side round.
+    const element = globe(canvasElement);
+    element.focus();
+    for (let i = 0; i < 18; i += 1) await userEvent.keyboard('{ArrowRight}');
+    await waitFor(() => expect(canvas.queryByText('United States 4,900')).not.toBeNull());
+    await waitFor(() => expect(canvas.queryByText('India 3,200')).toBeNull());
+    // The table lists the values already, so the labels are not repeated there.
+    await userEvent.click(canvas.getByRole('button', { name: 'Table view' }));
+    await expect(canvas.queryByText('United States 4,900')).toBeNull();
+  },
+};
+
+export const LabelsAreNotReadTwice: Story = {
+  args: { autoRotate: false, size: 300, center: [78, 22], labels: [{ id: 'IND', text: 'India 3,200' }] },
+  play: async ({ canvasElement }) => {
+    const label = await within(canvasElement).findByText('India 3,200');
+    await expect(label.closest('[aria-hidden="true"]')).not.toBeNull();
+  },
+};
+
+/** The rules, in any sheet, that apply only to a coarse primary pointer. */
+const coarseRules = () => [...document.styleSheets].flatMap((sheet) => [...sheet.cssRules]).filter((rule): rule is CSSMediaRule => rule instanceof CSSMediaRule && /pointer:\s*coarse/.test(rule.conditionText)).flatMap((rule) => [...rule.cssRules] as CSSStyleRule[]);
+
+export const TheKeyboardHintIsHiddenOnATouchScreen: Story = {
+  args: { autoRotate: false },
+  play: async ({ canvasElement }) => {
+    // Shown where there is a keyboard-capable pointer...
+    await expect(within(canvasElement).getByText(/Arrow keys turn the globe/)).toBeVisible();
+    // ...and dropped where the primary pointer is a finger, which has no use for it.
+    const hidden = coarseRules().filter((rule) => /_hint_/.test(rule.selectorText) && rule.style.display === 'none');
+    await expect(hidden).toHaveLength(1);
+  },
+};
+
+export const EveryControlIsThereWhateverThePointer: Story = {
+  args: { autoRotate: false },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    for (const name of ['Zoom in globe', 'Zoom out globe', 'Reset view', 'Table view']) await expect(canvas.getByRole('button', { name })).toBeVisible();
+    // Nothing that applies to a coarse pointer takes a control away.
+    await expect(coarseRules().filter((rule) => /_(buttons|button|controls)_/.test(rule.selectorText) && /^(none|hidden)$/.test(rule.style.display || rule.style.visibility))).toHaveLength(0);
+  },
+};
