@@ -69,10 +69,10 @@ export function ChartCard({ title, supportText, headingLevel = 3, source, asOf, 
   );
   const body = (
     <>
-      {state === 'loading' ? <div className={styles.panel} role="status" aria-busy="true" aria-label={`Loading ${title}`}><div className={styles.skeleton}>{[0, 1, 2, 3, 4].map((i) => <span key={i} className={styles.bar} style={{ height: `${30 + i * 12}%` }} />)}</div></div> : null}
-      {state === 'empty' ? <div className={styles.panel}><p className={styles.message}>{emptyMessage}</p></div> : null}
-      {state === 'error' ? <div className={styles.panel}><InlineAlert variant="error" title="Error" onDismiss={undefined}>{errorMessage}</InlineAlert>{onRetry ? <div className={styles.retry}><Button size="small" onClick={onRetry}>Try again</Button></div> : null}</div> : null}
-      {state === 'ready' ? (table && tableView ? <div className={styles.tableView}>{tableView}</div> : <div className={styles.panel}>{typeof children === 'function' ? children(expanded) : children}</div>) : null}
+      {state === 'loading' ? <div className={`syn-data-panel ${styles.panel}`} role="status" aria-busy="true" aria-label={`Loading ${title}`}><div className={styles.skeleton}>{[0, 1, 2, 3, 4].map((i) => <span key={i} className={styles.bar} style={{ height: `${30 + i * 12}%` }} />)}</div></div> : null}
+      {state === 'empty' ? <div className={`syn-data-panel ${styles.panel}`}><p className={styles.message}>{emptyMessage}</p></div> : null}
+      {state === 'error' ? <div className={`syn-data-panel ${styles.panel}`}><InlineAlert variant="error" title="Error" onDismiss={undefined}>{errorMessage}</InlineAlert>{onRetry ? <div className={styles.retry}><Button size="small" onClick={onRetry}>Try again</Button></div> : null}</div> : null}
+      {state === 'ready' ? (table && tableView ? <div className={styles.tableView}>{tableView}</div> : <div className={`syn-data-panel ${styles.panel}`}>{typeof children === 'function' ? children(expanded) : children}</div>) : null}
     </>
   );
   return (

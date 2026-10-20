@@ -245,6 +245,70 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
   if (!change) throw new Error(`${name}: no change pair clears ${changeFloor}`);
   const changeScore = minViewDistance(change.decrease, change.increase);
 
+  // Panel roles: the colour roles as they read on a dark data panel. A dark theme's own roles already read on dark, so they stand as
+  // they are. A light theme solves each one again against the ground and the surfaces a panel can raise from it, in the same order of
+  // steps as its own roles: text at its contrast targets, fills and lines at 3:1, tints between the ground and its first raise.
+  const panelPaths = [
+    ['surface', 'base'], ['surface', 'raised'], ['surface', 'sunken'], ['surface', 'overlay'], ['surface', 'inverse'],
+    ['text', 'primary'], ['text', 'secondary'], ['text', 'muted'], ['text', 'disabled'], ['text', 'on-accent'], ['text', 'inverse'], ['text', 'link'],
+    ['border', 'subtle'], ['border', 'default'], ['border', 'emphasis'],
+    ['accent', 'fill'], ['accent', 'hover'], ['accent', 'active'], ['accent', 'text'], ['accent', 'tint'], ['accent', 'secondary'],
+    ...['positive', 'negative', 'caution', 'info'].flatMap((k) => ['fill', 'text', 'tint'].map((part) => ['signal', k, part])),
+    ['focus-ring'], ['shadow'],
+  ];
+  let panelColours;
+  let panelSurfaces = [ground];
+  if (polarity === 'light') {
+    const pg = lch(hex(ground));
+    const raisedP = ok(Math.min(L0, pg.l * rho ** 0.5), pg.c, pg.h);
+    const sunkenP = ok(pg.l * rho ** -0.25, pg.c, pg.h);
+    const overlayP = ok(Math.min(L0, lch(hex(raisedP)).l * rho ** 0.5), pg.c, pg.h);
+    panelSurfaces = [ground, raisedP, sunkenP, overlayP];
+    const textAt = (target) => atContrast({ hue: pg.h, chroma: pg.c, background: overlayP, target, direction: 'lighter' });
+    const lighter = (from, backgrounds, target) => solveLightness({ from, direction: 1, backgrounds, target });
+    const stepped = (color, exponent) => { const c = lch(hex(color)); return ok(c.l * rho ** exponent, c.c, c.h); };
+    const pTint = (fill) => { const f = lch(hex(fill)); return ok((pg.l + lch(hex(raisedP)).l) / 2, f.c / rho ** 4, f.h); };
+    // The fill is lifted until the dark ink reads on it and on its two raised steps (4.5:1), which also puts it past 3:1 on every panel surface.
+    const lifted = lch(hex(lighter(accentFill, panelSurfaces, 3)));
+    let fillL = lifted.l;
+    const fillAt = (l) => ok(l, lifted.c, lifted.h);
+    for (let i = 0; i < 600 && [0, 0.25, 0.5].some((e) => contrast(darkInk, stepped(fillAt(fillL), e)) < 4.5); i += 1) fillL += 0.002;
+    const fill = fillAt(fillL);
+    const tintA = pTint(fill);
+    const fills = [fill, stepped(fill, 0.25), stepped(fill, 0.5)];
+    const ink = darkInk;
+    const accentTextP = lighter(accentFill, [...panelSurfaces, tintA], 4.5);
+    const line = gridline;
+    const afh = lch(hex(fill));
+    const solved = {
+      'surface-base': ground, 'surface-raised': raisedP, 'surface-sunken': sunkenP, 'surface-overlay': overlayP, 'surface-inverse': textAt(7),
+      'text-primary': textAt(Math.sqrt(7 * 21)), 'text-secondary': textAt(7), 'text-muted': textAt(4.5),
+      'text-disabled': atContrast({ hue: pg.h, chroma: pg.c, background: ground, target: Math.sqrt(4.5), direction: 'lighter' }),
+      'text-on-accent': ink, 'text-inverse': ground, 'text-link': accentTextP,
+      'border-subtle': ok((pg.l + lch(hex(line)).l) / 2, pg.c, pg.h), 'border-default': line, 'border-emphasis': lighter(line, panelSurfaces, 3),
+      'accent-fill': fills[0], 'accent-hover': fills[1], 'accent-active': fills[2], 'accent-text': accentTextP, 'accent-tint': tintA,
+      'accent-secondary': ok(afh.l, afh.c, afh.h + 360 / 6),
+      'focus-ring': lighter(accentFill, panelSurfaces, 3), shadow,
+      'signal-info-fill': fill, 'signal-info-text': accentTextP, 'signal-info-tint': tintA,
+    };
+    for (const k of ['positive', 'negative', 'caution']) {
+      const f = lighter(signals[k].fill, panelSurfaces, 3);
+      const tint = pTint(f);
+      Object.assign(solved, { [`signal-${k}-fill`]: f, [`signal-${k}-tint`]: tint, [`signal-${k}-text`]: lighter(signals[k].fill, [...panelSurfaces, tint], 4.5) });
+    }
+    panelColours = solved;
+  } else {
+    panelColours = {
+      'surface-base': surfaceBase, 'surface-raised': surfaceRaised, 'surface-sunken': surfaceSunken, 'surface-overlay': surfaceOverlay, 'surface-inverse': surfaceInverse,
+      'text-primary': textPrimary, 'text-secondary': textSecondary, 'text-muted': textMuted, 'text-disabled': textDisabled, 'text-on-accent': textOnAccent, 'text-inverse': textInverse, 'text-link': accentText,
+      'border-subtle': borderSubtle, 'border-default': borderDefault, 'border-emphasis': borderEmphasis,
+      'accent-fill': accentFill, 'accent-hover': accentHover, 'accent-active': accentActive, 'accent-text': accentText, 'accent-tint': accentTint, 'accent-secondary': accentSecondary,
+      ...Object.fromEntries(Object.entries(signals).flatMap(([k, v]) => [[`signal-${k}-fill`, v.fill], [`signal-${k}-text`, v.text], [`signal-${k}-tint`, v.tint]])),
+      'focus-ring': focusRing, shadow,
+    };
+  }
+  const panelTokens = Object.fromEntries(panelPaths.map((path) => [path.join('-'), GEN(polarity === 'light' ? hex(panelColours[path.join('-')]) : `{color.${path.join('.')}}`)]));
+
   // Tokens
   const t = {
     color: {
@@ -284,6 +348,7 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
       heat: Object.fromEntries(heat.map((c, i) => [String(i + 1), GEN(hex(c))])),
       div: Object.fromEntries(Object.entries(diverging).map(([i, c]) => [i < 0 ? `neg-${-i}` : i > 0 ? `pos-${i}` : 'mid', GEN(hex(c))])),
       change: { decrease: GEN(hex(change.decrease)), increase: GEN(hex(change.increase)) },
+      panel: panelTokens,
     },
   };
 
@@ -319,6 +384,16 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
   check('data-change-decrease on data-surface', change.decrease, ground, 3);
   check('data-change-increase on data-surface', change.increase, ground, 3);
   for (const [k, v] of Object.entries(signals)) check(`signal-${k}-fill on surface-base`, v.fill, surfaceBase, 3, 'informational');
+
+  // Panel roles read on the ground and on every surface a panel can raise from it.
+  const panelSurfaceNames = ['data-surface', 'data-panel-surface-raised', 'data-panel-surface-sunken', 'data-panel-surface-overlay'];
+  const pc = panelColours;
+  const panelTexts = { 'text-primary': 7, 'text-secondary': 4.5, 'text-muted': 4.5, 'text-link': 4.5, 'accent-text': 4.5, 'signal-positive-text': 4.5, 'signal-negative-text': 4.5, 'signal-caution-text': 4.5, 'signal-info-text': 4.5 };
+  for (const [id, target] of Object.entries(panelTexts)) panelSurfaces.forEach((surface, i) => check(`data-panel-${id} on ${panelSurfaceNames[i]}`, pc[id], surface, target));
+  for (const k of ['positive', 'negative', 'caution', 'info']) check(`data-panel-signal-${k}-text on data-panel-signal-${k}-tint`, pc[`signal-${k}-text`], pc[`signal-${k}-tint`], 4.5);
+  check('data-panel-text-link on data-panel-accent-tint', pc['text-link'], pc['accent-tint'], 4.5);
+  ['fill', 'hover', 'active'].forEach((part) => check(`data-panel-text-on-accent on data-panel-accent-${part}`, pc['text-on-accent'], pc[`accent-${part}`], 4.5));
+  for (const id of ['border-emphasis', 'focus-ring', 'accent-fill', 'signal-positive-fill', 'signal-negative-fill', 'signal-caution-fill']) panelSurfaces.forEach((surface, i) => check(`data-panel-${id} on ${panelSurfaceNames[i]}`, pc[id], surface, 3));
 
   // Hue-zone checks
   const hueChecks = [

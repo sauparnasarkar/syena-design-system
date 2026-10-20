@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { contrastRatio } from '../../lib/colour';
 import { observed, scenarios } from '../../specimens/data';
 import { Chart, chartTable, type ChartSeries } from '../Chart/Chart';
 import { Table } from '../Table/Table';
@@ -112,3 +113,27 @@ export const CardsInARowKeepTheirOwnHeight: Story = {
 
 export const Tidewater: Story = { globals: { theme: 'tidewater' }, args: { tableView: table } };
 export const Night: Story = { globals: { theme: 'night' } };
+
+const toHex = (css: string) => `#${(css.match(/\d+(\.\d+)?/g) ?? []).slice(0, 3).map((n) => Math.round(Number(n)).toString(16).padStart(2, '0')).join('')}`;
+const opaqueBehind = (el: HTMLElement) => {
+  for (let n: HTMLElement | null = el; n; n = n.parentElement) { const c = getComputedStyle(n).backgroundColor; if (!/rgba?\(0, 0, 0, 0\)|transparent/.test(c)) return c; }
+  throw new Error('nothing opaque behind the text');
+};
+/** Every piece of text inside the panel reads on what is directly behind it. */
+const expectTextReads = async (panel: HTMLElement) => {
+  const texts = [...panel.querySelectorAll<HTMLElement>('*')].filter((e) => [...e.childNodes].some((c) => c.nodeType === 3 && c.textContent?.trim()));
+  await expect(texts.length).toBeGreaterThan(0);
+  for (const e of texts) await expect(`${e.textContent?.trim()} ${contrastRatio(toHex(getComputedStyle(e).color), toHex(opaqueBehind(e))) >= 4.5}`).toMatch(/true$/);
+};
+
+export const ThePanelsTextReadsOnItInTheLightTheme: Story = {
+  globals: { theme: 'tidewater' },
+  args: { state: 'error', onRetry: fn() },
+  play: async ({ canvasElement }) => { await expectTextReads(canvasElement.querySelector('section > div') as HTMLElement); },
+};
+
+export const ThePanelsTextReadsOnItInTheNightTheme: Story = {
+  globals: { theme: 'night' },
+  args: { state: 'error', onRetry: fn() },
+  play: async ({ canvasElement }) => { await expectTextReads(canvasElement.querySelector('section > div') as HTMLElement); },
+};

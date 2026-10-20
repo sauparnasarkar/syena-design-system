@@ -333,6 +333,148 @@
         "$type": "color",
         "$value": "#c14860"
       }
+    },
+    "panel": {
+      "surface-base": {
+        "$type": "color",
+        "$value": "{color.surface.base}"
+      },
+      "surface-raised": {
+        "$type": "color",
+        "$value": "{color.surface.raised}"
+      },
+      "surface-sunken": {
+        "$type": "color",
+        "$value": "{color.surface.sunken}"
+      },
+      "surface-overlay": {
+        "$type": "color",
+        "$value": "{color.surface.overlay}"
+      },
+      "surface-inverse": {
+        "$type": "color",
+        "$value": "{color.surface.inverse}"
+      },
+      "text-primary": {
+        "$type": "color",
+        "$value": "{color.text.primary}"
+      },
+      "text-secondary": {
+        "$type": "color",
+        "$value": "{color.text.secondary}"
+      },
+      "text-muted": {
+        "$type": "color",
+        "$value": "{color.text.muted}"
+      },
+      "text-disabled": {
+        "$type": "color",
+        "$value": "{color.text.disabled}"
+      },
+      "text-on-accent": {
+        "$type": "color",
+        "$value": "{color.text.on-accent}"
+      },
+      "text-inverse": {
+        "$type": "color",
+        "$value": "{color.text.inverse}"
+      },
+      "text-link": {
+        "$type": "color",
+        "$value": "{color.text.link}"
+      },
+      "border-subtle": {
+        "$type": "color",
+        "$value": "{color.border.subtle}"
+      },
+      "border-default": {
+        "$type": "color",
+        "$value": "{color.border.default}"
+      },
+      "border-emphasis": {
+        "$type": "color",
+        "$value": "{color.border.emphasis}"
+      },
+      "accent-fill": {
+        "$type": "color",
+        "$value": "{color.accent.fill}"
+      },
+      "accent-hover": {
+        "$type": "color",
+        "$value": "{color.accent.hover}"
+      },
+      "accent-active": {
+        "$type": "color",
+        "$value": "{color.accent.active}"
+      },
+      "accent-text": {
+        "$type": "color",
+        "$value": "{color.accent.text}"
+      },
+      "accent-tint": {
+        "$type": "color",
+        "$value": "{color.accent.tint}"
+      },
+      "accent-secondary": {
+        "$type": "color",
+        "$value": "{color.accent.secondary}"
+      },
+      "signal-positive-fill": {
+        "$type": "color",
+        "$value": "{color.signal.positive.fill}"
+      },
+      "signal-positive-text": {
+        "$type": "color",
+        "$value": "{color.signal.positive.text}"
+      },
+      "signal-positive-tint": {
+        "$type": "color",
+        "$value": "{color.signal.positive.tint}"
+      },
+      "signal-negative-fill": {
+        "$type": "color",
+        "$value": "{color.signal.negative.fill}"
+      },
+      "signal-negative-text": {
+        "$type": "color",
+        "$value": "{color.signal.negative.text}"
+      },
+      "signal-negative-tint": {
+        "$type": "color",
+        "$value": "{color.signal.negative.tint}"
+      },
+      "signal-caution-fill": {
+        "$type": "color",
+        "$value": "{color.signal.caution.fill}"
+      },
+      "signal-caution-text": {
+        "$type": "color",
+        "$value": "{color.signal.caution.text}"
+      },
+      "signal-caution-tint": {
+        "$type": "color",
+        "$value": "{color.signal.caution.tint}"
+      },
+      "signal-info-fill": {
+        "$type": "color",
+        "$value": "{color.signal.info.fill}"
+      },
+      "signal-info-text": {
+        "$type": "color",
+        "$value": "{color.signal.info.text}"
+      },
+      "signal-info-tint": {
+        "$type": "color",
+        "$value": "{color.signal.info.tint}"
+      },
+      "focus-ring": {
+        "$type": "color",
+        "$value": "{color.focus-ring}"
+      },
+      "shadow": {
+        "$type": "color",
+        "$value": "{color.shadow}"
+      }
     }
   }
 }
