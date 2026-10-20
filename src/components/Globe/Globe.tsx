@@ -85,8 +85,10 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
     let frame = 0;
     let last = performance.now();
     const tick = (now: number) => {
-      setLon((r) => (r + (now - last) * degreesPerMillisecond(turnPeriod)) % 360);
+      // The step is worked out here: an updater may run after `last` has moved on, which would shrink it.
+      const step = (now - last) * degreesPerMillisecond(turnPeriod);
       last = now;
+      setLon((r) => (r + step) % 360);
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
