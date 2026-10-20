@@ -38,6 +38,11 @@
   box-shadow: var(--syn-elevation-2);
 }
 
+.inline {
+  position: static;
+  box-shadow: none;
+}
+
 .search {
   display: flex;
   align-items: center;

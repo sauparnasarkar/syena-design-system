@@ -1,10 +1,11 @@
 /* The WAI-ARIA listbox pattern: the list holds focus and handles the keys (arrows, Enter, type-ahead) on behalf of
    its options through aria-activedescendant, so the options carry roles and a click handler but no key handlers. */
 /* eslint-disable jsx-a11y/no-noninteractive-element-to-interactive-role, jsx-a11y/click-events-have-key-events */
-import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { rootPx, scale } from '../../generated/tokens';
 import { Icon } from '../Icon/Icon';
 import controls from '../controls.module.css';
+import { MenuPlacement } from './menuPlacement';
 import styles from './SelectBase.module.css';
 
 export interface Option {
@@ -53,6 +54,8 @@ export function SelectBase(props: SelectBaseProps) {
   const search = useRef<HTMLInputElement>(null);
   const list = useRef<HTMLUListElement>(null);
   const typed = useRef({ text: '', at: 0 });
+  const popup = useRef<HTMLDivElement>(null);
+  const inline = useContext(MenuPlacement) === 'inline';
 
   const searchable = !suppressSearch && options.length >= searchThreshold;
   const visible = useMemo(() => (query ? options.filter((o) => o.label.toLowerCase().includes(query.toLowerCase())) : options), [options, query]);
@@ -75,10 +78,12 @@ export function SelectBase(props: SelectBaseProps) {
   useEffect(() => {
     if (!open) return undefined;
     (search.current ?? list.current)?.focus();
+    // An inline list opens in the flow, which may be below the fold of a scrolling panel: bring it into view.
+    if (inline) popup.current?.scrollIntoView({ block: 'nearest' });
     const onDown = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) close(false); };
     document.addEventListener('pointerdown', onDown);
     return () => document.removeEventListener('pointerdown', onDown);
-  }, [open, close]);
+  }, [open, close, inline]);
 
   const choose = (option: Option) => {
     if (isDisabled(option)) return;
@@ -107,7 +112,8 @@ export function SelectBase(props: SelectBaseProps) {
       case 'End': if (!inSearch) { event.preventDefault(); move(enabled.length - 1); } break;
       case 'Enter': event.preventDefault(); { const option = enabled[index]; if (option) choose(option); } break;
       case ' ': if (!inSearch) { event.preventDefault(); const option = enabled[index]; if (option) choose(option); } break;
-      case 'Escape': event.preventDefault(); close(true); break;
+      // Only the list closes: the Escape is not passed on to a sheet or dialog around the field, which would close with it.
+      case 'Escape': event.preventDefault(); event.stopPropagation(); close(true); break;
       case 'Tab': close(false); break;
       default:
         // Type-ahead on the list: characters typed in quick succession search by the start of a label.
@@ -157,7 +163,7 @@ export function SelectBase(props: SelectBaseProps) {
         <Icon name="chevron" size="small" className={open ? styles.flipped : undefined} />
       </button>
       {open ? (
-        <div className={styles.popup}>
+        <div ref={popup} className={[styles.popup, inline ? styles.inline : ''].join(' ')}>
           {searchable ? (
             <div className={styles.search}>
               <Icon name="search" size="small" />
