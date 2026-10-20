@@ -1700,6 +1700,10 @@ belongs to the data).
   ("°C above 1850 to 1900").
 - Numbers use thousands separators and a fixed number of decimals per axis. Minus signs are
   the true minus character.
+- A chart that cannot be loaded or drawn is never left as a blank panel: it is replaced by an error
+  alert, "Chart failed to load", with a Reload button that reloads the page. A stale cached build
+  that asks for a file the server no longer has is the usual cause, and a reload fetches the
+  current one.
 
 #### Marks
 
