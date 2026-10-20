@@ -6,6 +6,7 @@ import { MapControls } from '../../charts/map/MapControls';
 import { formatTick, heatColour, type Domain } from '../../charts/map/heat';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { useResolvedTokens } from '../../theme/SynThemeProvider';
+import { defaultTurnPeriod, degreesPerMillisecond } from './turn';
 import styles from './Globe.module.css';
 
 export interface GlobeProps {
@@ -19,6 +20,8 @@ export interface GlobeProps {
   domain?: Domain;
   /** Turns slowly until the pointer or focus is on the globe, or the view has been changed. Off when the reader prefers reduced motion. */
   autoRotate?: boolean;
+  /** Seconds for one full turn while it turns on its own. 60 by default. */
+  turnPeriod?: number;
   /** The longitude and latitude in view at the start, in degrees. */
   center?: [number, number];
   formatValue?: (value: number) => string;
@@ -58,7 +61,7 @@ const anchorOf = (shape: (typeof coded)[number]['shape']): [number, number] => {
  * A globe that colours countries by value on the heat scale, drawn on a canvas from resolved tokens.
  * It turns, zooms and resets with buttons, the keyboard or a drag, and its values are also a table.
  */
-export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, autoRotate = true, center = defaultCenter, formatValue = formatTick, unit, size = 360, caption, compact = false, labels }: GlobeProps) {
+export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, autoRotate = true, turnPeriod = defaultTurnPeriod, center = defaultCenter, formatValue = formatTick, unit, size = 360, caption, compact = false, labels }: GlobeProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const t = useResolvedTokens(tokenNames);
   const reduced = useReducedMotion();
@@ -82,13 +85,13 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
     let frame = 0;
     let last = performance.now();
     const tick = (now: number) => {
-      setLon((r) => (r + (now - last) * 0.006) % 360);
+      setLon((r) => (r + (now - last) * degreesPerMillisecond(turnPeriod)) % 360);
       last = now;
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [turning]);
+  }, [turning, turnPeriod]);
 
   const projection = useMemo(() => geoOrthographic().translate([size / 2, size / 2]).scale((size / 2 - 2) * zoom).rotate([-lon, -lat]), [size, zoom, lon, lat]);
 

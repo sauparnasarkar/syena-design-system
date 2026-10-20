@@ -1502,7 +1502,7 @@ with named values; there are no colour-named variants.
 - **Purpose and props.** A globe coloured by a country-level value on the heat scale (§3.6).
   Props: `values` (by alpha-3 code), `valueLabel` (what the value is and its unit), `ariaLabel`,
   `domain` (default 0.01 to 10,000, on a log axis), `unit`, `formatValue`, `autoRotate`, `center`,
-  `size`, `caption`, `compact`, `labels`. A year is the parent's: it passes the values for the year in view, and may
+  `size`, `caption`, `compact`, `labels`, `turnPeriod` (seconds for one full turn when it turns on its own; 60 by default). A year is the parent's: it passes the values for the year in view, and may
   pass a `caption` (the year and total, say) that is drawn directly under the globe. With `compact`, for a wide setting, the caption is drawn on the picture's top-left corner instead, the pointed-at country on its bottom-left corner (only while one is pointed at, so no row is held back), and the legend's name shares a row with its scale.
 - **Anatomy.** The globe on `data-surface`, country borders in the same colour; a
   read-out (country, value and unit, or *No data*) for the country pointed at or tapped, the tapped one outlined in `data-text`;
