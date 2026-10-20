@@ -27,6 +27,12 @@ function cssValue(token) {
   }
 }
 
+/** The scope of a dark data panel: every colour role takes its panel value, so what sits inside reads on the panel in either theme. */
+const panelScope = (tokens) => {
+  const roles = tokens.filter((t) => t.path[0] === 'data' && t.path[1] === 'panel').map((t) => t.path[2]);
+  return `.syn-data-panel {\n  color-scheme: dark;\n${roles.map((r) => `  --syn-color-${r}: var(--syn-data-panel-${r});`).join('\n')}\n}`;
+};
+
 const emitted = (token) => token.isSource && token.path.join('.') !== 'figure.size-adjust';
 const declarations = (dictionary) => dictionary.allTokens.filter(emitted).map((t) => `  ${t.name}: ${cssValue(t)};`);
 
@@ -81,6 +87,7 @@ export async function buildTokens() {
     `@font-face {\n  font-family: "Syn Figure";\n  src: url("../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2");\n  font-weight: 100 900;\n  font-style: normal;\n  font-display: swap;\n  size-adjust: ${Math.round(sizeAdjust * 10000) / 100}%;\n}`,
     base.output.trimEnd(),
     ...themeNames.map((n) => themes[n].output.trimEnd()),
+    panelScope(themes.night.tokens),
   ].join('\n\n');
 
   const px = (group) => Object.fromEntries(Object.entries(group).map(([k, v]) => [k, Math.round(parseFloat(v) * rootPx)]));

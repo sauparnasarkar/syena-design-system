@@ -27,6 +27,7 @@
     "syn-surface-sunken",
     "syn-surface-overlay",
     "syn-surface-inverse",
+    "syn-data-panel",
     "syn-visually-hidden"
   ]
 }

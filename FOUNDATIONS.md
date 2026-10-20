@@ -666,6 +666,17 @@ matches the dark feature banners the products place on the same pages, and lets 
 colours, validated once against one ground, serve both themes. The decision applies to every
 chart, chart card and globe, not only to banners, so there is no per-component surface option.
 
+**Colour roles on a dark panel.** Text, links, signals, borders and controls placed on a dark panel
+must not take the page's light-theme colours: they would be dark on dark. Each theme therefore
+carries a panel value for every colour role (`data-panel-*`, one per `color-*` role), and the
+`syn-data-panel` class draws the ground and rebinds every `color-*` role to its panel value for
+everything inside it, so a button, a link or a signal reads on the panel with no change to the
+component. In a dark theme the panel value is the theme's own role, so nothing moves. In a light
+theme each role is solved again against the ground and the surfaces a panel can raise from it:
+text at the same contrast steps as the page (primary 7:1 and above, secondary 7:1, muted and
+links 4.5:1), fills, lines and focus rings at 3:1, tints between the ground and its first raise.
+Chart cards put it on their panel; any other dark panel does the same.
+
 **Neutrals on the ground.** Each is the lightness that gives an exact contrast ratio against
 the ground, at the ground's hue:
 
@@ -773,7 +784,7 @@ every colour-vision view. Change marks are always paired with a sign or arrow gl
 UI boundaries, icons and chart marks. Primary text and chart text aim higher (7:1).
 
 <!-- generated:contrast-count -->
-night: 105 required pairs; tidewater: 105 required pairs.
+night: 128 required pairs; tidewater: 173 required pairs.
 <!-- /generated:contrast-count -->
 
 The table shows each pair family at its worst surface in each theme:
@@ -826,6 +837,29 @@ The table shows each pair family at its worst surface in each theme:
 | data-div-* | 3:1 | 4.54 | 4.52 | pass |
 | data-change-decrease | 3:1 | 11.19 | 10.69 | pass |
 | data-change-increase | 3:1 | 3.78 | 3.52 | pass |
+| data-panel-text-primary | 7:1 | 17.57 | 13.78 | pass |
+| data-panel-text-secondary | 4.5:1 | 13.70 | 7.96 | pass |
+| data-panel-text-muted | 4.5:1 | 10.24 | 5.15 | pass |
+| data-panel-text-link | 4.5:1 | 6.94 | 5.12 | pass |
+| data-panel-accent-text | 4.5:1 | 6.94 | 5.12 | pass |
+| data-panel-signal-positive-text | 4.5:1 | 7.68 | 5.14 | pass |
+| data-panel-signal-negative-text | 4.5:1 | 6.96 | 5.12 | pass |
+| data-panel-signal-caution-text | 4.5:1 | 8.34 | 7.91 | pass |
+| data-panel-signal-info-text | 4.5:1 | 6.94 | 5.12 | pass |
+| data-panel-signal-positive-text on data-panel-signal-positive-tint | 4.5:1 | 6.13 | 4.94 | pass |
+| data-panel-signal-negative-text on data-panel-signal-negative-tint | 4.5:1 | 5.85 | 5.16 | pass |
+| data-panel-signal-caution-text on data-panel-signal-caution-tint | 4.5:1 | 6.88 | 7.77 | pass |
+| data-panel-signal-info-text on data-panel-signal-info-tint | 4.5:1 | 5.64 | 4.99 | pass |
+| data-panel-text-link on data-panel-accent-tint | 4.5:1 | 5.64 | 4.99 | pass |
+| data-panel-text-on-accent on data-panel-accent-fill | 4.5:1 | 6.33 | 4.52 | pass |
+| data-panel-text-on-accent on data-panel-accent-hover | 4.5:1 | 7.08 | 5.03 | pass |
+| data-panel-text-on-accent on data-panel-accent-active | 4.5:1 | 7.96 | 5.60 | pass |
+| data-panel-border-emphasis | 3:1 | 4.65 | 3.41 | pass |
+| data-panel-focus-ring | 3:1 | 5.72 | 3.41 | pass |
+| data-panel-accent-fill | 3:1 | 5.72 | 3.87 | pass |
+| data-panel-signal-positive-fill | 3:1 | 7.68 | 4.41 | pass |
+| data-panel-signal-negative-fill | 3:1 | 5.66 | 3.52 | pass |
+| data-panel-signal-caution-fill | 3:1 | 8.34 | 7.91 | pass |
 <!-- /generated:contrast-table -->
 
 Pairs measured and reported but not required (decorative, or never used alone):
