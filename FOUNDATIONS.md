@@ -1704,6 +1704,8 @@ belongs to the data).
   alert, "Chart failed to load", with a Reload button that reloads the page. A stale cached build
   that asks for a file the server no longer has is the usual cause, and a reload fetches the
   current one.
+  The alert and the button are `space-3` apart. A chart given new data, layout or height tries again and
+  the message goes; until then it stays folded away at its full width, so the next draw is the right size.
 
 #### Marks
 

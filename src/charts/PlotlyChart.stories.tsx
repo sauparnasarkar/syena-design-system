@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import type { Data } from 'plotly.js';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, waitFor, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { anomaly, emitters, observed, scenarios, composition, compositionNames } from '../specimens/data';
 import { divergingColour, projectionDash, seriesColour } from './palette';
 import { PlotlyChart } from './PlotlyChart';
@@ -75,8 +76,8 @@ export const CategoricalTidewater: Story = { render: make(categorical, CAT), pla
 export const AFailedDrawSaysSoAndOffersAReload: StoryObj<typeof PlotlyChart> = {
   render: () => (
     <div style={{ padding: 'var(--syn-space-4)', width: 'min(100%, 900px)' }}>
-      {/* A trace that throws when it is read makes the draw reject, as a chart that fails to load does. */}
-      <PlotlyChart data={[{ type: 'scatter', get x(): never { throw new Error('unreadable'); }, y: [1, 2] } as unknown as Data]} ariaLabel="A chart that cannot be drawn" height={200} />
+      {/* A trace that is not there makes the draw reject, as a chart that fails to load does. */}
+      <PlotlyChart data={[null as unknown as Data]} ariaLabel="A chart that cannot be drawn" height={200} />
     </div>
   ),
   play: async ({ canvasElement }) => {
@@ -85,5 +86,50 @@ export const AFailedDrawSaysSoAndOffersAReload: StoryObj<typeof PlotlyChart> = {
     await expect(within(canvasElement).getByRole('button', { name: 'Reload' })).toBeEnabled();
     // Not a blank panel: the failed chart is no longer announced as a picture.
     await expect(canvasElement.querySelector('[role="img"]')).toBeNull();
+  },
+};
+
+// A data set Plotly cannot draw: a trace that is not there. Its draw rejects, as a chart that fails to load does.
+const unreadable = [null as unknown as Data];
+const readable: Data[] = [{ type: 'scatter', x: [1, 2, 3], y: [1, 3, 2] }];
+
+function Recovers() {
+  const [data, setData] = useState<Data[]>(unreadable);
+  return (
+    <div style={{ padding: 'var(--syn-space-4)', width: 'min(100%, 900px)' }}>
+      <button type="button" onClick={() => setData(readable)}>Use readable data</button>
+      <PlotlyChart data={data} ariaLabel="A chart that recovers" height={200} />
+    </div>
+  );
+}
+
+export const AFailedChartDrawsAgainWhenItsDataChanges: StoryObj<typeof PlotlyChart> = {
+  render: () => <Recovers />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByRole('alert', undefined, { timeout: 8000 });
+    await userEvent.click(canvas.getByRole('button', { name: 'Use readable data' }));
+    await waitFor(() => expect(canvas.queryByRole('alert')).toBeNull(), { timeout: 8000 });
+    await waitFor(() => expect(canvasElement.querySelector('.main-svg')).not.toBeNull(), { timeout: 8000 });
+    // Drawn at the width of its place, not collapsed while the message was up.
+    const svg = canvasElement.querySelector('.main-svg') as SVGElement;
+    await expect(svg.getBoundingClientRect().width).toBeGreaterThan(300);
+    await expect(canvas.getByRole('img', { name: 'A chart that recovers' })).toBeInTheDocument();
+  },
+};
+
+export const TheReloadButtonSitsApartFromTheMessage: StoryObj<typeof PlotlyChart> = {
+  render: () => (
+    <div style={{ padding: 'var(--syn-space-4)', width: 'min(100%, 900px)' }}>
+      <PlotlyChart data={unreadable} ariaLabel="A chart that cannot be drawn" height={200} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const alert = await canvas.findByRole('alert', undefined, { timeout: 8000 });
+    const reload = canvas.getByRole('button', { name: 'Reload' });
+    const gap = reload.getBoundingClientRect().top - alert.getBoundingClientRect().bottom;
+    const space3 = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--syn-space-3')) * parseFloat(getComputedStyle(document.documentElement).fontSize);
+    await expect(Math.abs(gap - space3)).toBeLessThanOrEqual(1);
   },
 };
