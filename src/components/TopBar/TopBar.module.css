@@ -31,6 +31,43 @@
   min-width: 0;
 }
 
+.brand {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--syn-space-2);
+  min-width: 0;
+}
+
+.product {
+  overflow: hidden;
+  color: var(--syn-color-text-muted);
+  font: 600 var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-type-caption-family);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The title and the selection share one line, the title first, so a short name above them does not make the bar taller. */
+.line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--syn-space-2);
+  min-width: 0;
+}
+
+.line .heading {
+  flex: none;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summaryBeside {
+  flex: 1;
+  min-width: 0;
+}
+
 .heading {
   color: var(--syn-color-text-primary);
   font: 600 var(--syn-type-text-md-size) / var(--syn-type-text-md-line) var(--syn-type-text-md-family);
