@@ -1133,7 +1133,9 @@ with named values; there are no colour-named variants.
 - **AnalysisBar.** Props: `title`, `purpose`, and the controls as children. Sticky at the top of
   the content column; at compact widths it appears in the sheet, where the page title is not
   repeated: the sheet's own heading is `sheetTitle` (*Filters* by default, level two), because
-  the top bar holds the page heading. In the sheet each control fills the width. The
+  the top bar holds the page heading. In the sheet each control fills the width. The bar sits on
+  `layer-rail`, one layer above `layer-sticky`, so a menu opened in it reaches down over a row
+  pinned beneath it (jump links, a year row) instead of opening behind it. The
   navigation drawer and the sheet each have a visible close control at the top; Escape and a
   tap on the dimmed area close them too, and focus returns to the button that opened them.
 - **SourceStrip.** Props: `summary`, `compactSummary` (*Sources* by default), `sources`,
