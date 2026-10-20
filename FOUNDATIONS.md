@@ -1132,9 +1132,9 @@ with named values; there are no colour-named variants.
 #### TopBar *(compact widths only)*
 
 - **Purpose and props.** The bar shown below `bp-compact`. Props: `logo` (required, as for
-  `Rail`), `title`,
+  `Rail`), `title`, `productName` (the short name, beside the mark), `summary`,
   `onOpenNavigation`, `onOpenControls`, `showControls` (on by default; off for a view with no controls, which removes the button), `actions`.
-- **Anatomy.** Navigation button, view title, analysis-controls button; optional actions.
+- **Anatomy.** Navigation button, view title, analysis-controls button; optional actions. With `productName`, the mark is followed by the short name on one line (caption size, muted, semibold) and the title on the line under it, the summary sharing the title's line so the bar keeps its height; the whole group carries the mark's full name as a tooltip, the short text is hidden from assistive technology because the mark already carries the full name, and the page title is still the `h1`. Without it the title is beside the mark with the summary under it.
   Height `bar-height`; buttons are `control-height-touch` square.
 - **States.** Navigation open; controls open.
 - **Tokens.** `surface-raised`, `border-default`, `text-primary`.
