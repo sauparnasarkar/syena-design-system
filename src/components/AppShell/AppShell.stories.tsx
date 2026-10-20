@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { useState } from 'react';
 import { AnalysisBar } from '../AnalysisBar/AnalysisBar';
+import { MultiSelect } from '../MultiSelect/MultiSelect';
+import { Select } from '../Select/Select';
 import { BackToTop } from '../BackToTop/BackToTop';
 import { Footer } from '../Footer/Footer';
 import { Rail } from '../Rail/Rail';
@@ -312,5 +315,75 @@ export const BackToTopClearsTheTabToo: Story = {
     const hit = document.elementFromPoint(a.left + a.width / 2, a.bottom - 3);
     await expect(hit === button || button.contains(hit)).toBe(true);
     window.scrollTo(0, 0);
+  },
+};
+
+const countries = Array.from({ length: 30 }, (_, i) => ({ value: `c${i}`, label: ['Argentina', 'Brazil', 'Canada', 'Denmark', 'Egypt', 'France', 'Ghana', 'Hungary', 'India', 'Japan', 'Kenya', 'Laos', 'Mexico', 'Nepal', 'Oman', 'Peru', 'Qatar', 'Romania', 'Spain', 'Turkey', 'Uganda', 'Vietnam', 'Yemen', 'Zambia', 'Chile', 'Cuba', 'Iran', 'Iraq', 'Italy', 'Jordan'][i] }));
+const yearOptions = Array.from({ length: 6 }, (_, i) => ({ value: String(2019 + i), label: String(2019 + i) }));
+
+function SheetWithMenus() {
+  const [chosen, setChosen] = useState<string[]>(['c0', 'c1']);
+  const [year, setYear] = useState('2024');
+  return (
+    <AppShell
+      compact
+      rail={<Rail logo={placeholderMark} productName="Climate analysis" groups={navGroups} footerItems={navFooter} current="country" onItemClick={(_item, event) => event.preventDefault()} />}
+      topBar={<TopBar logo={placeholderMark} title="Overview" summary="Example" />}
+      analysisBar={
+        <AnalysisBar title="Overview" purpose="Where emissions are.">
+          <MultiSelect label="Countries" options={countries} value={chosen} onChange={setChosen} maxSelected={10} />
+          <Select label="Year" options={yearOptions} value={year} onChange={setYear} suppressSearch />
+        </AnalysisBar>
+      }
+      strip={<SourceStrip summary="Source: example" methodNotes={<p>Notes.</p>} />}
+    >
+      {modules}
+    </AppShell>
+  );
+}
+
+const openSheet = async (canvasElement: HTMLElement) => {
+  const canvas = within(canvasElement);
+  await userEvent.click(canvas.getByRole('button', { name: 'Open analysis controls' }));
+  return canvas.findByRole('dialog', { name: 'Analysis controls' });
+};
+
+export const AMenuInTheSheetOpensInlineAndPushesTheControlsBelowIt: Story = {
+  render: () => <SheetWithMenus />,
+  play: async ({ canvasElement }) => {
+    const sheet = await openSheet(canvasElement);
+    const countriesTrigger = within(sheet).getByRole('combobox', { name: /Countries/ });
+    const yearTrigger = within(sheet).getByRole('combobox', { name: /Year/ });
+    const before = yearTrigger.getBoundingClientRect().top;
+    await userEvent.click(countriesTrigger);
+    const list = await within(sheet).findByRole('listbox');
+    const popup = list.parentElement as HTMLElement;
+    // In the flow of the sheet, not floated over it: the sheet makes room, and the control after it moves down.
+    await expect(getComputedStyle(popup).position).not.toBe('absolute');
+    await waitFor(() => expect(yearTrigger.getBoundingClientRect().top).toBeGreaterThanOrEqual(popup.getBoundingClientRect().bottom - 1));
+    await expect(yearTrigger.getBoundingClientRect().top).toBeGreaterThan(before + 100);
+    // Every option the list shows can be reached: the last one in view is the element hit at its centre.
+    const options = within(list).getAllByRole('option');
+    const last = options.find((o) => o.getBoundingClientRect().bottom <= list.getBoundingClientRect().bottom) as HTMLElement;
+    last.scrollIntoView({ block: 'nearest' });
+    const box = last.getBoundingClientRect();
+    await expect(last.contains(document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2))).toBe(true);
+  },
+};
+
+export const EscapeInTheSheetClosesTheOpenListAndLeavesTheSheetOpen: Story = {
+  render: () => <SheetWithMenus />,
+  play: async ({ canvasElement }) => {
+    const sheet = await openSheet(canvasElement);
+    const trigger = within(sheet).getByRole('combobox', { name: /Countries/ });
+    await userEvent.click(trigger);
+    await within(sheet).findByRole('listbox');
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(within(sheet).queryByRole('listbox')).toBeNull());
+    await expect(within(canvasElement).getByRole('dialog', { name: 'Analysis controls' })).toBeInTheDocument();
+    await waitFor(() => expect(trigger).toHaveFocus());
+    // A second Escape, with nothing open, closes the sheet.
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(within(canvasElement).queryByRole('dialog', { name: 'Analysis controls' })).toBeNull());
   },
 };
