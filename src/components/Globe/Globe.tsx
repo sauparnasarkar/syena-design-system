@@ -1,4 +1,4 @@
-import { geoContains, geoGraticule10, geoOrthographic, geoPath } from 'd3-geo';
+import { geoArea, geoCentroid, geoContains, geoDistance, geoGraticule10, geoOrthographic, geoPath } from 'd3-geo';
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
 import { coded } from '../../charts/map/countries';
 import { HeatLegend } from '../../charts/map/HeatLegend';
@@ -30,10 +30,12 @@ export interface GlobeProps {
   caption?: ReactNode;
   /** A shorter figure for a wide setting: the caption and the pointed-at country are drawn on the picture's corners, and the legend's name shares a row with its scale. */
   compact?: boolean;
+  /** Words kept on the picture for a few countries, for example the largest values: each names a country by its alpha-3 code. A label is drawn only while its country faces the viewer, and not in the table view. */
+  labels?: { id: string; text: string }[];
 }
 
 const heatNames = ['data-heat-1', 'data-heat-2', 'data-heat-3', 'data-heat-4', 'data-heat-5', 'data-heat-6', 'data-heat-7'] as const;
-const tokenNames = ['data-surface', 'data-text-muted', 'data-no-data', 'data-gridline', ...heatNames] as const;
+const tokenNames = ['data-surface', 'data-text', 'data-text-muted', 'data-no-data', 'data-gridline', ...heatNames] as const;
 const defaultCenter: [number, number] = [10, 20];
 const defaultDomain: Domain = [0.01, 10000];
 const zoomMin = 1;
@@ -41,12 +43,22 @@ const zoomMax = 6;
 const zoomStep = 1.4;
 const turnStep = 10;
 const maxTilt = 70;
+/** How far a press may move and still be a tap, in pixels. */
+const tapSlop = 6;
+
+/** The middle of the country's largest part, so a country with far islands is labelled on its mainland. */
+const anchorOf = (shape: (typeof coded)[number]['shape']): [number, number] => {
+  const g = shape.geometry;
+  if (g.type !== 'MultiPolygon') return geoCentroid(shape);
+  const largest = g.coordinates.reduce((best, part) => { const p = { type: 'Polygon' as const, coordinates: part }; const a = geoArea(p); return a > best.a ? { a, p } : best; }, { a: -1, p: { type: 'Polygon' as const, coordinates: g.coordinates[0] } });
+  return geoCentroid(largest.p);
+};
 
 /**
  * A globe that colours countries by value on the heat scale, drawn on a canvas from resolved tokens.
  * It turns, zooms and resets with buttons, the keyboard or a drag, and its values are also a table.
  */
-export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, autoRotate = true, center = defaultCenter, formatValue = formatTick, unit, size = 360, caption, compact = false }: GlobeProps) {
+export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, autoRotate = true, center = defaultCenter, formatValue = formatTick, unit, size = 360, caption, compact = false, labels }: GlobeProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const t = useResolvedTokens(tokenNames);
   const reduced = useReducedMotion();
@@ -57,7 +69,8 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
   const [touched, setTouched] = useState(false);
   const [tableView, setTableView] = useState(false);
   const [hover, setHover] = useState<string | null>(null);
-  const drag = useRef<{ x: number; y: number } | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
+  const drag = useRef<{ startX: number; startY: number; x: number; y: number; moved: boolean } | null>(null);
   const tableId = useId();
 
   const rows = useMemo(() => coded.filter((r) => r.code in values).sort((a, b) => values[b.code] - values[a.code]), [values]);
@@ -99,9 +112,11 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
       // Borders in the panel's colour: visible wherever a step has 3:1 against it, which every step does.
       ctx.strokeStyle = t['data-surface']; ctx.lineWidth = 0.6; ctx.stroke();
     }
+    const chosen = selected ? coded.find((c) => c.code === selected) : undefined;
+    if (chosen) { ctx.beginPath(); path(chosen.shape); ctx.strokeStyle = t['data-text']; ctx.lineWidth = 2; ctx.stroke(); }
     ctx.beginPath(); path({ type: 'Sphere' }); ctx.strokeStyle = t['data-text-muted']; ctx.lineWidth = 1; ctx.stroke();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [t, projection, size, values, domain, tableView]);
+  }, [t, projection, size, values, domain, tableView, selected]);
 
   const reset = () => { setLon(center[0]); setLat(center[1]); setZoom(1); setTouched(true); };
   const zoomBy = (factor: number) => { setZoom((z) => Math.min(zoomMax, Math.max(zoomMin, z * factor))); setTouched(true); };
@@ -117,27 +132,60 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
     else if (k === '+' || k === '=') zoomBy(zoomStep);
     else if (k === '-' || k === '_') zoomBy(1 / zoomStep);
     else if (k === '0' || k === 'Home') reset();
+    else if (k === 'Escape' && selected) setSelected(null);
     else return;
     event.preventDefault();
   };
 
+  const countryAt = (event: PointerEvent<HTMLCanvasElement>) => {
+    const box = event.currentTarget.getBoundingClientRect();
+    const point = projection.invert?.([((event.clientX - box.left) / box.width) * size, ((event.clientY - box.top) / box.height) * size]);
+    return point ? coded.find((c) => geoContains(c.shape, point)) : undefined;
+  };
+  const describe = (code: string) => {
+    const found = coded.find((c) => c.code === code);
+    return found ? `${found.name}: ${code in values ? [formatValue(values[code]), unit].filter(Boolean).join(' ') : 'No data'}` : null;
+  };
+
+  // Capture keeps a drag going outside the picture; it is only an aid, and the pointer may already be gone.
+  const capture = (el: HTMLElement, id: number, on: boolean) => { try { if (on) el.setPointerCapture(id); else el.releasePointerCapture?.(id); } catch { /* the pointer ended */ } };
   const onPointerDown = (event: PointerEvent<HTMLCanvasElement>) => {
-    drag.current = { x: event.clientX, y: event.clientY };
-    event.currentTarget.setPointerCapture(event.pointerId);
+    drag.current = { startX: event.clientX, startY: event.clientY, x: event.clientX, y: event.clientY, moved: false };
+    capture(event.currentTarget, event.pointerId, true);
   };
   const onPointerMove = (event: PointerEvent<HTMLCanvasElement>) => {
-    const box = event.currentTarget.getBoundingClientRect();
-    if (drag.current) {
+    const d = drag.current;
+    if (d) {
+      // A finger always wobbles: the globe turns only once the press has clearly travelled.
+      if (!d.moved && Math.hypot(event.clientX - d.startX, event.clientY - d.startY) < tapSlop) return;
+      d.moved = true;
       const scale = 0.4 / zoom;
-      turn(-(event.clientX - drag.current.x) * scale, (event.clientY - drag.current.y) * scale);
-      drag.current = { x: event.clientX, y: event.clientY };
+      turn(-(event.clientX - d.x) * scale, (event.clientY - d.y) * scale);
+      d.x = event.clientX;
+      d.y = event.clientY;
       return;
     }
-    const point = projection.invert?.([((event.clientX - box.left) / box.width) * size, ((event.clientY - box.top) / box.height) * size]);
-    const found = point ? coded.find((c) => geoContains(c.shape, point)) : undefined;
-    setHover(found ? `${found.name}: ${found.code in values ? [formatValue(values[found.code]), unit].filter(Boolean).join(' ') : 'No data'}` : null);
+    // A finger does not hover: only a pointer that can rest on the globe names what is under it.
+    if (event.pointerType === 'touch') return;
+    setHover(countryAt(event)?.code ?? null);
   };
-  const onPointerUp = (event: PointerEvent<HTMLCanvasElement>) => { drag.current = null; event.currentTarget.releasePointerCapture?.(event.pointerId); };
+  const onPointerUp = (event: PointerEvent<HTMLCanvasElement>) => {
+    // A press that did not travel is a tap: it chooses the country under it, or none on the sea.
+    if (drag.current && !drag.current.moved) setSelected(countryAt(event)?.code ?? null);
+    drag.current = null;
+    capture(event.currentTarget, event.pointerId, false);
+  };
+
+  const shown = hover ?? selected;
+  const shownText = shown ? describe(shown) : null;
+  const anchors = useMemo(() => new Map((labels ?? []).flatMap((l) => { const c = coded.find((x) => x.code === l.id); return c ? [[l.id, anchorOf(c.shape)] as const] : []; })), [labels]);
+  const placed = tableView ? [] : (labels ?? []).flatMap((l) => {
+    const at = anchors.get(l.id);
+    // Only the side facing the viewer, and only what is inside the picture.
+    if (!at || geoDistance(at, [lon, lat]) >= Math.PI / 2) return [];
+    const xy = projection(at);
+    return xy && xy[0] >= 0 && xy[0] <= size && xy[1] >= 0 && xy[1] <= size ? [{ ...l, x: xy[0], y: xy[1] }] : [];
+  });
 
   if (!t) return null;
   return (
@@ -158,6 +206,7 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
           onKeyDown={onKeyDown}
           onPointerEnter={() => setPaused(true)}
           onPointerLeave={() => { setPaused(false); setHover(null); drag.current = null; }}
+          onPointerCancel={() => { drag.current = null; }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
@@ -165,7 +214,12 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
           onBlur={() => setPaused(false)}
         />
         {compact && caption && !tableView ? <div className={styles.corner}>{caption}</div> : null}
-        {tableView ? null : compact ? (hover ? <p className={styles.readoutCorner} aria-hidden="true">{hover}</p> : null) : <p className={styles.readout} aria-hidden="true">{hover ?? ' '}</p>}
+        {placed.length ? (
+          <div className={styles.labels} aria-hidden="true">
+            {placed.map((l) => <span key={l.id} className={styles.label} style={{ left: `${(l.x / size) * 100}%`, top: `${(l.y / size) * 100}%` }}>{l.text}</span>)}
+          </div>
+        ) : null}
+        {tableView ? null : compact ? (shownText ? <p className={styles.readoutCorner} aria-hidden="true">{shownText}</p> : null) : <p className={styles.readout} aria-hidden="true">{shownText ?? ' '}</p>}
       </div>
       {caption && !compact ? <div className={styles.caption}>{caption}</div> : null}
       <HeatLegend label={valueLabel} domain={domain} formatValue={formatValue} inline={compact} />

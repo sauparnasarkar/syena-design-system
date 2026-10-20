@@ -1502,17 +1502,18 @@ with named values; there are no colour-named variants.
 - **Purpose and props.** A globe coloured by a country-level value on the heat scale (§3.6).
   Props: `values` (by alpha-3 code), `valueLabel` (what the value is and its unit), `ariaLabel`,
   `domain` (default 0.01 to 10,000, on a log axis), `unit`, `formatValue`, `autoRotate`, `center`,
-  `size`, `caption`, `compact`. A year is the parent's: it passes the values for the year in view, and may
+  `size`, `caption`, `compact`, `labels`. A year is the parent's: it passes the values for the year in view, and may
   pass a `caption` (the year and total, say) that is drawn directly under the globe. With `compact`, for a wide setting, the caption is drawn on the picture's top-left corner instead, the pointed-at country on its bottom-left corner (only while one is pointed at, so no row is held back), and the legend's name shares a row with its scale.
-- **Anatomy.** The globe on `data-surface`, country borders in the same colour; a hover
-  read-out (country, value and unit, or *No data*); the caption, if any; the heat legend: a bar
+- **Anatomy.** The globe on `data-surface`, country borders in the same colour; a
+  read-out (country, value and unit, or *No data*) for the country pointed at or tapped, the tapped one outlined in `data-text`;
+  optional `labels` (a few `{ id, text }` entries, the id an alpha-3 code), each a short pill on the panel's colour at the middle of its country's largest part, drawn only while that country faces the viewer and never in the table view, and hidden from assistive technology because the table lists every value; the caption, if any; the heat legend: a bar
   with a tick at every power of ten and the outlined no-data swatch; then the controls (zoom in,
   zoom out, *Reset view*, *Table view*) and a one-line keyboard hint, so the legend is seen before
   the controls. The figure carries the data panel itself, so everything in it reads on a page of
   either theme. Missing values are one flat `data-no-data`.
 - **States.** Turning (until the pointer or focus is on it, a control or key has been used, or
   motion is reduced), paused, zoomed, table view (the globe is replaced by the table of values).
-- **Behaviour.** Arrow keys turn, `+` and `−` zoom, `0` or Home resets; dragging turns. Zoom
+- **Behaviour.** Arrow keys turn, `+` and `−` zoom, `0` or Home resets; dragging turns, once a press has travelled a few pixels. A press that does not travel is a tap: it chooses the country under it (or none, on the sea), and its read-out stays until another tap or Escape. A finger does not hover, so only a mouse or pen shows the pointed-at read-out, which gives way to the chosen country's when it leaves. Zoom
   stops at 1× and 6×, and the zoom buttons are disabled at the stops. The controls are compact
   (the small control height, not the touch height) and filled with the panel's colour and drawn
   in the panel's text colour, so they read as buttons on any background.
@@ -1521,7 +1522,7 @@ with named values; there are no colour-named variants.
   changes.
 - **Accessibility.** The canvas is an image with a name and a description pointing at the table of
   values (largest first), which is also the table view; rotation stops under reduced motion; the
-  controls are buttons with names, reachable by keyboard; the hint is visible text.
+  controls are buttons with names, reachable by keyboard; the hint is visible text, dropped where the primary pointer is coarse (a finger has no use for it); the four controls are there for every pointer.
 
 #### Choropleth
 

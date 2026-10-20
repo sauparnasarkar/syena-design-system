@@ -66,6 +66,24 @@
   pointer-events: none;
 }
 
+.labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Words on the picture, on the panel's own colour so they read over any heat step. */
+.label {
+  position: absolute;
+  padding: 0 var(--syn-space-1);
+  border-radius: var(--syn-radius-control);
+  background: var(--syn-data-surface);
+  color: var(--syn-data-text);
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+}
+
 .hidden {
   position: absolute;
   width: var(--syn-layout-border-hairline);
