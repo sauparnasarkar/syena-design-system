@@ -321,3 +321,36 @@ export const ATableThatFitsDoesNotMentionScrolling: Story = {
     await expect(within(canvasElement).queryByText(/scroll sideways/i)).toBeNull();
   },
 };
+
+type Profile = { year: number; co2: number; perCapita: number; yoy: number; intensity: number };
+const profile: Profile[] = [1990, 1991, 1992, 1993].map((year, i) => ({ year, co2: 2483.53 + i * 135, perCapita: 2.15 + i * 0.09, yoy: 3.1 - i, intensity: 1.24 - i * 0.02 }));
+
+export const AHeaderThatWrapsIsNotCutOff: Story = {
+  tags: ['both-scrollbar-modes'],
+  args: {
+    rows: profile as unknown as Row[],
+    columns: [
+      { key: 'year', header: 'Year', numeric: false, format: (v: unknown) => String(v) },
+      { key: 'co2', header: 'CO₂ (MtCO₂)' },
+      { key: 'perCapita', header: 'CO₂ per Capita (t/person)' },
+      { key: 'yoy', header: 'YoY % Change' },
+      { key: 'intensity', header: 'GHG Intensity (kg CO₂e/$ GDP)' },
+    ] as unknown as DataTableColumn<Row>[],
+  },
+  decorators: [frame('min(100%, 390px)')],
+  play: async ({ canvasElement }) => {
+    await ready(canvasElement);
+    // However many lines a header takes, its text stays inside its cell, so the header grows to fit.
+    await waitFor(() => {
+      const cells = [...canvasElement.querySelectorAll<HTMLElement>('.ag-header-cell')];
+      expect(cells.length).toBeGreaterThan(3);
+      for (const cell of cells) {
+        const text = cell.querySelector('span') as HTMLElement;
+        const box = text.getBoundingClientRect();
+        const own = cell.getBoundingClientRect();
+        expect(box.top).toBeGreaterThanOrEqual(own.top - 1);
+        expect(box.bottom).toBeLessThanOrEqual(own.bottom + 1);
+      }
+    }, { timeout: 4000 });
+  },
+};

@@ -132,6 +132,8 @@ export function DataTable<Row extends object>({ columns: given, rows, caption, m
         field: col.key as never,
         headerName: col.header,
         headerComponent: ColumnHeader,
+        // The header is as tall as its tallest name once it wraps, and no shorter than a row.
+        autoHeaderHeight: true,
         headerComponentParams: { unit: col.unit, numeric: !!col.numeric },
         sortable: col.sortable ?? true,
         ...(col.numeric ? numericColumn<Row>() : {}),
