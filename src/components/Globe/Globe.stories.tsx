@@ -364,33 +364,50 @@ export const EveryControlIsThereWhateverThePointer: Story = {
   },
 };
 
-// A label rides the surface, so how far it drifts across the middle of the picture in a measured time is the turn rate.
+// A label rides the surface, so how far it drifts across the middle of the picture in a measured time is the turn rate. The frame clock is
+// driven by hand (sixty frames of a sixtieth of a second, one second in all) and no pointer can reach the globe, so neither a slow machine nor a
+// mouse left over from another story (a hover pauses the turn) can change the answer.
+let frames: { step: (ms: number) => void } | null = null;
+const handClock = () => {
+  const real = { raf: window.requestAnimationFrame, cancel: window.cancelAnimationFrame, now: performance.now };
+  let time = 0;
+  let next = 0;
+  const queue = new Map<number, FrameRequestCallback>();
+  window.requestAnimationFrame = (cb) => { next += 1; queue.set(next, cb); return next; };
+  window.cancelAnimationFrame = (id) => { queue.delete(id); };
+  performance.now = () => time;
+  frames = { step: (ms) => { time += ms; const due = [...queue.values()]; queue.clear(); due.forEach((cb) => cb(time)); } };
+  return () => { window.requestAnimationFrame = real.raf; window.cancelAnimationFrame = real.cancel; performance.now = real.now; frames = null; };
+};
+const untouchable = (Story: () => ReactElement) => <div style={{ pointerEvents: 'none' }}>{page(Story)}</div>;
+
 const turnRate = async (canvasElement: HTMLElement, text: string, size: number, latitude: number) => {
   const label = await within(canvasElement).findByText(text);
   const x = () => label.getBoundingClientRect().left + label.getBoundingClientRect().width / 2;
   const startX = x();
-  const start = performance.now();
-  await new Promise((resolve) => { setTimeout(resolve, 1500); });
+  for (let i = 0; i < 60; i += 1) { frames!.step(1000 / 60); await new Promise((resolve) => { setTimeout(resolve, 0); }); }
   const radians = (x() - startX) / ((size / 2 - 2) * Math.cos((latitude * Math.PI) / 180));
-  return Math.abs((radians * 180) / Math.PI) / ((performance.now() - start) / 1000);
+  return Math.abs((radians * 180) / Math.PI);
 };
 
 export const ATurnPeriodOfThirtySecondsTurnsTwelveDegreesASecond: Story = {
   args: { autoRotate: true, turnPeriod: 30, size: 300, center: [78, 22], labels: [{ id: 'IND', text: 'India 3,200' }] },
-  decorators: [page],
+  decorators: [untouchable],
+  beforeEach: handClock,
   play: async ({ canvasElement }) => {
     const rate = await turnRate(canvasElement, 'India 3,200', 300, 22);
-    await expect(rate).toBeGreaterThan(10);
-    await expect(rate).toBeLessThan(14);
+    await expect(rate).toBeGreaterThan(11);
+    await expect(rate).toBeLessThan(13);
   },
 };
 
 export const WithoutATurnPeriodTheGlobeTurnsSixDegreesASecond: Story = {
   args: { autoRotate: true, size: 300, center: [78, 22], labels: [{ id: 'IND', text: 'India 3,200' }] },
-  decorators: [page],
+  decorators: [untouchable],
+  beforeEach: handClock,
   play: async ({ canvasElement }) => {
     const rate = await turnRate(canvasElement, 'India 3,200', 300, 22);
-    await expect(rate).toBeGreaterThan(5);
-    await expect(rate).toBeLessThan(7);
+    await expect(rate).toBeGreaterThan(5.5);
+    await expect(rate).toBeLessThan(6.5);
   },
 };
