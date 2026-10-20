@@ -1,6 +1,7 @@
 import type { ColDef, GridApi, ICellRendererParams, IHeaderParams } from 'ag-grid-community';
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { numericColumn, ThemedGrid } from '../../grid/ThemedGrid';
+import { formatFigure } from '../Figure/Figure';
 import { useWidth } from '../../hooks/useWidth';
 import { useResolvedTokens } from '../../theme/SynThemeProvider';
 import { toPx } from '../../theme/lengths';
@@ -18,8 +19,10 @@ export interface DataTableColumn<Row> {
   /** Stays in view when the table scrolls sideways. The first column is pinned by default. */
   pinned?: boolean;
   sortable?: boolean;
-  /** How a cell is written; the raw value by default. */
+  /** How a cell is written; a number by default is written with thousands separators, a true minus and `decimals`. */
   format?: (value: unknown, row: Row) => string;
+  /** The decimals every number in a numeric column is written with. By default the most any value in the column has, so the column lines up. */
+  decimals?: number;
 }
 
 export interface DataTableProps<Row> {
@@ -70,10 +73,17 @@ function WrappedLabel({ valueFormatted, value }: ICellRendererParams) {
   return <span className={styles.label}>{String(valueFormatted ?? value ?? '')}</span>;
 }
 
+/** The digits after the point in a number as it is written, with the noise of binary arithmetic (0.1 + 0.2) rounded away. */
+const fractionDigits = (value: number) => {
+  const text = String(Number(value.toPrecision(12)));
+  const [mantissa, exponent] = text.split('e');
+  return Math.max(0, (mantissa.split('.')[1] ?? '').length - Number(exponent ?? 0));
+};
+
 const cellText = <Row extends object>(col: DataTableColumn<Row>, row: Row) => {
   const value = (row as Record<string, unknown>)[col.key];
   if (col.format) return col.format(value, row);
-  return col.numeric && typeof value === 'number' ? value.toLocaleString('en-GB') : String(value ?? '');
+  return col.numeric && typeof value === 'number' ? formatFigure(value, { decimals: col.decimals }) : String(value ?? '');
 };
 
 /**
@@ -82,11 +92,13 @@ const cellText = <Row extends object>(col: DataTableColumn<Row>, row: Row) => {
  * the last column meets the right edge. Numbers and their headers are right-aligned in the figure face.
  */
 export function DataTable<Row extends object>({ columns: given, rows, caption, maxVisibleRows = 10, loading, emptyMessage = 'Nothing to show.', emptyAction, onRowSelected }: DataTableProps<Row>) {
-  // A column that does not say whether it is numeric is, when every value in it that is there is a number.
+  // A column that does not say whether it is numeric is, when every value in it that is there is a number. A numeric column
+  // that does not say its decimals is written to the most any value in it has, so the figures line up down the column.
   const columns = useMemo(() => given.map((col) => {
-    if (col.numeric !== undefined) return col;
     const values = rows.map((r) => (r as Record<string, unknown>)[col.key]).filter((v) => v !== null && v !== undefined && v !== '');
-    return { ...col, numeric: values.length > 0 && values.every((v) => typeof v === 'number') };
+    const numeric = col.numeric ?? (values.length > 0 && values.every((v) => typeof v === 'number'));
+    const decimals = col.decimals ?? (numeric ? Math.max(0, ...values.filter((v): v is number => typeof v === 'number').map(fractionDigits)) : undefined);
+    return { ...col, numeric, decimals };
   }), [given, rows]);
   const captionId = useId();
   const t = useResolvedTokens(tokenNames);

@@ -354,3 +354,43 @@ export const AHeaderThatWrapsIsNotCutOff: Story = {
     }, { timeout: 4000 });
   },
 };
+
+type Reading = { name: string; total: number; change: number; share: number };
+const readings: Reading[] = [
+  { name: 'First', total: 2483.53, change: -4.47, share: 6.7 },
+  { name: 'Second', total: 3351.2, change: 1.5, share: 12 },
+  { name: 'Third', total: 700, change: -0.25, share: 2.17 },
+];
+const cellTexts = (el: HTMLElement, col: string) => [...el.querySelectorAll(`.ag-cell[col-id="${col}"]`)].map((c) => c.textContent);
+
+export const NumbersShareOneNumberOfDecimalsDownAColumn: Story = {
+  args: {
+    rows: readings as unknown as Row[],
+    columns: [
+      { key: 'name', header: 'Name' },
+      { key: 'total', header: 'Total' },
+      { key: 'change', header: 'Change' },
+      { key: 'share', header: 'Share', decimals: 1 },
+    ] as unknown as DataTableColumn<Row>[],
+  },
+  play: async ({ canvasElement }) => {
+    await ready(canvasElement);
+    await waitFor(() => {
+      // The most decimals any value in the column has, kept for every value in it.
+      expect(cellTexts(canvasElement, 'total')).toEqual(['2,483.53', '3,351.20', '700.00']);
+      // A column that says how many decimals it has is written to that many.
+      expect(cellTexts(canvasElement, 'share')).toEqual(['6.7', '12.0', '2.2']);
+    });
+  },
+};
+
+export const ANegativeNumberUsesTheTrueMinus: Story = {
+  args: {
+    rows: readings as unknown as Row[],
+    columns: [{ key: 'name', header: 'Name' }, { key: 'change', header: 'Change' }] as unknown as DataTableColumn<Row>[],
+  },
+  play: async ({ canvasElement }) => {
+    await ready(canvasElement);
+    await waitFor(() => expect(cellTexts(canvasElement, 'change')).toEqual(['−4.47', '1.50', '−0.25']));
+  },
+};
