@@ -35,14 +35,16 @@ export function SourceStrip({ summary, compactSummary = 'Sources', sources, defi
   const panel = useId();
   const set = (next: boolean) => { setOwn(next); onOpenChange?.(next); };
   const strip = useRef<HTMLElement>(null);
-  const [tucked, setTucked] = useState(false);
+  const [tuckedState, setTucked] = useState(false);
   const anchor = useRef(0);
+  // Only a phone tucks it, and never while its panel is open.
+  const tucked = tuckedState && phone && !isOpen;
   const close = useRef(set);
   useEffect(() => { close.current = set; });
   // On a phone the strip tucks away once the page has been scrolled on from where it was last shown, unless its panel is open;
   // it comes back at the very end of the page, where it rests above the footer.
   useEffect(() => {
-    if (!phone || isOpen) { setTucked(false); return undefined; }
+    if (!phone || isOpen) return undefined;
     anchor.current = window.scrollY;
     const onScroll = () => {
       const y = window.scrollY;
