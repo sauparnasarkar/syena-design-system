@@ -55,8 +55,12 @@ Baselines are platform specific; create them on the platform that runs the compa
 
 ## Contributing
 
-Pull requests name the section of `FOUNDATIONS.md` they implement. Scales are changed by
+This repository is not accepting contributions (see [Licence](#licence)). For the owner's own changes, pull requests name the section of `FOUNDATIONS.md` they implement. Scales are changed by
 changing the formulas and inputs, never by editing generated values.
+
+## Licence
+
+This repository is public as a portfolio, for viewing only. All rights are reserved, and it is not accepting contributions. See [LICENSE](LICENSE).
 
 ## Third-party material
 
