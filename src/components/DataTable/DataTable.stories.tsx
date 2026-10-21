@@ -423,3 +423,21 @@ export const CompactDensityHasShorterRows: Story = {
     await expectNothingClipped(canvasElement);
   },
 };
+
+/** A sticky bar over the table covers its header too: the grid's own layers stay inside it and never rise above the page's sticky layer. */
+export const TheHeaderStaysUnderAStickyLayerOverTheTable: Story = {
+  render: (args) => (
+    <div style={{ position: 'relative' }}>
+      <DataTable {...args} />
+      <div data-syn-cover style={{ position: 'absolute', inset: '0 0 auto 0', height: '8rem', zIndex: 'var(--syn-layer-sticky)', background: 'var(--syn-color-surface-base)' }} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    await ready(canvasElement);
+    const header = canvasElement.querySelector('.ag-header') as HTMLElement;
+    const cover = canvasElement.querySelector('[data-syn-cover]') as HTMLElement;
+    const box = header.getBoundingClientRect();
+    await expect(box.bottom).toBeLessThan(cover.getBoundingClientRect().bottom);
+    await waitFor(() => expect(cover.contains(document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2))).toBe(true));
+  },
+};
