@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useScrollLock } from '../../hooks/useScrollLock';
 import { Button } from '../Button/Button';
 import { scrollToJumpTarget } from '../../lib/scrollToJumpTarget';
 import { useIsMobile } from '../../hooks/useIsMobile';
@@ -30,6 +31,7 @@ export interface AppShellProps {
 function Overlay({ label, side, onClose, children }: { label: string; side: 'start' | 'top'; onClose: () => void; children: ReactNode }) {
   const panel = useRef<HTMLDivElement>(null);
   useFocusTrap(panel, true, onClose);
+  useScrollLock(panel, true);
   return (
     <div className={styles.overlay}>
       <div className={styles.scrim} onClick={onClose} aria-hidden="true" />

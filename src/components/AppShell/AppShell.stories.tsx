@@ -173,6 +173,74 @@ export const CompactDrawerAndSheet: Story = {
   },
 };
 
+// A finger drag, as the browser would deliver it: the page behind an open overlay must not scroll, but a list inside the overlay must.
+function drag(target: Element, fromY: number, toY: number) {
+  const at = (y: number) => new Touch({ identifier: 1, target, clientX: 20, clientY: y });
+  const send = (type: string, y: number, live: boolean) => {
+    const event = new TouchEvent(type, { bubbles: true, cancelable: true, touches: live ? [at(y)] : [], targetTouches: live ? [at(y)] : [], changedTouches: [at(y)] });
+    target.dispatchEvent(event);
+    return event;
+  };
+  send('touchstart', fromY, true);
+  const move = send('touchmove', toY, true);
+  send('touchend', toY, false);
+  return move.defaultPrevented;
+}
+
+export const CompactOverlaysLockThePageBehindThem: Story = {
+  render: () => <Example compact slots tall groups={manyGroups} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const main = canvas.getByRole('main');
+    window.scrollTo(0, 300);
+    await waitFor(() => expect(window.scrollY).toBe(300));
+    const before = main.getBoundingClientRect();
+    const open = canvas.getByRole('button', { name: 'Open navigation' });
+    await userEvent.click(open);
+    const drawer = await canvas.findByRole('dialog', { name: 'Navigation' });
+    // The page can no longer scroll by wheel, keys or touch ...
+    await expect(getComputedStyle(document.documentElement).overflow).toBe('hidden');
+    await expect(getComputedStyle(document.body).overflow).toBe('hidden');
+    // ... a drag on the dimmed page is stopped (iOS Safari scrolls the page under a touch whatever the overflow says) ...
+    await expect(drag(main, 400, 300)).toBe(true);
+    await expect(drag(main, 300, 400)).toBe(true);
+    // ... but the overlay's own list still scrolls, until it reaches an end, where the drag is held rather than handed to the page.
+    const list = drawer.querySelector('[class*="destinations"]') as HTMLElement;
+    list.scrollTop = 40;
+    await expect(drag(list, 300, 260)).toBe(false);
+    await expect(drag(list, 260, 300)).toBe(false);
+    list.scrollTop = 0;
+    await expect(drag(list, 260, 300)).toBe(true);
+    list.scrollTop = list.scrollHeight;
+    await expect(drag(list, 300, 260)).toBe(true);
+    // Nothing moves: no jump in position and no shift from a scrollbar disappearing.
+    const during = main.getBoundingClientRect();
+    await expect(Math.abs(during.top - before.top)).toBeLessThanOrEqual(1);
+    await expect(Math.abs(during.width - before.width)).toBeLessThanOrEqual(1);
+    await expect(window.scrollY).toBe(300);
+
+    // Closing gives the page back: scrolling is allowed again and the width is as it was.
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(canvas.queryByRole('dialog')).toBeNull());
+    await expect(document.documentElement.style.overflow).toBe('');
+    await expect(document.body.style.overflow).toBe('');
+    await expect(drag(main, 400, 300)).toBe(false);
+    await expect(Math.abs(main.getBoundingClientRect().width - before.width)).toBeLessThanOrEqual(1);
+
+    // The sheet locks the page the same way, and a second overlay opened after the first leaves it unlocked when closed.
+    const controls = canvas.getByRole('button', { name: 'Open analysis controls' });
+    await userEvent.click(controls);
+    await canvas.findByRole('dialog', { name: 'Analysis controls' });
+    await expect(getComputedStyle(document.documentElement).overflow).toBe('hidden');
+    await expect(drag(main, 400, 300)).toBe(true);
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(canvas.queryByRole('dialog')).toBeNull());
+    await expect(document.documentElement.style.overflow).toBe('');
+    await expect(drag(main, 400, 300)).toBe(false);
+    window.scrollTo(0, 0);
+  },
+};
+
 export const CompactTidewater: Story = { render: () => <Example compact />, globals: { theme: 'tidewater' } };
 
 export const TheStripTakesNoRoomAndNeverCoversContent: Story = {
