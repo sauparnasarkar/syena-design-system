@@ -1,6 +1,7 @@
 import { geoArea, geoCentroid, geoContains, geoDistance, geoGraticule10, geoOrthographic, geoPath } from 'd3-geo';
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
 import { coded } from '../../charts/map/countries';
+import { tableRows } from '../../charts/map/tableRows';
 import { HeatLegend } from '../../charts/map/HeatLegend';
 import { MapControls } from '../../charts/map/MapControls';
 import { formatTick, heatColour, type Domain } from '../../charts/map/heat';
@@ -61,7 +62,8 @@ const anchorOf = (shape: (typeof coded)[number]['shape']): [number, number] => {
  * A globe that colours countries by value on the heat scale, drawn on a canvas from resolved tokens.
  * It turns, zooms and resets with buttons, the keyboard or a drag, and its values are also a table.
  */
-export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, autoRotate = true, turnPeriod = defaultTurnPeriod, center = defaultCenter, formatValue = formatTick, unit, size = 360, caption, compact = false, labels }: GlobeProps) {
+export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, autoRotate = true, turnPeriod = defaultTurnPeriod, center = defaultCenter, formatValue: givenFormat, unit, size = 360, caption, compact = false, labels }: GlobeProps) {
+  const formatValue = givenFormat ?? formatTick;
   const canvas = useRef<HTMLCanvasElement>(null);
   const t = useResolvedTokens(tokenNames);
   const reduced = useReducedMotion();
@@ -76,7 +78,7 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
   const drag = useRef<{ startX: number; startY: number; x: number; y: number; moved: boolean } | null>(null);
   const tableId = useId();
 
-  const rows = useMemo(() => coded.filter((r) => r.code in values).sort((a, b) => values[b.code] - values[a.code]), [values]);
+  const rows = useMemo(() => tableRows(values, givenFormat), [values, givenFormat]);
   const stops = t ? heatNames.map((n) => t[n]) : [];
 
   const turning = autoRotate && !reduced && !paused && !touched && !tableView;
@@ -244,7 +246,7 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
           <caption>{ariaLabel}</caption>
           <thead><tr><th scope="col">Country</th><th scope="col">{valueLabel}</th></tr></thead>
           <tbody>
-            {rows.map((r) => <tr key={r.code}><th scope="row">{r.name}</th><td>{formatValue(values[r.code])}</td></tr>)}
+            {rows.map((r) => <tr key={r.code}><th scope="row">{r.name}</th><td>{r.text}</td></tr>)}
           </tbody>
         </table>
       </div>

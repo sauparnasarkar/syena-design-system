@@ -98,7 +98,9 @@ Accessibility is a build-time constraint, not a review step.
   against both adjacent colours, and has an accessible name.
 - Motion is functional and short, and is removed when the reader prefers reduced motion.
 - Every chart has a text alternative and, where the data is tabular, a way to view it as a
-  table.
+  table. A map's table lists every country, because "no data" is part of what the map says: the
+  countries with a value first, largest first, rounded to three significant figures (whole numbers
+  from a hundred up), then every other country by name, marked "No data".
 
 ### 1.7 Applying the principles
 

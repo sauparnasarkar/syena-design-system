@@ -1,6 +1,7 @@
 import { geoContains, geoNaturalEarth1, geoPath } from 'd3-geo';
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
 import { coded } from '../../charts/map/countries';
+import { tableRows } from '../../charts/map/tableRows';
 import { HeatLegend } from '../../charts/map/HeatLegend';
 import { MapControls } from '../../charts/map/MapControls';
 import { formatTick, heatColour, type Domain } from '../../charts/map/heat';
@@ -40,7 +41,8 @@ const home: View = { k: 1, x: 0, y: 0 };
  * A flat world map that colours countries by value on the heat scale, drawn on a canvas from resolved tokens.
  * It zooms, pans and resets with buttons, the keyboard or a drag, and its values are also a table.
  */
-export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDomain, formatValue = formatTick, unit, outline = [], caption }: ChoroplethProps) {
+export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDomain, formatValue: givenFormat, unit, outline = [], caption }: ChoroplethProps) {
+  const formatValue = givenFormat ?? formatTick;
   const [box, width] = useWidth<HTMLDivElement>();
   const canvas = useRef<HTMLCanvasElement>(null);
   const t = useResolvedTokens(tokenNames);
@@ -50,7 +52,7 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
   const drag = useRef<{ x: number; y: number } | null>(null);
   const tableId = useId();
 
-  const rows = useMemo(() => coded.filter((r) => r.code in values).sort((a, b) => values[b.code] - values[a.code]), [values]);
+  const rows = useMemo(() => tableRows(values, givenFormat), [values, givenFormat]);
   const stops = t ? heatNames.map((n) => t[n]) : [];
   // The projection is fitted to the width of the countries shown, so the map is exactly as tall as it needs to be.
   const { projection, height } = useMemo(() => {
@@ -166,7 +168,7 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
           <caption>{ariaLabel}</caption>
           <thead><tr><th scope="col">Country</th><th scope="col">{valueLabel}</th></tr></thead>
           <tbody>
-            {rows.map((r) => <tr key={r.code}><th scope="row">{r.name}</th><td>{formatValue(values[r.code])}</td></tr>)}
+            {rows.map((r) => <tr key={r.code}><th scope="row">{r.name}</th><td>{r.text}</td></tr>)}
           </tbody>
         </table>
       </div>

@@ -58,7 +58,7 @@ export const LegendHasATickAtEveryPowerOfTen: Story = {
     const canvas = within(canvasElement);
     await waitFor(() => expectLegendFits(canvasElement, { all: true }));
     for (const tick of ['0.01', '0.1', '1', '10', '100', '1,000', '10,000']) await expect(canvas.getByText(tick, { selector: 'li' })).toBeInTheDocument();
-    await expect(canvas.getByText('No data')).toBeInTheDocument();
+    await expect(canvas.getByText('No data', { selector: ':not(td)' })).toBeInTheDocument(); // the legend's; the table repeats it per country
   },
 };
 
@@ -66,7 +66,10 @@ export const TextAlternativeListsEveryValue: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const table = canvas.getByRole('table', { name: /World map of annual CO₂ emissions/ });
-    await expect(within(table).getAllByRole('row')).toHaveLength(Object.keys(illustrativeEmissions).length + 1);
+    const rows = within(table).getAllByRole('row').slice(1).map((r) => [...r.children].map((c) => c.textContent));
+    // Every value is listed; every other country follows, as having no data.
+    await expect(rows.filter(([, text]) => text !== 'No data')).toHaveLength(Object.keys(illustrativeEmissions).length);
+    await expect(rows.length).toBeGreaterThan(Object.keys(illustrativeEmissions).length);
     await expect(map(canvasElement)).toHaveAccessibleDescription(/World map of annual CO₂ emissions/);
   },
 };
@@ -134,3 +137,19 @@ export const NarrowKeepsTheMapAndLegend: Story = {
 
 export const Tidewater: Story = { globals: { theme: 'tidewater' } };
 export const Night: Story = { globals: { theme: 'night' } };
+
+export const TableRoundsValuesAndListsCountriesWithoutData: Story = {
+  args: { values: { CHN: 12288.6666, USA: 4904.123, VNM: 370.456, FJI: 0.45678 } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Table view' }));
+    const rows = within(canvas.getByRole('table')).getAllByRole('row').slice(1).map((r) => [...r.children].map((c) => c.textContent));
+    // Values first, largest first, rounded to three significant figures (whole numbers from a thousand): not 12,288.667 or 0.45678.
+    await expect(rows.slice(0, 4)).toEqual([['China', '12,289'], ['United States of America', '4,904'], ['Vietnam', '370'], ['Fiji', '0.457']]);
+    // Every other country is listed too, after them, as having no data: the table is the map's text alternative, and no data is part of what the map says.
+    const rest = rows.slice(4);
+    await expect(rest.length).toBeGreaterThan(150);
+    await expect(rest.every(([, text]) => text === 'No data')).toBe(true);
+    await expect(rest.map(([name]) => name)).toEqual([...rest.map(([name]) => name)].sort((a, b) => String(a).localeCompare(String(b))));
+  },
+};
