@@ -91,8 +91,9 @@ export function ThemedGrid<Row>({ rowData, columnDefs, defaultColDef, ariaLabel,
   }, [api, fitRows, measure]);
 
   if (!theme) return null;
+  // The grid's own layers (its sticky header is raised above its rows) stay inside it, under the page's sticky bars.
   return (
-    <div ref={host} role="region" aria-label={ariaLabelledBy ? undefined : ariaLabel} aria-labelledby={ariaLabelledBy} style={{ height: fitRows ? fitted ?? height : height }}>
+    <div ref={host} role="region" aria-label={ariaLabelledBy ? undefined : ariaLabel} aria-labelledby={ariaLabelledBy} style={{ height: fitRows ? fitted ?? height : height, isolation: 'isolate' }}>
       <AgGridReact<Row>
         theme={theme}
         rowData={rowData}
