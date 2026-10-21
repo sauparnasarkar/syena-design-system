@@ -290,7 +290,7 @@ export const NarrowScrollsInsideItsRegionAndKeepsTheFirstColumn: Story = {
     await waitFor(() => expect(viewport.scrollWidth).toBeGreaterThan(viewport.clientWidth));
     await expect(canvasElement.querySelector('.ag-cell-last-left-pinned')).not.toBeNull();
     // The check above only means something where scrollbars take space, so the test browser must show them.
-    await waitFor(() => expect((canvasElement.querySelector('.ag-body-horizontal-scroll') as HTMLElement).offsetHeight).toBeGreaterThan(0), { timeout: 4000 });
+    await waitFor(() => expect((canvasElement.querySelector('.ag-root > .ag-body-horizontal-scroll') as HTMLElement).offsetHeight).toBeGreaterThan(0), { timeout: 4000 });
     await expectNothingClipped(canvasElement);
   },
 };
@@ -439,5 +439,38 @@ export const TheHeaderStaysUnderAStickyLayerOverTheTable: Story = {
     const box = header.getBoundingClientRect();
     await expect(box.bottom).toBeLessThan(cover.getBoundingClientRect().bottom);
     await waitFor(() => expect(cover.contains(document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2))).toBe(true));
+  },
+};
+
+type Wide = Record<string, string | number>;
+const wideColumns: DataTableColumn<Wide>[] = [
+  { key: 'statistic', header: 'Statistic' },
+  ...['Country', 'Year', 'Emissions', 'Per person', 'Population', 'Output', 'Total'].map((h) => ({ key: h.toLowerCase().replace(' ', '_'), header: h })),
+];
+const wideRows: Wide[] = Array.from({ length: 11 }, (_, i) => Object.fromEntries(wideColumns.map((c, j) => [c.key, j === 0 ? `row ${i + 1}` : 1234567890 + i * 1000 + j])));
+
+/**
+ * A table that fits its rows and also scrolls sideways is as tall as its header, rows and scrollbar: the height settles and does not keep
+ * growing. Some versions of the grid library also put the scrollbar's class on the grid's root while it scrolls sideways, so the story does
+ * that too: the scrollbar is the element that holds the scroll, not whichever element carries the class first.
+ */
+export const AFittedTableThatScrollsSidewaysHasAHeightThatSettles: Story = {
+  tags: ['both-scrollbar-modes'],
+  decorators: [frame('356px')],
+  args: { columns: wideColumns as never, rows: wideRows as never, density: 'compact', maxVisibleRows: 14 },
+  play: async ({ canvasElement }) => {
+    await ready(canvasElement);
+    const viewport = canvasElement.querySelector('.ag-body-horizontal-scroll-viewport') as HTMLElement;
+    await waitFor(() => expect(viewport.scrollWidth).toBeGreaterThan(viewport.clientWidth));
+    const region = canvasElement.querySelector('[role="region"]') as HTMLElement;
+    (canvasElement.querySelector('.ag-root') as HTMLElement).classList.add('ag-body-horizontal-scroll');
+    // Nudge the width so the table measures itself again.
+    (canvasElement.firstElementChild as HTMLElement).style.width = '350px';
+    const row = lengthOf('calc(var(--syn-type-text-sm-line) + var(--syn-space-2))');
+    // Header, the rows, the scrollbar and the frame: far less than twice the rows, however long it is left to settle.
+    const limit = row * (wideRows.length + 1) + 60;
+    await new Promise((r) => setTimeout(r, 2500));
+    await expect(region.getBoundingClientRect().height).toBeLessThan(limit);
+    await expect(region.getBoundingClientRect().height).toBeGreaterThan(row * wideRows.length);
   },
 };

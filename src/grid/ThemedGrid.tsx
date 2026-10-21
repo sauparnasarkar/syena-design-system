@@ -61,7 +61,8 @@ export function ThemedGrid<Row>({ rowData, columnDefs, defaultColDef, ariaLabel,
     // When the grid scrolls sideways, the scrollbar's own height is reserved below the rows: measured from the bar
     // element, exactly, whether the browser lays it out in the flow or the grid floats it over the last row. A grid
     // that does not scroll has no bar (the data table switches it off), so nothing is kept.
-    const bar = el.querySelector<HTMLElement>('.ag-body-horizontal-scroll');
+    // The bar is a child of the grid root; some versions of the library also put its class on the root itself, which is as tall as the grid.
+    const bar = el.querySelector<HTMLElement>('.ag-root > .ag-body-horizontal-scroll');
     const viewport = el.querySelector<HTMLElement>('.ag-body-horizontal-scroll-viewport');
     const scrolls = !!viewport && viewport.scrollWidth > viewport.clientWidth;
     const barHeight = bar && scrolls && getComputedStyle(bar).display !== 'none' ? bar.offsetHeight : 0;
