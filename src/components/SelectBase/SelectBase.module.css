@@ -151,3 +151,12 @@
   color: var(--syn-color-text-disabled);
   text-decoration: none;
 }
+
+/* A touch browser zooms the page in when a field under sixteen pixels takes focus and does not zoom back out, so on touch the field is the large text step. */
+@media (pointer: coarse) {
+  .searchInput {
+    font-family: var(--syn-type-text-lg-family);
+    font-size: var(--syn-type-text-lg-size);
+    line-height: var(--syn-type-text-lg-line);
+  }
+}

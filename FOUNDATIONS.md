@@ -1087,6 +1087,10 @@ shares one box:
   `space(2)`.
 - Corner `radius-control`; boundary a `border-hairline` line in `border-emphasis`.
 - Label in `text-md` (`text-sm` when small).
+- A field that takes typing (a list's search field, the prompt bar's text area, the theme switch's
+  select) is in the `text-lg` step on touch devices, which is not under sixteen pixels: a touch
+  browser zooms the page when a smaller field takes focus and does not zoom back out. The page
+  viewport is never set to forbid zooming.
 
 **State vocabulary.** Applied the same way everywhere:
 
