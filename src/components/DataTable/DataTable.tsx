@@ -1,5 +1,6 @@
 import type { ColDef, GridApi, ICellRendererParams, IHeaderParams } from 'ag-grid-community';
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
+import { gridRowHeight, type GridDensity } from '../../grid/params';
 import { numericColumn, ThemedGrid } from '../../grid/ThemedGrid';
 import { formatFigure } from '../Figure/Figure';
 import { useWidth } from '../../hooks/useWidth';
@@ -33,13 +34,15 @@ export interface DataTableProps<Row> {
   /** More rows than this scroll inside a fixed-height grid; fewer fit the grid to its rows. */
   maxVisibleRows?: number;
   loading?: boolean;
+  /** `compact` shortens the header and every row to the text's line height plus one step of space, for a long list read down; `comfortable` (the default) is the control height. */
+  density?: GridDensity;
   /** Why there is nothing to show; offer the way out with `emptyAction`. */
   emptyMessage?: string;
   emptyAction?: { label: string; onClick: () => void };
   onRowSelected?: (row: Row) => void;
 }
 
-const tokenNames = ['space-2', 'space-4', 'space-8', 'icon-small', 'layout-control-height', 'family-ui', 'family-figure', 'type-text-sm-size'] as const;
+const tokenNames = ['space-2', 'space-4', 'space-8', 'icon-small', 'layout-control-height', 'family-ui', 'family-figure', 'type-text-sm-size', 'type-text-sm-line'] as const;
 
 let ruler: CanvasRenderingContext2D | null = null;
 const textWidth = (text: string, font: string) => {
@@ -91,7 +94,7 @@ const cellText = <Row extends object>(col: DataTableColumn<Row>, row: Row) => {
  * least two number columns show beside it; the others take their content width and share the rest, so
  * the last column meets the right edge. Numbers and their headers are right-aligned in the figure face.
  */
-export function DataTable<Row extends object>({ columns: given, rows, caption, maxVisibleRows = 10, loading, emptyMessage = 'Nothing to show.', emptyAction, onRowSelected }: DataTableProps<Row>) {
+export function DataTable<Row extends object>({ columns: given, rows, caption, maxVisibleRows = 10, loading, density = 'comfortable', emptyMessage = 'Nothing to show.', emptyAction, onRowSelected }: DataTableProps<Row>) {
   // A column that does not say whether it is numeric is, when every value in it that is there is a number. A numeric column
   // that does not say its decimals is written to the most any value in it has, so the figures line up down the column.
   const columns = useMemo(() => given.map((col) => {
@@ -186,7 +189,7 @@ export function DataTable<Row extends object>({ columns: given, rows, caption, m
   }, [api, columnDefs, rows]);
 
   const fits = rows.length <= maxVisibleRows;
-  const rowHeight = t ? toPx(t['layout-control-height']) : 0;
+  const rowHeight = t ? gridRowHeight(t, toPx, density) : 0;
   const empty = (): ReactNode => <div className={styles.empty}>{emptyMessage}</div>;
 
   return (
@@ -194,7 +197,7 @@ export function DataTable<Row extends object>({ columns: given, rows, caption, m
       <p id={captionId} className={styles.caption}>{caption}</p>
       {columnDefs?.scrolls ? <p className={styles.caption}>Scroll sideways to see every column.</p> : null}
       {columnDefs ? (
-        <ThemedGrid<Row> rowData={rows} columnDefs={columnDefs.defs} suppressHorizontalScroll={!columnDefs.scrolls} ariaLabelledBy={captionId} ariaLabel={caption} fitRows={fits && rows.length > 0} height={rows.length === 0 ? rowHeight * 5 : rowHeight * (maxVisibleRows + 1)} loading={loading} onReady={setApi} noRowsOverlayComponent={empty} onRowSelected={onRowSelected} />
+        <ThemedGrid<Row> rowData={rows} columnDefs={columnDefs.defs} suppressHorizontalScroll={!columnDefs.scrolls} ariaLabelledBy={captionId} ariaLabel={caption} fitRows={fits && rows.length > 0} height={rows.length === 0 ? rowHeight * 5 : rowHeight * (maxVisibleRows + 1)} loading={loading} density={density} onReady={setApi} noRowsOverlayComponent={empty} onRowSelected={onRowSelected} />
       ) : null}
       {rows.length === 0 && emptyAction ? <div className={styles.action}><Button size="small" onClick={emptyAction.onClick}>{emptyAction.label}</Button></div> : null}
     </div>

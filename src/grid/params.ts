@@ -8,7 +8,7 @@ export const gridTokenNames = [
   'color-signal-positive-text', 'color-signal-negative-text', 'color-signal-negative-fill', 'color-signal-negative-tint',
   'data-cat-1', 'data-cat-2', 'data-cat-3', 'data-cat-4', 'data-cat-5', 'data-cat-6', 'data-cat-7',
   'elevation-1', 'elevation-2', 'elevation-3',
-  'family-ui', 'type-text-sm-size', 'type-title-sm-weight',
+  'family-ui', 'type-text-sm-size', 'type-text-sm-line', 'type-title-sm-weight',
   'layout-control-height', 'layout-control-height-sm', 'layout-border-hairline', 'layout-focus-ring-width',
   'space-1', 'space-2', 'space-3', 'space-4', 'radius-card', 'radius-control', 'icon-small',
 ] as const;
@@ -21,7 +21,15 @@ export type GridParams = Parameters<typeof themeQuartz.withParams>[0];
  * whole pixels. Row and header height are the control height of section 2.5; padding is a spacing
  * step; shadows are the elevation tokens. Nothing here is a literal colour, shadow or size.
  */
-export function gridParams(t: GridTokens, px: (length: string) => number): GridParams {
+export type GridDensity = 'comfortable' | 'compact';
+
+/** Row and header height: the control height, or in compact density the text's line height plus one step of space. */
+export function gridRowHeight(t: Pick<GridTokens, 'layout-control-height' | 'type-text-sm-line' | 'space-2'>, px: (length: string) => number, density: GridDensity = 'comfortable'): number {
+  return density === 'compact' ? px(t['type-text-sm-line']) + px(t['space-2']) : px(t['layout-control-height']);
+}
+
+export function gridParams(t: GridTokens, px: (length: string) => number, density: GridDensity = 'comfortable'): GridParams {
+  const rowHeight = gridRowHeight(t, px, density);
   const hairline = px(t['layout-border-hairline']);
   const line = (color: string) => ({ style: 'solid' as const, width: hairline, color });
   const formula = (n: 1 | 2 | 3 | 4 | 5 | 6 | 7) => {
@@ -57,8 +65,8 @@ export function gridParams(t: GridTokens, px: (length: string) => number): GridP
     fontFamily: t['family-ui'],
     fontSize: px(t['type-text-sm-size']),
     headerFontSize: px(t['type-text-sm-size']),
-    rowHeight: px(t['layout-control-height']),
-    headerHeight: px(t['layout-control-height']),
+    rowHeight,
+    headerHeight: rowHeight,
     spacing: px(t['space-2']),
     cellHorizontalPadding: px(t['space-4']),
     borderRadius: px(t['radius-control']),

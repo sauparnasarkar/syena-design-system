@@ -1,6 +1,7 @@
 import { AllCommunityModule, ModuleRegistry, type ColDef, type GridApi, type GridReadyEvent } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { GridDensity } from './params';
 import { useGridTheme } from './theme';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -34,6 +35,8 @@ export interface ThemedGridProps<Row> {
   fitRows?: boolean;
   /** No horizontal scrolling or scrollbar: for grids whose columns are known to fit. */
   suppressHorizontalScroll?: boolean;
+  /** Row and header height: `compact` is the text's line height plus one step of space, for tables read as a long list. */
+  density?: GridDensity;
   onReady?: (api: GridApi<Row>) => void;
   defaultColDef?: ColDef<Row>;
   /** Shown instead of rows when there are none: say why, and offer the way out. */
@@ -41,8 +44,8 @@ export interface ThemedGridProps<Row> {
 }
 
 /** A data grid themed from tokens. The data table component builds on this. */
-export function ThemedGrid<Row>({ rowData, columnDefs, defaultColDef, ariaLabel, ariaLabelledBy, loading, onRowSelected, height, fitRows, suppressHorizontalScroll, onReady, noRowsOverlayComponent }: ThemedGridProps<Row>) {
-  const theme = useGridTheme();
+export function ThemedGrid<Row>({ rowData, columnDefs, defaultColDef, ariaLabel, ariaLabelledBy, loading, onRowSelected, height, fitRows, suppressHorizontalScroll, density, onReady, noRowsOverlayComponent }: ThemedGridProps<Row>) {
+  const theme = useGridTheme(density);
   const host = useRef<HTMLDivElement>(null);
   const [api, setApi] = useState<GridApi<Row> | null>(null);
   const [fitted, setFitted] = useState<number | null>(null);
