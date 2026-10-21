@@ -1499,6 +1499,9 @@ with named values; there are no colour-named variants.
   column is pinned and the others share the remaining width, so the last column meets the
   right edge of the header and of the container. Props also include `caption`, `loading`,
   `emptyMessage`, `emptyAction` and `onRowSelected`.
+- **Density.** `density` is `comfortable` (the default: header and rows are the control height of
+  section 2.5) or `compact` (the text's line height plus one step of space), for a long list read
+  down. A header whose name wraps, or carries a unit, is taller than one line in either density.
 - **Accessibility.** Grid semantics supplied by the library; header and cell focus styled
   with `focus-ring`; a visible text alternative describes sorting.
 

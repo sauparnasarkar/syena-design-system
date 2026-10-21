@@ -394,3 +394,32 @@ export const ANegativeNumberUsesTheTrueMinus: Story = {
     await waitFor(() => expect(cellTexts(canvasElement, 'change')).toEqual(['−4.47', '1.50', '−0.25']));
   },
 };
+
+/** The height a CSS length takes, resolved from the page's own tokens. */
+const lengthOf = (css: string) => {
+  const probe = document.createElement('div');
+  probe.style.cssText = `position:absolute;visibility:hidden;height:${css}`;
+  document.body.appendChild(probe);
+  const px = probe.getBoundingClientRect().height;
+  probe.remove();
+  return px;
+};
+
+/** Compact density sets the header and every row to the text's line height plus one step of space: shorter than the default, and nothing cut off. */
+export const CompactDensityHasShorterRows: Story = {
+  // No unit under a name, so no header is taller than one line.
+  args: { density: 'compact', columns: columns.slice(0, 5) },
+  play: async ({ canvasElement }) => {
+    await ready(canvasElement);
+    const compact = lengthOf('calc(var(--syn-type-text-sm-line) + var(--syn-space-2))');
+    const comfortable = lengthOf('var(--syn-layout-control-height)');
+    await expect(compact).toBeLessThan(comfortable);
+    const row = canvasElement.querySelector('.ag-grid-scrolling-rows .ag-row') as HTMLElement;
+    const header = canvasElement.querySelector('.ag-header-row') as HTMLElement;
+    await waitFor(() => {
+      expect(row.getBoundingClientRect().height).toBeCloseTo(compact, 0);
+      expect(header.getBoundingClientRect().height).toBeCloseTo(compact, 0);
+    }, { timeout: 10000 });
+    await expectNothingClipped(canvasElement);
+  },
+};
