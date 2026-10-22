@@ -190,9 +190,12 @@ const stripClearsTheHomeBar = (screen: Screen): Story => ({
     await waitFor(() => expect(window.scrollY).toBe(300));
     const strip = canvas.getByRole('complementary', { name: 'Sources and methodology' });
     const box = strip.firstElementChild as HTMLElement;
-    const text = (canvas.queryByRole('button', { name: 'Methodology' }) ?? canvas.getByRole('button', { name: 'Show sources and methodology' })).getBoundingClientRect();
-    await expect(text.bottom).toBeLessThanOrEqual(window.innerHeight - bottom + 1);
-    await expect(Math.abs(box.getBoundingClientRect().bottom - window.innerHeight)).toBeLessThan(1);
+    // The window was just resized and the page scrolled: the strip is measured until it has settled at the bottom edge (it may also tuck on a phone).
+    await waitFor(() => {
+      const text = (canvas.queryByRole('button', { name: 'Methodology' }) ?? canvas.getByRole('button', { name: 'Show sources and methodology' })).getBoundingClientRect();
+      expect(text.bottom).toBeLessThanOrEqual(window.innerHeight - bottom + 1);
+      expect(Math.abs(box.getBoundingClientRect().bottom - window.innerHeight)).toBeLessThan(1);
+    }, { timeout: 5000 });
   }),
 });
 
