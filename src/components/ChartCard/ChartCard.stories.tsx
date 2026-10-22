@@ -152,3 +152,35 @@ export const ExpandedCardStaysInsideTheSafeArea: Story = {
     await expect(window.innerHeight - box.bottom).toBeGreaterThanOrEqual(21);
   }),
 };
+
+/** A finger drag, as the browser would deliver it; true when the page's own scrolling was stopped. */
+function dragIsStopped(target: Element, fromY: number, toY: number) {
+  const at = (y: number) => new Touch({ identifier: 1, target, clientX: 20, clientY: y });
+  const send = (type: string, y: number, live: boolean) => {
+    const event = new TouchEvent(type, { bubbles: true, cancelable: true, touches: live ? [at(y)] : [], targetTouches: live ? [at(y)] : [], changedTouches: [at(y)] });
+    target.dispatchEvent(event);
+    return event;
+  };
+  send('touchstart', fromY, true);
+  const move = send('touchmove', toY, true);
+  send('touchend', toY, false);
+  return move.defaultPrevented;
+}
+
+/** While a card is expanded the page behind it does not scroll, and it is given back when the card closes. */
+export const ExpandedCardLocksThePage: Story = {
+  args: { expandable: true },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Expand Annual emissions' }));
+    await canvas.findByRole('dialog', { name: 'Annual emissions' });
+    await expect(getComputedStyle(document.documentElement).overflow).toBe('hidden');
+    await expect(getComputedStyle(document.body).overflow).toBe('hidden');
+    await expect(dragIsStopped(canvasElement, 400, 300)).toBe(true);
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(canvas.queryByRole('dialog')).toBeNull());
+    await expect(document.documentElement.style.overflow).toBe('');
+    await expect(document.body.style.overflow).toBe('');
+    await expect(dragIsStopped(canvasElement, 400, 300)).toBe(false);
+  },
+};

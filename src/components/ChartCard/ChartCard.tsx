@@ -1,5 +1,6 @@
 import { useId, useRef, useState, type ReactNode } from 'react';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useScrollLock } from '../../hooks/useScrollLock';
 import { Button } from '../Button/Button';
 import { Card } from '../Card/Card';
 import { CardHeader } from '../CardHeader/CardHeader';
@@ -39,6 +40,7 @@ export interface ChartCardProps {
 function Frame({ expanded, onClose, label, children }: { expanded: boolean; onClose: () => void; label: string; children: ReactNode }) {
   const panel = useRef<HTMLDivElement>(null);
   useFocusTrap(panel, expanded, onClose);
+  useScrollLock(panel, expanded);
   // The same elements are kept whether or not the card is expanded, so focus stays on the control that was used.
   return (
     <div className={expanded ? styles.overlay : undefined}>
