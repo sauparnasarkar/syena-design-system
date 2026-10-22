@@ -9,6 +9,8 @@
   position: absolute;
   inset-inline: 0;
   bottom: 0;
+  /* The background runs under the home bar; the text stays above it. */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   box-shadow: inset 0 var(--syn-layout-border-hairline) 0 var(--syn-color-border-default);
   background: var(--syn-color-surface-sunken);
   color: var(--syn-color-text-muted);

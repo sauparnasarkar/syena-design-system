@@ -168,6 +168,25 @@ export const JumpLinksLandBelowTheTabRowOnly: Story = {
   }),
 };
 
+/** The strip pinned to the bottom of the view keeps its text and its button above the home bar, while its background runs under it. */
+const stripClearsTheHomeBar = (screen: Screen): Story => ({
+  render: () => <Landscape />,
+  play: ({ canvasElement }) => withScreen(screen, async () => {
+    const bottom = screen.insets?.bottom ?? 0;
+    const canvas = within(canvasElement);
+    window.scrollTo(0, 300);
+    await waitFor(() => expect(window.scrollY).toBe(300));
+    const strip = canvas.getByRole('complementary', { name: 'Sources and methodology' });
+    const box = strip.firstElementChild as HTMLElement;
+    const text = (canvas.queryByRole('button', { name: 'Methodology' }) ?? canvas.getByRole('button', { name: 'Show sources and methodology' })).getBoundingClientRect();
+    await expect(text.bottom).toBeLessThanOrEqual(window.innerHeight - bottom + 1);
+    await expect(Math.abs(box.getBoundingClientRect().bottom - window.innerHeight)).toBeLessThan(1);
+  }),
+});
+
+export const StripClearsTheHomeBarInLandscape: Story = stripClearsTheHomeBar({ width: 844, height: 390, insets: { left: 47, right: 47, bottom: 21 } });
+export const StripClearsTheHomeBarInPortrait: Story = stripClearsTheHomeBar({ width: 390, height: 844, insets: { top: 47, bottom: 34 } });
+
 /** The rail's own choice is the person's: the short screen collapses it without changing it, and the choice is back when the screen is not short. */
 export const ShortScreenKeepsTheRailChoice: Story = {
   args: { onCollapsedChange: fn() },
