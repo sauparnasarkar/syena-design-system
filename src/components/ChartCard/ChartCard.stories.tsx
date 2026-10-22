@@ -4,6 +4,7 @@ import { contrastRatio } from '../../lib/colour';
 import { observed, scenarios } from '../../specimens/data';
 import { Chart, chartTable, type ChartSeries } from '../Chart/Chart';
 import { withScreen } from '../storyScreen';
+import { SegmentedControl } from '../SegmentedControl/SegmentedControl';
 import { Table } from '../Table/Table';
 import { ChartCard } from './ChartCard';
 
@@ -182,5 +183,45 @@ export const ExpandedCardLocksThePage: Story = {
     await expect(document.documentElement.style.overflow).toBe('');
     await expect(document.body.style.overflow).toBe('');
     await expect(dragIsStopped(canvasElement, 400, 300)).toBe(false);
+  },
+};
+
+/** The slot a phone 320 pixels wide leaves a card: the page's gutters and the card's own padding are taken off. */
+const narrowSlot = 288;
+
+/** In a slot as narrow as a small phone's, the header's controls drop below the title instead of widening the card past the slot. */
+export const HeaderWrapsInANarrowSlot: Story = {
+  args: {
+    title: 'CO₂ Emissions by Country (2024)',
+    expandable: true,
+    actions: <SegmentedControl ariaLabel="Basis" items={[{ value: 'absolute', label: 'Absolute' }, { value: 'cumulative', label: 'Cumulative' }]} value="absolute" onChange={() => {}} size="small" />,
+  },
+  // A grid cell, as on a page: it takes the width its content needs unless that is held to the slot.
+  decorators: [(Story) => <div style={{ display: 'grid', gridTemplateColumns: '1fr', width: narrowSlot }}><Story /></div>],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const card = canvas.getByRole('heading', { name: 'CO₂ Emissions by Country (2024)' }).closest('section') as HTMLElement;
+    const slot = card.parentElement as HTMLElement;
+    const slotBox = slot.getBoundingClientRect();
+    await waitFor(() => expect(card.getBoundingClientRect().right).toBeLessThanOrEqual(slotBox.right + 1));
+    await expect(card.getBoundingClientRect().width).toBeLessThanOrEqual(narrowSlot + 1);
+    const control = canvas.getByRole('radiogroup', { name: 'Basis' }).getBoundingClientRect();
+    await expect(control.right).toBeLessThanOrEqual(slotBox.right + 1);
+    await expect(control.left).toBeGreaterThanOrEqual(slotBox.left - 1);
+    // The controls sit below the title, not beside it.
+    const title = canvas.getByRole('heading', { name: 'CO₂ Emissions by Country (2024)' }).getBoundingClientRect();
+    await expect(control.top).toBeGreaterThanOrEqual(title.bottom - 1);
+  },
+};
+
+/** Wide enough for the title and the controls on one line, they stay on one line. */
+export const HeaderKeepsOneLineWhenItFits: Story = {
+  args: { title: 'Annual emissions', actions: <SegmentedControl ariaLabel="Basis" items={[{ value: 'absolute', label: 'Absolute' }, { value: 'cumulative', label: 'Cumulative' }]} value="absolute" onChange={() => {}} size="small" /> },
+  decorators: [(Story) => <div style={{ display: 'grid', gridTemplateColumns: '1fr', width: 360 }}><Story /></div>],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const title = canvas.getByRole('heading', { name: 'Annual emissions' }).getBoundingClientRect();
+    const control = canvas.getByRole('radiogroup', { name: 'Basis' }).getBoundingClientRect();
+    await expect(control.top).toBeLessThan(title.bottom);
   },
 };
