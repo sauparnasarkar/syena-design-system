@@ -12,6 +12,11 @@
   flex-direction: column;
 }
 
+/* The rail is out of the flow here; the page keeps the width of the narrow rail beside the notch side's inset. */
+.short {
+  padding-left: calc(env(safe-area-inset-left, 0px) + var(--syn-layout-rail-width-collapsed));
+}
+
 .column {
   display: flex;
   flex: 1;

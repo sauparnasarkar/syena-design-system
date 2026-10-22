@@ -1,6 +1,14 @@
-/** The bottom edge of the sticky bars pinned to the top of the page, so a target lands below them. */
+/**
+ * The bottom edge of the bars pinned to the top of the page, so a target lands below them: where a pinned bar sits once the page has
+ * scrolled, not where it is now. A bar that is not pinned (it scrolls away with the page, as on a short screen) is not counted.
+ */
 export function stickyOffset() {
-  return Math.max(0, ...[...document.querySelectorAll('[data-syn-sticky="top"]')].map((el) => el.getBoundingClientRect().bottom));
+  return Math.max(0, ...[...document.querySelectorAll('[data-syn-sticky="top"]')].map((el) => {
+    const { position, top } = getComputedStyle(el);
+    const box = el.getBoundingClientRect();
+    if (position === 'fixed') return box.bottom;
+    return position === 'sticky' ? (Number.parseFloat(top) || 0) + box.height : 0;
+  }));
 }
 
 /**
