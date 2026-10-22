@@ -1,5 +1,6 @@
 .header {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--syn-space-3);
@@ -11,6 +12,8 @@
 }
 
 .text {
+  /* The title keeps this much room beside the controls; when it would get less, the controls drop to their own line. */
+  flex: 1 1 var(--syn-space-8);
   min-width: 0;
 }
 
@@ -30,4 +33,5 @@
   display: flex;
   flex: none;
   gap: var(--syn-space-1);
+  margin-inline-start: auto;
 }
