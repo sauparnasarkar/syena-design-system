@@ -51,4 +51,21 @@ export const TheLowerThumbStaysReachableAtTheTop: Story = {
   },
 };
 
+/** Each thumb's input is at least 24 pixels tall, the smallest target the accessibility guidelines allow, while the thumbs keep their size and place on the track. */
+export const ThumbInputsMeetTheTargetSize: Story = {
+  render: () => <Controlled />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const track = canvas.getByRole('slider', { name: 'From year' }).parentElement as HTMLElement;
+    for (const name of ['From year', 'To year']) {
+      const box = canvas.getByRole('slider', { name }).getBoundingClientRect();
+      await expect(box.height).toBeGreaterThanOrEqual(24);
+      await expect(box.width).toBeGreaterThanOrEqual(24);
+      // Centred on the track, so the thumb sits where it did.
+      const mid = track.getBoundingClientRect();
+      await expect(Math.abs((box.top + box.height / 2) - (mid.top + mid.height / 2))).toBeLessThan(1);
+    }
+  },
+};
+
 export const Tidewater: Story = { render: () => <Controlled />, globals: { theme: 'tidewater' } };
