@@ -50,9 +50,10 @@ export function Rail({ logo, productName, brandHref, onBrandClick, productSwitch
     setOwn(next);
     onCollapsedChange?.(next);
   };
-  // Closing the opened rail: focus goes to the toggle when it was inside the rail (so Escape or a tap on a destination leaves it somewhere sensible).
-  const close = () => {
-    if (nav.current?.contains(document.activeElement)) toggleButton.current?.focus();
+  // Closing the opened rail. Unless the person tapped the content (which has its own idea of focus), focus goes to the toggle: where a
+  // click does not focus a button (Safari), focus is not inside the rail to be seen as leaving it.
+  const close = (refocus = true) => {
+    if (refocus) toggleButton.current?.focus();
     setOpened(false);
   };
   // Leaving the short screen puts the rail back as it was (nothing was changed), so it is not still opened when the screen is short again.
@@ -64,7 +65,7 @@ export function Rail({ logo, productName, brandHref, onBrandClick, productSwitch
   useEffect(() => {
     if (!overlaid) return;
     const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') close(); };
-    const onPointer = (event: PointerEvent) => { if (!nav.current?.contains(event.target as Node)) close(); };
+    const onPointer = (event: PointerEvent) => { if (!nav.current?.contains(event.target as Node)) close(false); };
     // A tap on the rail's action (which the app defines) closes it too, as a destination does.
     const onClick = (event: Event) => { if (actionsBox.current?.contains(event.target as Node)) close(); };
     document.addEventListener('keydown', onKey);

@@ -121,7 +121,8 @@ const landscape = (screen: Screen): Story => ({
     const over = rail.getBoundingClientRect();
     await expect(rail.contains(document.elementFromPoint(over.left + wide - 6, over.top + 8))).toBe(true);
 
-    // Escape closes it and focus returns to the rail's toggle.
+    // Escape closes it and focus returns to the rail's toggle (also where a click does not focus a button, as in Safari).
+    (document.activeElement as HTMLElement).blur();
     await userEvent.keyboard('{Escape}');
     await widthIs(rail, narrow);
     await expect(canvas.getByRole('button', { name: 'Expand navigation' })).toHaveFocus();
@@ -135,6 +136,7 @@ const landscape = (screen: Screen): Story => ({
     // ... a tap on a destination, with focus back on the toggle ...
     await userEvent.click(canvas.getByRole('button', { name: 'Expand navigation' }));
     await widthIs(rail, wide);
+    (document.activeElement as HTMLElement).blur();
     await userEvent.click(within(rail).getByRole('link', { name: 'Overview' }));
     await widthIs(rail, narrow);
     await expect(canvas.getByRole('button', { name: 'Expand navigation' })).toHaveFocus();
