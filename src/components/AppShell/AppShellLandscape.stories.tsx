@@ -158,9 +158,21 @@ export const Phone852x393: Story = landscape({ width: 852, height: 393, insets: 
 export const JumpLinksLandBelowTheTabRowOnly: Story = {
   render: () => <Landscape />,
   play: ({ canvasElement }) => withScreen({ width: 844, height: 340, insets: { left: 47, right: 47, bottom: 21 } }, async () => {
+    const canvas = within(canvasElement);
+    // The window was just resized: the jump is measured once the layout has stopped moving (the narrow rail is in place and the target holds still).
+    await widthIs(canvas.getByRole('navigation', { name: 'Primary' }), lengthOf('--syn-layout-rail-width-collapsed'));
+    const where = () => (document.getElementById('composition') as HTMLElement).getBoundingClientRect().top + window.scrollY;
+    let last = -1;
+    await waitFor(async () => {
+      const now = where();
+      const still = now === last;
+      last = now;
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(still).toBe(true);
+    }, { timeout: 5000 });
     window.scrollTo(0, 0);
     await waitFor(() => expect(window.scrollY).toBe(0));
-    const row = within(canvasElement).getByRole('navigation', { name: 'Sections' }).parentElement as HTMLElement;
+    const row = canvas.getByRole('navigation', { name: 'Sections' }).parentElement as HTMLElement;
     await expect(scrollToJumpTarget('composition', { reducedMotion: true })).toBe(true);
     await waitFor(() => expect(window.scrollY).toBeGreaterThan(0));
     const target = document.getElementById('composition') as HTMLElement;
