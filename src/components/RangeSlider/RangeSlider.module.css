@@ -23,7 +23,8 @@
   inset-inline: 0;
   top: 50%;
   width: 100%;
-  height: var(--syn-space-5);
+  /* Taller than the thumb, so each input is a target of at least 24 pixels; it is centred on the track and out of the layout. */
+  height: var(--syn-space-6);
   margin: 0;
   padding: 0;
   border: 0;
