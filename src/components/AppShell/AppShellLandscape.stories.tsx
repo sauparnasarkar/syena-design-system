@@ -231,6 +231,8 @@ export const ShortScreenKeepsTheRailChoice: Story = {
     await widthIs(rail(), narrow);
     await expect(onChange).toHaveBeenCalledTimes(1);
     await withScreen(short, async () => {
+      // The rail is narrow by choice already, so its width cannot say the short screen is in force: its position does (fixed beside the content).
+      await waitFor(() => expect(getComputedStyle(rail()).position).toBe('fixed'));
       await widthIs(rail(), narrow);
       await userEvent.click(canvas.getByRole('button', { name: 'Expand navigation' }));
       await widthIs(rail(), wide);
