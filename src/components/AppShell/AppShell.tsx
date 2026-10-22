@@ -4,6 +4,7 @@ import { useScrollLock } from '../../hooks/useScrollLock';
 import { Button } from '../Button/Button';
 import { scrollToJumpTarget } from '../../lib/scrollToJumpTarget';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { useShortScreen } from '../../hooks/useShortScreen';
 import { ShellContext } from './ShellContext';
 import styles from './AppShell.module.css';
 
@@ -48,6 +49,8 @@ function Overlay({ label, side, onClose, children }: { label: string; side: 'sta
 export function AppShell({ rail, topBar, analysisBar, strip, children, footer, navigationOpen, onNavigationOpenChange, controlsOpen, onControlsOpenChange, compact: forced, skipLabel = 'Skip to content' }: AppShellProps) {
   const detected = useIsMobile();
   const compact = forced ?? detected;
+  // A short, narrow screen: the rail is narrow and leaves the page's flow (see Rail), so the page makes room for it.
+  const short = useShortScreen() && !compact;
   const [ownNav, setOwnNav] = useState(false);
   const [ownControls, setOwnControls] = useState(false);
   const navOpen = navigationOpen ?? ownNav;
@@ -62,7 +65,7 @@ export function AppShell({ rail, topBar, analysisBar, strip, children, footer, n
 
   return (
     <ShellContext.Provider value={state}>
-      <div className={[styles.app, compact ? styles.compact : ''].join(' ')}>
+      <div className={[styles.app, compact ? styles.compact : '', short ? styles.short : ''].join(' ')}>
         <nav aria-label="Skip links"><a href="#content" className={styles.skip} onClick={(event) => { event.preventDefault(); scrollToJumpTarget('content'); }}>{skipLabel}</a></nav>
         {compact ? topBar : rail}
         <div className={styles.column}>

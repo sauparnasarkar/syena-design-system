@@ -11,6 +11,13 @@
   background: var(--syn-color-surface-raised);
 }
 
+/* On a short, narrow screen (a phone turned sideways) the bar scrolls away with the page; only the rows beneath it stay pinned. */
+@media (max-height: 500px) and (max-width: 950px) {
+  .bar {
+    position: static;
+  }
+}
+
 .sheet {
   position: static;
   padding: var(--syn-space-4);

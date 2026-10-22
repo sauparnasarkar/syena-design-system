@@ -3,6 +3,7 @@ import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { contrastRatio } from '../../lib/colour';
 import { observed, scenarios } from '../../specimens/data';
 import { Chart, chartTable, type ChartSeries } from '../Chart/Chart';
+import { withScreen } from '../storyScreen';
 import { Table } from '../Table/Table';
 import { ChartCard } from './ChartCard';
 
@@ -136,4 +137,18 @@ export const ThePanelsTextReadsOnItInTheNightTheme: Story = {
   globals: { theme: 'night' },
   args: { state: 'error', onRetry: fn() },
   play: async ({ canvasElement }) => { await expectTextReads(canvasElement.querySelector('section > div') as HTMLElement); },
+};
+
+/** On a phone turned sideways the expanded card stays clear of the notch and the home bar. */
+export const ExpandedCardStaysInsideTheSafeArea: Story = {
+  args: { expandable: true },
+  play: ({ canvasElement }) => withScreen({ width: 844, height: 390, insets: { left: 47, right: 47, bottom: 21 } }, async () => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Expand Annual emissions' }));
+    const dialog = await canvas.findByRole('dialog', { name: 'Annual emissions' });
+    const box = dialog.getBoundingClientRect();
+    await expect(box.left).toBeGreaterThanOrEqual(47);
+    await expect(document.documentElement.clientWidth - box.right).toBeGreaterThanOrEqual(47);
+    await expect(window.innerHeight - box.bottom).toBeGreaterThanOrEqual(21);
+  }),
 };

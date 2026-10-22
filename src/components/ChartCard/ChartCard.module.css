@@ -54,7 +54,8 @@
   z-index: var(--syn-layer-modal);
   display: grid;
   place-items: center;
-  padding: var(--syn-space-4);
+  /* Inside the notch and home bar insets. */
+  padding: calc(var(--syn-space-4) + env(safe-area-inset-top, 0px)) calc(var(--syn-space-4) + env(safe-area-inset-right, 0px)) calc(var(--syn-space-4) + env(safe-area-inset-bottom, 0px)) calc(var(--syn-space-4) + env(safe-area-inset-left, 0px));
 }
 
 .scrim {

@@ -42,7 +42,7 @@ export function BackToTop({ targetId, avoidSelector }: BackToTopProps) {
     if (target) { if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1'); target.focus({ preventScroll: true }); }
   };
   return (
-    <button type="button" className={styles.button} style={{ insetBlockEnd: `calc(var(--syn-space-4) + ${lift}px)` }} onClick={go}>
+    <button type="button" className={styles.button} style={{ insetBlockEnd: `calc(var(--syn-space-4) + env(safe-area-inset-bottom, 0px) + ${lift}px)` }} onClick={go}>
       <Icon name="up" />
       <span className={styles.label}>Back to top</span>
     </button>

@@ -1,4 +1,5 @@
-import { useState, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react';
+import { useShortScreen } from '../../hooks/useShortScreen';
 import { Icon } from '../Icon/Icon';
 import { ProductMark, type ProductMarkSource } from '../ProductMark/ProductMark';
 import { useShell } from '../AppShell/ShellContext';
@@ -22,6 +23,7 @@ export interface RailProps extends Pick<SidebarNavProps, 'groups' | 'footerItems
   actions?: RailSlot;
   /** Utilities at the foot, above the collapse control, for example a theme switch. They are in the drawer too. */
   utilities?: RailSlot;
+  /** The rail's own state, expanded or collapsed. On a short, narrow screen (a phone turned sideways) the rail is always narrow, and opening it lays it over the content for as long as it is wanted; this state is neither read nor changed there, so it is as it was when the screen is no longer short. */
   collapsed?: boolean;
   defaultCollapsed?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
@@ -30,11 +32,47 @@ export interface RailProps extends Pick<SidebarNavProps, 'groups' | 'footerItems
 
 export function Rail({ logo, productName, brandHref, onBrandClick, productSwitcher, actions, utilities, groups, footerItems, current, onItemClick, collapsed, defaultCollapsed = false, onCollapsedChange, ariaLabel = 'Primary' }: RailProps) {
   const shell = useShell();
+  const short = useShortScreen();
   const [own, setOwn] = useState(defaultCollapsed);
+  // On a short screen: whether the rail is opened over the content. Not the rail's own state.
+  const [opened, setOpened] = useState(false);
+  const nav = useRef<HTMLElement>(null);
+  const toggleButton = useRef<HTMLButtonElement>(null);
+  const actionsBox = useRef<HTMLDivElement>(null);
   // In the drawer the rail is always expanded and has no collapse control.
   const drawer = shell?.compact === true;
-  const isCollapsed = drawer ? false : (collapsed ?? own);
-  const toggle = () => { const next = !isCollapsed; setOwn(next); onCollapsedChange?.(next); };
+  const narrow = short && !drawer;
+  const overlaid = narrow && opened;
+  const isCollapsed = drawer ? false : narrow ? !opened : (collapsed ?? own);
+  const toggle = () => {
+    if (narrow) { setOpened(!opened); return; }
+    const next = !isCollapsed;
+    setOwn(next);
+    onCollapsedChange?.(next);
+  };
+  // Closing the opened rail. Unless the person tapped the content (which has its own idea of focus), focus goes to the toggle: where a
+  // click does not focus a button (Safari), focus is not inside the rail to be seen as leaving it.
+  const close = (refocus = true) => {
+    if (refocus) toggleButton.current?.focus();
+    setOpened(false);
+  };
+  // Leaving the short screen puts the rail back as it was (nothing was changed), so it is not still opened when the screen is short again.
+  const [wasNarrow, setWasNarrow] = useState(narrow);
+  if (wasNarrow !== narrow) {
+    setWasNarrow(narrow);
+    if (!narrow) setOpened(false);
+  }
+  useEffect(() => {
+    if (!overlaid) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') close(); };
+    const onPointer = (event: PointerEvent) => { if (!nav.current?.contains(event.target as Node)) close(false); };
+    // A tap on the rail's action (which the app defines) closes it too, as a destination does.
+    const onClick = (event: Event) => { if (actionsBox.current?.contains(event.target as Node)) close(); };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('pointerdown', onPointer, true);
+    document.addEventListener('click', onClick);
+    return () => { document.removeEventListener('keydown', onKey); document.removeEventListener('pointerdown', onPointer, true); document.removeEventListener('click', onClick); };
+  }, [overlaid]);
   const brandBody = (
     <>
       <ProductMark mark={logo} />
@@ -42,7 +80,7 @@ export function Rail({ logo, productName, brandHref, onBrandClick, productSwitch
     </>
   );
   return (
-    <nav aria-label={ariaLabel} className={[styles.rail, isCollapsed ? styles.collapsed : styles.expanded].join(' ')}>
+    <nav ref={nav} aria-label={ariaLabel} className={[styles.rail, isCollapsed ? styles.collapsed : styles.expanded, narrow ? styles.short : '', overlaid ? styles.overlaid : ''].join(' ')}>
       {productSwitcher ? <div className={styles.switcher}>{productSwitcher}</div> : null}
       <div className={styles.brand}>
         {brandHref ? (
@@ -51,22 +89,22 @@ export function Rail({ logo, productName, brandHref, onBrandClick, productSwitch
             className={styles.brandLink}
             // Collapsed, the name is written nowhere, so the link carries it.
             aria-label={isCollapsed ? logo.name : undefined}
-            onClick={(event) => { onBrandClick?.(event); if (drawer) shell?.setNavigationOpen(false); }}
+            onClick={(event) => { onBrandClick?.(event); if (drawer) shell?.setNavigationOpen(false); if (overlaid) close(); }}
           >
             {brandBody}
             {isCollapsed ? <span className={styles.tip} aria-hidden="true">{logo.name}</span> : null}
           </a>
         ) : brandBody}
       </div>
-      {actions ? <div className={styles.actions}>{typeof actions === 'function' ? actions(isCollapsed) : actions}</div> : null}
+      {actions ? <div ref={actionsBox} className={styles.actions}>{typeof actions === 'function' ? actions(isCollapsed) : actions}</div> : null}
       {/* In the drawer only the destinations scroll, so the utilities stay in view; a collapsed rail needs its tooltips to overflow. */}
       <div className={drawer ? styles.destinations : styles.destinationsFree}>
-        <SidebarNav groups={groups} footerItems={footerItems} current={current} collapsed={isCollapsed} onItemClick={(item, event) => { onItemClick?.(item, event); if (drawer) shell?.setNavigationOpen(false); }} />
+        <SidebarNav groups={groups} footerItems={footerItems} current={current} collapsed={isCollapsed} onItemClick={(item, event) => { onItemClick?.(item, event); if (drawer) shell?.setNavigationOpen(false); if (overlaid) close(); }} />
       </div>
       <div className={styles.foot}>
         {utilities ? <div className={styles.utilities}>{typeof utilities === 'function' ? utilities(isCollapsed) : utilities}</div> : null}
         {drawer ? null : (
-          <button type="button" className={styles.toggle} aria-expanded={!isCollapsed} aria-label={isCollapsed ? 'Expand navigation' : 'Collapse navigation'} onClick={toggle}>
+          <button ref={toggleButton} type="button" className={styles.toggle} aria-expanded={!isCollapsed} aria-label={isCollapsed ? 'Expand navigation' : 'Collapse navigation'} onClick={toggle}>
             <Icon name="collapse" className={isCollapsed ? styles.turned : undefined} />
             {isCollapsed ? null : <span>Collapse</span>}
           </button>

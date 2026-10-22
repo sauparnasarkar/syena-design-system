@@ -1,7 +1,8 @@
 .button {
   position: fixed;
-  inset-inline-end: var(--syn-space-5);
-  inset-block-end: var(--syn-space-4);
+  /* Clear of the notch side and the home bar. */
+  inset-inline-end: calc(var(--syn-space-5) + env(safe-area-inset-right, 0px));
+  inset-block-end: calc(var(--syn-space-4) + env(safe-area-inset-bottom, 0px));
   z-index: var(--syn-layer-sticky);
   display: flex;
   align-items: center;

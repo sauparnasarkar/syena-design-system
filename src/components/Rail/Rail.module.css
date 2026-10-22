@@ -7,7 +7,8 @@
   flex-direction: column;
   gap: var(--syn-space-4);
   height: 100vh;
-  padding: var(--syn-space-4) var(--syn-space-3);
+  /* The rail reaches the bottom of the screen, so its last control clears the home bar. */
+  padding: var(--syn-space-4) var(--syn-space-3) calc(var(--syn-space-4) + env(safe-area-inset-bottom, 0px));
   overflow-y: auto;
   border-inline-end: var(--syn-layout-border-hairline) solid var(--syn-color-border-default);
   background: var(--syn-color-surface-sunken);
@@ -21,6 +22,27 @@
 .collapsed {
   width: var(--syn-layout-rail-width-collapsed);
   overflow: visible;
+}
+
+/* On a short, narrow screen (a phone turned sideways) the rail is narrow and out of the page's flow, inside the notch side; the shell leaves room for it.
+   It scrolls when its destinations do not fit, so its tooltips (which would be cut off by that) are not shown. Opened, it lies over the content. */
+.short {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: env(safe-area-inset-left, 0px);
+  height: auto;
+  padding-top: calc(var(--syn-space-4) + env(safe-area-inset-top, 0px));
+}
+
+.short.collapsed {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.overlaid {
+  z-index: var(--syn-layer-overlay);
+  box-shadow: var(--syn-elevation-3);
 }
 
 .switcher {
