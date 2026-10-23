@@ -67,7 +67,8 @@ export const TextAlternativeListsEveryValue: Story = {
     const canvas = within(canvasElement);
     const table = canvas.getByRole('table', { name: /Annual CO₂ emissions by country/ });
     // Every value is listed, largest first; every other country follows, as having no data.
-    const cells = within(table).getAllByRole('cell').map((c) => c.textContent ?? '');
+    // The cells are read straight from the table: a role query over a couple of hundred cells is slow enough on a busy machine to time the story out.
+    const cells = [...table.querySelectorAll('td')].map((c) => c.textContent ?? '');
     const values = cells.filter((text) => text !== 'No data').map((text) => Number(text.replace(/,/g, '')));
     await expect(values).toHaveLength(Object.keys(illustrativeEmissions).length);
     await expect(values).toEqual([...values].sort((a, b) => b - a));
@@ -416,11 +417,11 @@ export const WithoutATurnPeriodTheGlobeTurnsSixDegreesASecond: Story = {
 };
 
 export const TableRoundsValuesAndListsCountriesWithoutData: Story = {
-  args: { values: { CHN: 12288.6666, USA: 4904.123, VNM: 370.456, FJI: 0.45678 } },
+  args: { autoRotate: false, values: { CHN: 12288.6666, USA: 4904.123, VNM: 370.456, FJI: 0.45678 } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('button', { name: 'Table view' }));
-    const rows = within(canvas.getByRole('table')).getAllByRole('row').slice(1).map((r) => [...r.children].map((c) => c.textContent));
+    const rows = [...canvas.getByRole('table').querySelectorAll('tr')].slice(1).map((r) => [...r.children].map((c) => c.textContent));
     // Values first, largest first, rounded to three significant figures (whole numbers from a thousand): not 12,288.667 or 0.45678.
     await expect(rows.slice(0, 4)).toEqual([['China', '12,289'], ['United States of America', '4,904'], ['Vietnam', '370'], ['Fiji', '0.457']]);
     // Every other country is listed too, after them, as having no data: the table is the map's text alternative, and no data is part of what the map says.
