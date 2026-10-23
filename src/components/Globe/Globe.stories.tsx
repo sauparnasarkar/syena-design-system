@@ -381,7 +381,7 @@ const handClock = () => {
   window.cancelAnimationFrame = (id) => { queue.delete(id); };
   performance.now = () => time;
   frames = { step: (ms) => { time += ms; const due = [...queue.values()]; queue.clear(); due.forEach((cb) => cb(time)); } };
-  return () => { console.log('DIAG62 handClock cleanup at', Date.now() % 100000); window.requestAnimationFrame = real.raf; window.cancelAnimationFrame = real.cancel; performance.now = real.now; frames = null; };
+  return () => { window.requestAnimationFrame = real.raf; window.cancelAnimationFrame = real.cancel; performance.now = real.now; frames = null; };
 };
 const untouchable = (Story: () => ReactElement) => <div style={{ pointerEvents: 'none' }}>{page(Story)}</div>;
 
@@ -417,19 +417,10 @@ export const WithoutATurnPeriodTheGlobeTurnsSixDegreesASecond: Story = {
 };
 
 export const TableRoundsValuesAndListsCountriesWithoutData: Story = {
-  args: { values: { CHN: 12288.6666, USA: 4904.123, VNM: 370.456, FJI: 0.45678 } },
+  args: { autoRotate: false, values: { CHN: 12288.6666, USA: 4904.123, VNM: 370.456, FJI: 0.45678 } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    // DIAG62 (temporary): where does this story wait on a slow runner?
-    const t0 = Date.now();
-    const at = (label: string) => console.log(`DIAG62 ${label} +${Date.now() - t0}ms`, JSON.stringify({ rafNative: /native code/.test(String(window.requestAnimationFrame)), perfNative: /native code/.test(String(performance.now)), leakedClock: frames !== null, visible: document.visibilityState, focused: document.hasFocus(), rows: document.querySelectorAll('tr').length }));
-    const watchdog = [2000, 6000, 10000, 13000].map((ms) => setTimeout(() => at(`still waiting after ${ms}ms`), ms));
-    at('start');
-    const button = canvas.getByRole('button', { name: 'Table view' });
-    at('button found');
-    await userEvent.click(button);
-    at('clicked');
-    watchdog.forEach(clearTimeout);
+    await userEvent.click(canvas.getByRole('button', { name: 'Table view' }));
     const rows = [...canvas.getByRole('table').querySelectorAll('tr')].slice(1).map((r) => [...r.children].map((c) => c.textContent));
     // Values first, largest first, rounded to three significant figures (whole numbers from a thousand): not 12,288.667 or 0.45678.
     await expect(rows.slice(0, 4)).toEqual([['China', '12,289'], ['United States of America', '4,904'], ['Vietnam', '370'], ['Fiji', '0.457']]);
