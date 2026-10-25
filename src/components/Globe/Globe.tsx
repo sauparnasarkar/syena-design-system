@@ -38,6 +38,8 @@ export interface GlobeProps {
   labels?: { id: string; text: string }[];
   /** More controls, drawn in the same row as zoom, reset and table view (for example play and a slider for the year). */
   controls?: ReactNode;
+  /** For a narrow, short space such as a phone, and it includes `compact`: the legend is the bar and its end values with no name row, only the table button is drawn (zoom and reset stay on the keys), and the controls share one row. */
+  dense?: boolean;
   /** `sr-only` keeps the keyboard hint for a screen reader and does not draw it. */
   hintVisibility?: 'visible' | 'sr-only';
 }
@@ -66,7 +68,8 @@ const anchorOf = (shape: (typeof coded)[number]['shape']): [number, number] => {
  * A globe that colours countries by value on the heat scale, drawn on a canvas from resolved tokens.
  * It turns, zooms and resets with buttons, the keyboard or a drag, and its values are also a table.
  */
-export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, autoRotate = true, turnPeriod = defaultTurnPeriod, center = defaultCenter, formatValue: givenFormat, unit, size = 360, caption, compact = false, labels, controls, hintVisibility = 'visible' }: GlobeProps) {
+export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, autoRotate = true, turnPeriod = defaultTurnPeriod, center = defaultCenter, formatValue: givenFormat, unit, size = 360, caption, compact = false, labels, controls, hintVisibility = 'visible', dense = false }: GlobeProps) {
+  const tight = compact || dense;
   const formatValue = givenFormat ?? formatTick;
   const canvas = useRef<HTMLCanvasElement>(null);
   const t = useResolvedTokens(tokenNames);
@@ -200,7 +203,7 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
 
   if (!t) return null;
   return (
-    <figure className={styles.globe}>
+    <figure className={dense ? `${styles.globe} ${styles.dense}` : styles.globe}>
       <div className={styles.stage} style={{ width: size }}>
         {/* Focusable so the keyboard can turn and zoom it; the turn pauses while it has the pointer or focus. */}
         {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
@@ -224,16 +227,16 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
           onFocus={() => setPaused(true)}
           onBlur={() => setPaused(false)}
         />
-        {compact && caption && !tableView ? <div className={styles.corner}>{caption}</div> : null}
+        {tight && caption && !tableView ? <div className={styles.corner}>{caption}</div> : null}
         {placed.length ? (
           <div className={styles.labels} aria-hidden="true">
             {placed.map((l) => <span key={l.id} className={styles.label} style={{ left: `${(l.x / size) * 100}%`, top: `${(l.y / size) * 100}%` }}>{l.text}</span>)}
           </div>
         ) : null}
-        {tableView ? null : compact ? (shownText ? <p className={styles.readoutCorner} aria-hidden="true">{shownText}</p> : null) : <p className={styles.readout} aria-hidden="true">{shownText ?? ' '}</p>}
+        {tableView ? null : tight ? (shownText ? <p className={styles.readoutCorner} aria-hidden="true">{shownText}</p> : null) : <p className={styles.readout} aria-hidden="true">{shownText ?? ' '}</p>}
       </div>
-      {caption && !compact ? <div className={styles.caption}>{caption}</div> : null}
-      <HeatLegend label={valueLabel} domain={domain} formatValue={formatValue} inline={compact} />
+      {caption && !tight ? <div className={styles.caption}>{caption}</div> : null}
+      <HeatLegend label={valueLabel} domain={domain} formatValue={formatValue} inline={tight} dense={dense} endNote={[unit, '· log'].filter(Boolean).join(' ')} />
       <MapControls
         subject="globe"
         onZoomIn={() => zoomBy(zoomStep)}
@@ -246,6 +249,7 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
         hint="Arrow keys turn the globe, + and − zoom, 0 resets."
         hintVisibility={hintVisibility}
         extra={controls}
+        dense={dense}
       />
       <div className={tableView ? styles.tableView : styles.hidden} {...(tableView ? { role: 'region', 'aria-label': 'Table of values', tabIndex: 0 } : {})}>
         <table id={tableId}>

@@ -11,6 +11,10 @@ export interface HeatLegendProps {
   noDataLabel?: string;
   /** The name shares a row with the scale instead of sitting above it. */
   inline?: boolean;
+  /** For a narrow, short space: the name is kept for a screen reader but not drawn, and `endNote` follows the last tick. */
+  dense?: boolean;
+  /** Written after the last tick when `dense`, for example the unit and the scale's kind. */
+  endNote?: string;
 }
 
 /**
@@ -18,7 +22,7 @@ export interface HeatLegendProps {
  * narrow for every label, labels are thinned (every other tick, then every third, …), always keeping both ends; the
  * first label starts at the bar's start and the last ends at its end, so no label runs past the bar.
  */
-export function HeatLegend({ label, domain, formatValue = formatTick, noDataLabel = 'No data', inline = false }: HeatLegendProps) {
+export function HeatLegend({ label, domain, formatValue = formatTick, noDataLabel = 'No data', inline = false, dense = false, endNote }: HeatLegendProps) {
   const ticks = logTicks(domain);
   const textKey = ticks.map(formatValue).join('|');
   const list = useRef<HTMLUListElement>(null);
@@ -51,9 +55,9 @@ export function HeatLegend({ label, domain, formatValue = formatTick, noDataLabe
   const shown = new Set(kept ?? ticks.map((_, i) => i));
   return (
     <div className={styles.legend}>
-      {inline ? null : <span className={styles.label}>{label}, log scale</span>}
-      <div className={[styles.row, inline ? styles.rowInline : ''].filter(Boolean).join(' ')}>
-        {inline ? <span className={styles.label}>{label}, log scale</span> : null}
+      {inline || dense ? null : <span className={styles.label}>{label}, log scale</span>}
+      <div className={[styles.row, inline || dense ? styles.rowInline : ''].filter(Boolean).join(' ')}>
+        {inline || dense ? <span className={dense ? `${styles.label} ${styles.srOnly}` : styles.label}>{label}, log scale</span> : null}
         <div className={styles.scale}>
           <span className={styles.bar} aria-hidden="true" />
           <ul ref={list} className={styles.ticks}>
@@ -64,7 +68,7 @@ export function HeatLegend({ label, domain, formatValue = formatTick, noDataLabe
                 aria-hidden={shown.has(i) ? undefined : 'true'}
                 style={{ insetInlineStart: `${logPosition(t, domain) * 100}%` }}
               >
-                {formatValue(t)}
+                {dense && endNote && i === last ? `${formatValue(t)} ${endNote}` : formatValue(t)}
               </li>
             ))}
           </ul>

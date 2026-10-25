@@ -12,6 +12,10 @@
   color: var(--syn-data-text);
 }
 
+.dense {
+  gap: var(--syn-space-2);
+}
+
 .stage {
   position: relative;
   max-width: 100%;
