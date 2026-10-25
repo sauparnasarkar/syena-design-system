@@ -24,7 +24,8 @@ export interface HeatLegendProps {
  */
 export function HeatLegend({ label, domain, formatValue = formatTick, noDataLabel = 'No data', inline = false, dense = false, endNote }: HeatLegendProps) {
   const ticks = logTicks(domain);
-  const textKey = ticks.map(formatValue).join('|');
+  // The last tick's text also depends on `dense` and `endNote`, so a change in either is measured again.
+  const textKey = [...ticks.map(formatValue), dense ? endNote ?? '' : ''].join('|');
   const list = useRef<HTMLUListElement>(null);
   const [kept, setKept] = useState<number[] | null>(null);
 
