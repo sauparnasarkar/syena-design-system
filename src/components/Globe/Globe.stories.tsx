@@ -455,5 +455,8 @@ export const ControlsInTheSameRowAndAQuietHint: Story = {
     // The hint is still in the page for a screen reader but takes no room.
     const hint = canvas.getByText(/Arrow keys turn the globe/);
     await expect(hint.getBoundingClientRect().width).toBeLessThanOrEqual(1);
+    // A finger-first device drops only the drawn hint: the rule for a coarse pointer does not reach the screen-reader-only one.
+    const dropped = coarseRules().filter((rule) => /_hint_/.test(rule.selectorText) && rule.style.display === 'none');
+    await expect(dropped.every((rule) => /:not\(\.[^)]*srOnly/.test(rule.selectorText))).toBe(true);
   },
 };

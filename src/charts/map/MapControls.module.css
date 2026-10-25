@@ -51,7 +51,7 @@
 
 /* The keys are of no use to a finger, so the hint gives its line back. */
 @media (pointer: coarse) {
-  .hint {
+  .hint:not(.srOnly) {
     display: none;
   }
 }
