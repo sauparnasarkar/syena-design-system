@@ -21,9 +21,37 @@
   text-wrap: balance;
 }
 
+/* More controls beside the buttons: they take the room the buttons leave and wrap above them when the row is narrow. */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--syn-space-2) var(--syn-space-4);
+  width: 100%;
+}
+
+.extra {
+  display: flex;
+  flex: 1 1 14rem;
+  align-items: center;
+  gap: var(--syn-space-3);
+  min-width: 0;
+}
+
+/* Kept for a screen reader, not drawn. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 /* The keys are of no use to a finger, so the hint gives its line back. */
 @media (pointer: coarse) {
-  .hint {
+  .hint:not(.srOnly) {
     display: none;
   }
 }
