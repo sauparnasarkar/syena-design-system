@@ -39,6 +39,22 @@
   min-width: 0;
 }
 
+/* Dense: the extra controls and the one button share a row that does not wrap. */
+.rowDense {
+  flex-wrap: nowrap;
+  gap: var(--syn-space-3);
+}
+
+.rowDense .extra {
+  flex-basis: 0;
+}
+
+/* A finger-sized target. */
+.buttonDense {
+  min-width: var(--syn-layout-control-height);
+  min-height: var(--syn-layout-control-height);
+}
+
 /* Kept for a screen reader, not drawn. */
 .srOnly {
   position: absolute;

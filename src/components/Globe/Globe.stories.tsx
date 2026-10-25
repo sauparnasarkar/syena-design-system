@@ -460,3 +460,58 @@ export const ControlsInTheSameRowAndAQuietHint: Story = {
     await expect(dropped.every((rule) => /:not\(\.[^)]*srOnly/.test(rule.selectorText))).toBe(true);
   },
 };
+
+export const DenseKeepsTheLegendToABarAndOneControlsRow: Story = {
+  args: {
+    autoRotate: false,
+    size: 200,
+    dense: true,
+    hintVisibility: 'sr-only',
+    valueLabel: 'CO₂ (MtCO₂)',
+    caption: <span>2024 · 37,398 MtCO₂</span>,
+    controls: (
+      <>
+        <button type="button" aria-label="Pause years" style={{ minWidth: 'var(--syn-layout-control-height)', minHeight: 'var(--syn-layout-control-height)' }}><span aria-hidden="true" style={{ display: 'block', width: 'var(--syn-space-3)', height: 'var(--syn-space-3)', background: 'currentColor' }} /></button>
+        <input type="range" min={1970} max={2024} defaultValue={2024} aria-label="Year" style={{ flex: 1, minWidth: 0 }} />
+      </>
+    ),
+  },
+  decorators: [(Story) => <div style={{ width: 'calc(21 * var(--syn-space-4))', padding: 'var(--syn-space-4)', background: 'var(--syn-color-surface-base)' }}><Story /></div>],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const box = globe(canvasElement).getBoundingClientRect();
+    // The view buttons for the keys are not drawn; the table button is, as an icon at a finger-sized target.
+    await expect(canvas.queryByRole('button', { name: 'Zoom in globe' })).toBeNull();
+    await expect(canvas.queryByRole('button', { name: 'Zoom out globe' })).toBeNull();
+    await expect(canvas.queryByRole('button', { name: 'Reset view' })).toBeNull();
+    const table = canvas.getByRole('button', { name: 'Table view' });
+    await expect(table.textContent?.trim()).toBe('');
+    const minimum = parseFloat(getComputedStyle(table).minHeight);
+    await expect(table.getBoundingClientRect().height).toBeGreaterThanOrEqual(minimum);
+    // One controls row: Pause, the slider and the table button share a line, and it does not wrap.
+    const pause = canvas.getByRole('button', { name: 'Pause years' }).getBoundingClientRect();
+    const slider = canvas.getByRole('slider', { name: 'Year' }).getBoundingClientRect();
+    await expect(Math.abs(pause.top - table.getBoundingClientRect().top)).toBeLessThan(pause.height);
+    await expect(slider.width).toBeGreaterThan(pause.width);
+    // The legend is a bar with its end values and no name row; its name stays for a screen reader, and the last value carries the unit and the scale.
+    const name = canvas.getByText('CO₂ (MtCO₂), log scale');
+    await expect(name.getBoundingClientRect().width).toBeLessThanOrEqual(1);
+    await expect(canvas.getByText(/^10,000 MtCO₂ · log$/)).toBeVisible();
+    // The caption is on the picture's corner and the controls follow the legend closely.
+    await expect(Math.abs(canvas.getByText(/37,398 MtCO₂/).getBoundingClientRect().top - box.top)).toBeLessThanOrEqual(1);
+    const legend = canvasElement.querySelector('[class*="_legend_"]') as HTMLElement;
+    await expect(pause.top - legend.getBoundingClientRect().bottom).toBeLessThanOrEqual(24);
+  },
+};
+
+export const NotDenseKeepsTheViewButtonsAndTheLegendName: Story = {
+  args: { autoRotate: false, size: 200, compact: true, valueLabel: 'CO₂ (MtCO₂)' },
+  decorators: [page],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('button', { name: 'Zoom in globe' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Reset view' })).toBeVisible();
+    await expect(canvas.getByText('CO₂ (MtCO₂), log scale').getBoundingClientRect().width).toBeGreaterThan(1);
+    await expect(canvas.getByText('10,000')).toBeVisible();
+  },
+};
