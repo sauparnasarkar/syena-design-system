@@ -431,3 +431,29 @@ export const TableRoundsValuesAndListsCountriesWithoutData: Story = {
     await expect(rest.map(([name]) => name)).toEqual([...rest.map(([name]) => name)].sort((a, b) => String(a).localeCompare(String(b))));
   },
 };
+
+export const ControlsInTheSameRowAndAQuietHint: Story = {
+  args: {
+    autoRotate: false,
+    size: 300,
+    compact: true,
+    hintVisibility: 'sr-only',
+    controls: (
+      <>
+        <button type="button" style={{ minHeight: 'var(--syn-layout-control-height-sm)', padding: '0 var(--syn-space-3)' }}>Pause years</button>
+        <input type="range" min={1970} max={2024} defaultValue={2024} aria-label="Year" style={{ flex: 1, minWidth: 0 }} />
+      </>
+    ),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const pause = canvas.getByRole('button', { name: 'Pause years' });
+    const zoomIn = canvas.getByRole('button', { name: 'Zoom in globe' });
+    // One row: the added controls and the view buttons share a line.
+    await expect(Math.abs(pause.getBoundingClientRect().top - zoomIn.getBoundingClientRect().top)).toBeLessThan(40);
+    await expect(canvas.getByRole('slider', { name: 'Year' })).toBeVisible();
+    // The hint is still in the page for a screen reader but takes no room.
+    const hint = canvas.getByText(/Arrow keys turn the globe/);
+    await expect(hint.getBoundingClientRect().width).toBeLessThanOrEqual(1);
+  },
+};

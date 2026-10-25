@@ -36,6 +36,10 @@ export interface GlobeProps {
   compact?: boolean;
   /** Words kept on the picture for a few countries, for example the largest values: each names a country by its alpha-3 code. A label is drawn only while its country faces the viewer, and not in the table view. */
   labels?: { id: string; text: string }[];
+  /** More controls, drawn in the same row as zoom, reset and table view (for example play and a slider for the year). */
+  controls?: ReactNode;
+  /** `sr-only` keeps the keyboard hint for a screen reader and does not draw it. */
+  hintVisibility?: 'visible' | 'sr-only';
 }
 
 const heatNames = ['data-heat-1', 'data-heat-2', 'data-heat-3', 'data-heat-4', 'data-heat-5', 'data-heat-6', 'data-heat-7'] as const;
@@ -62,7 +66,7 @@ const anchorOf = (shape: (typeof coded)[number]['shape']): [number, number] => {
  * A globe that colours countries by value on the heat scale, drawn on a canvas from resolved tokens.
  * It turns, zooms and resets with buttons, the keyboard or a drag, and its values are also a table.
  */
-export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, autoRotate = true, turnPeriod = defaultTurnPeriod, center = defaultCenter, formatValue: givenFormat, unit, size = 360, caption, compact = false, labels }: GlobeProps) {
+export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, autoRotate = true, turnPeriod = defaultTurnPeriod, center = defaultCenter, formatValue: givenFormat, unit, size = 360, caption, compact = false, labels, controls, hintVisibility = 'visible' }: GlobeProps) {
   const formatValue = givenFormat ?? formatTick;
   const canvas = useRef<HTMLCanvasElement>(null);
   const t = useResolvedTokens(tokenNames);
@@ -240,6 +244,8 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
         tableView={tableView}
         onTableViewChange={setTableView}
         hint="Arrow keys turn the globe, + and − zoom, 0 resets."
+        hintVisibility={hintVisibility}
+        extra={controls}
       />
       <div className={tableView ? styles.tableView : styles.hidden} {...(tableView ? { role: 'region', 'aria-label': 'Table of values', tabIndex: 0 } : {})}>
         <table id={tableId}>
