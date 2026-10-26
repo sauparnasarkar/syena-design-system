@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { geoNaturalEarth1 } from 'd3-geo';
+import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test';
+import { coded } from '../../charts/map/countries';
 import { expectHintBalanced, expectLegendFits } from '../../charts/map/legendChecks';
 import { illustrativeEmissions } from '../../specimens/countryValues';
 import { Choropleth } from './Choropleth';
@@ -151,5 +153,69 @@ export const TableRoundsValuesAndListsCountriesWithoutData: Story = {
     await expect(rest.length).toBeGreaterThan(150);
     await expect(rest.every(([, text]) => text === 'No data')).toBe(true);
     await expect(rest.map(([name]) => name)).toEqual([...rest.map(([name]) => name)].sort((a, b) => String(a).localeCompare(String(b))));
+  },
+};
+
+// Where a country sits on the home view of the picture, found the way the map itself fits its shapes to the width.
+const place = (picture: HTMLCanvasElement, lonLat: [number, number]) => {
+  const box = picture.getBoundingClientRect();
+  const at = geoNaturalEarth1().fitWidth(box.width, { type: 'FeatureCollection', features: coded.map((c) => c.shape) })(lonLat)!;
+  return { box, x: box.left + at[0], y: box.top + at[1] };
+};
+const press = (picture: HTMLElement, x: number, y: number, pointerType = 'touch') => {
+  const at = { clientX: x, clientY: y, pointerType, pointerId: 7, isPrimary: true };
+  fireEvent.pointerDown(picture, at);
+  fireEvent.pointerUp(picture, at);
+};
+const tapReadout = (root: HTMLElement) => (root.querySelector('[class*="_readoutTap"]') as HTMLElement | null)?.textContent?.trim() ?? '';
+
+export const TapNamesACountryAndItsValueAndAnotherTapOrEscapeClearsIt: Story = {
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    const picture = map(canvasElement);
+    const india = place(picture, [78, 22]);
+    await expect(tapReadout(canvasElement)).toBe('');
+    // A tap, with no pointer ever hovering: the country and the same figure the table gives.
+    press(picture, india.x, india.y);
+    await waitFor(() => expect(tapReadout(canvasElement)).toMatch(/^India: /));
+    await expect(tapReadout(canvasElement)).toContain(String(illustrativeEmissions.IND).replace(/\B(?=(\d{3})+(?!\d))/g, ','));
+    // It sits over the picture, not below it where a tall map would put it out of sight.
+    const chip = canvasElement.querySelector('[class*="_readoutTap"]') as HTMLElement;
+    await expect(chip.getBoundingClientRect().top).toBeLessThan(india.box.top + 40);
+    // A tap on the sea clears it.
+    press(picture, india.box.left + 2, india.box.top + 2);
+    await waitFor(() => expect(tapReadout(canvasElement)).toBe(''));
+    press(picture, india.x, india.y);
+    await waitFor(() => expect(tapReadout(canvasElement)).toMatch(/^India: /));
+    picture.focus();
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(tapReadout(canvasElement)).toBe(''));
+  },
+};
+
+export const ADragMovesTheMapAndNamesNothing: Story = {
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    const picture = map(canvasElement);
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Zoom in map' }));
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Zoom in map' }));
+    const { x, y } = place(picture, [78, 22]);
+    const at = (dx: number) => ({ clientX: x + dx, clientY: y, pointerType: 'touch', pointerId: 7, isPrimary: true });
+    const start = picture.toDataURL();
+    fireEvent.pointerDown(picture, at(0));
+    fireEvent.pointerMove(picture, at(40));
+    fireEvent.pointerUp(picture, at(40));
+    await waitFor(() => expect(picture.toDataURL()).not.toBe(start));
+    await expect(tapReadout(canvasElement)).toBe('');
+  },
+};
+
+export const AMouseClickLeavesTheNamingToHover: Story = {
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    const picture = map(canvasElement);
+    const { x, y } = place(picture, [78, 22]);
+    press(picture, x, y, 'mouse');
+    await expect(tapReadout(canvasElement)).toBe('');
   },
 };

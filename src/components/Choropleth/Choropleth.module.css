@@ -9,6 +9,7 @@
 }
 
 .stage {
+  position: relative;
   width: 100%;
   min-width: 0;
 }
@@ -26,6 +27,20 @@
 }
 
 /* The country under the pointer, for a reader who is pointing; the table is the text alternative. */
+/* A tapped country, over the picture's top corner so it is seen where the finger is; it only exists while one is chosen, so nothing moves. */
+.readoutTap {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  max-width: 100%;
+  padding: 0 var(--syn-space-2);
+  border-radius: var(--syn-radius-control);
+  background: var(--syn-data-surface);
+  color: var(--syn-data-text);
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+  pointer-events: none;
+}
+
 .caption {
   align-self: stretch;
   text-align: center;
