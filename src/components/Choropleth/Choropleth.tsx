@@ -32,6 +32,8 @@ const tokenNames = ['data-surface', 'data-text', 'data-text-muted', 'data-no-dat
 const defaultDomain: Domain = [0.01, 10000];
 const zoomMax = 8;
 const zoomStep = 1.5;
+/** How far, in px, a press may wander and still be a tap: a finger always wobbles. */
+const tapSlop = 6;
 const land = { type: 'FeatureCollection' as const, features: coded.map((c) => c.shape) };
 
 type View = { k: number; x: number; y: number };
@@ -49,7 +51,9 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
   const [view, setView] = useState<View>(home);
   const [tableView, setTableView] = useState(false);
   const [hover, setHover] = useState<string | null>(null);
-  const drag = useRef<{ x: number; y: number } | null>(null);
+  // A finger does not hover: a tap names a country and its value until another tap or Escape.
+  const [selected, setSelected] = useState<string | null>(null);
+  const drag = useRef<{ startX: number; startY: number; x: number; y: number; moved: boolean } | null>(null);
   const tableId = useId();
 
   const rows = useMemo(() => tableRows(values, givenFormat), [values, givenFormat]);
@@ -108,22 +112,46 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
     else if (k === '+' || k === '=') zoomAbout(zoomStep);
     else if (k === '-' || k === '_') zoomAbout(1 / zoomStep);
     else if (k === '0' || k === 'Home') setView(home);
+    else if (k === 'Escape' && selected) setSelected(null);
     else return;
     event.preventDefault();
   };
-  const onPointerDown = (event: PointerEvent<HTMLCanvasElement>) => { drag.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); };
-  const onPointerMove = (event: PointerEvent<HTMLCanvasElement>) => {
-    if (drag.current) {
-      pan(event.clientX - drag.current.x, event.clientY - drag.current.y);
-      drag.current = { x: event.clientX, y: event.clientY };
-      return;
-    }
+  const countryAt = (event: PointerEvent<HTMLCanvasElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const point = projection.invert?.([(event.clientX - rect.left - view.x) / view.k, (event.clientY - rect.top - view.y) / view.k]);
-    const found = point ? coded.find((c) => geoContains(c.shape, point)) : undefined;
-    setHover(found ? `${found.name}: ${found.code in values ? [formatValue(values[found.code]), unit].filter(Boolean).join(' ') : 'No data'}` : null);
+    return point ? coded.find((c) => geoContains(c.shape, point)) : undefined;
   };
-  const onPointerUp = (event: PointerEvent<HTMLCanvasElement>) => { drag.current = null; event.currentTarget.releasePointerCapture?.(event.pointerId); };
+  // Worked out from the code each time, so the figure follows the values (for example while a year plays).
+  const describe = (code: string) => {
+    const found = coded.find((c) => c.code === code);
+    return found ? `${found.name}: ${code in values ? [formatValue(values[code]), unit].filter(Boolean).join(' ') : 'No data'}` : null;
+  };
+  // Capture keeps a drag going outside the picture; it is only an aid, and the pointer may already be gone.
+  const capture = (el: HTMLElement, id: number, on: boolean) => { try { if (on) el.setPointerCapture(id); else el.releasePointerCapture?.(id); } catch { /* the pointer ended */ } };
+  const onPointerDown = (event: PointerEvent<HTMLCanvasElement>) => {
+    drag.current = { startX: event.clientX, startY: event.clientY, x: event.clientX, y: event.clientY, moved: false };
+    capture(event.currentTarget, event.pointerId, true);
+  };
+  const onPointerMove = (event: PointerEvent<HTMLCanvasElement>) => {
+    const d = drag.current;
+    if (d) {
+      if (!d.moved && Math.hypot(event.clientX - d.startX, event.clientY - d.startY) < tapSlop) return;
+      d.moved = true;
+      pan(event.clientX - d.x, event.clientY - d.y);
+      d.x = event.clientX;
+      d.y = event.clientY;
+      return;
+    }
+    const found = countryAt(event);
+    setHover(found ? describe(found.code) : null);
+  };
+  const onPointerUp = (event: PointerEvent<HTMLCanvasElement>) => {
+    // A touch that did not travel is a tap: it chooses the country under it, or none on the sea. A mouse has hover instead.
+    if (drag.current && !drag.current.moved && event.pointerType === 'touch') setSelected(countryAt(event)?.code ?? null);
+    drag.current = null;
+    capture(event.currentTarget, event.pointerId, false);
+  };
+  const tapped = !tableView && selected ? describe(selected) : null;
 
   return (
     <figure className={styles.map}>
@@ -146,8 +174,10 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
+            onPointerCancel={() => { drag.current = null; }}
           />
         ) : null}
+        {tapped ? <p className={styles.readoutTap} aria-hidden="true">{tapped}</p> : null}
         {tableView ? null : <p className={styles.readout} aria-hidden="true">{hover ?? ' '}</p>}
       </div>
       {caption ? <div className={styles.caption}>{caption}</div> : null}
