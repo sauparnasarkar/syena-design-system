@@ -217,15 +217,17 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
     setHiddenLabels((prev) => (prev.size === next.size && [...next].every((id) => prev.has(id)) ? prev : next));
   }, []);
   useLayoutEffect(measure, [measure, placement]);
-  // The picture may be narrower than `size` (it shrinks with its container) with nothing else changing, which moves and rescales the boxes: measure again whenever it is resized.
+  // The boxes also change without `size` or the labels changing: the picture shrinks with its container (it may be narrower than `size`), and a label's own width changes when its
+  // font loads or swaps. So the stage and every drawn label are watched, and the labels are checked again whenever any of them is resized.
   const stage = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = stage.current;
     if (!el || typeof ResizeObserver === 'undefined') return undefined;
     const observer = new ResizeObserver(measure);
     observer.observe(el);
+    labelBoxes.current.forEach((label) => observer.observe(label));
     return () => observer.disconnect();
-  }, [measure, drawing]);
+  }, [measure, drawing, placement]);
 
   if (!t) return null;
   return (

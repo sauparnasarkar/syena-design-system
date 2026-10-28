@@ -380,6 +380,22 @@ export const LabelsAreCheckedAgainWhenThePictureIsResized: Story = {
   },
 };
 
+/** A label's own width changes when its font loads or swaps, with the picture the same size: the labels are checked again. */
+export const LabelsAreCheckedAgainWhenALabelChangesSize: Story = {
+  args: { autoRotate: false, size: 900, center: [112, 34], labels: [{ id: 'CHN', text: 'China 12,289' }, { id: 'KOR', text: 'South Korea 584' }] },
+  decorators: [page],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const korea = await canvas.findByText('South Korea 584');
+    const china = await canvas.findByText('China 12,289');
+    await waitFor(() => expect(getComputedStyle(korea).visibility).toBe('visible'));
+    china.style.fontSize = '64px'; // what a late font does to the width of the words
+    korea.style.fontSize = '64px';
+    await waitFor(() => expect(getComputedStyle(korea).visibility).toBe('hidden'));
+    await expect(getComputedStyle(china).visibility).toBe('visible');
+  },
+};
+
 export const ALargerGlobeHasRoomForBoth: Story = {
   args: { autoRotate: false, size: 900, center: [112, 34], labels: [{ id: 'CHN', text: 'China 12,289' }, { id: 'KOR', text: 'South Korea 584' }] },
   decorators: [page],
