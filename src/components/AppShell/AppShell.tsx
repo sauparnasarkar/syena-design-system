@@ -65,8 +65,9 @@ export function AppShell({ rail, topBar, analysisBar, strip, children, footer, n
       if (!(el instanceof HTMLElement) || el.closest('[data-syn-sticky], [role="dialog"]')) return;
       requestAnimationFrame(() => {
         if (document.activeElement !== el) return;
-        const { top, bottom } = pinnedClearance();
         const box = el.getBoundingClientRect();
+        // Only the bars that reach across the control: the strip spans the canvas, not the rail beside it.
+        const { top, bottom } = pinnedClearance(box);
         const floor = window.innerHeight - bottom;
         // Nothing to do for something taller than the room left, or already clear.
         if (box.height > floor - top) return;

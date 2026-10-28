@@ -305,6 +305,27 @@ export const AControlReachedByKeyboardIsNeverHiddenUnderAPinnedBar: Story = {
   },
 };
 
+/** The strip spans the canvas, not the rail beside it: a rail control near the bottom edge is fully in view, and focusing it must not move the page. */
+export const FocusingARailControlBesideTheStripDoesNotScrollThePage: Story = {
+  tags: ['desktop-only'],
+  render: () => <Example compact={false} tall controls />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    window.scrollTo(0, 600);
+    await waitFor(() => expect(Math.round(window.scrollY)).toBe(600));
+    const rail = canvas.getByRole('navigation', { name: 'Primary' });
+    const buttons = within(rail).getAllByRole('button');
+    const last = buttons[buttons.length - 1]; // the collapse control, at the foot of the rail
+    const strip = canvas.getByRole('complementary', { name: 'Sources and methodology' }).firstElementChild as HTMLElement;
+    // It is beside the strip, in the same rows of the view but not under it.
+    await expect(last.getBoundingClientRect().right).toBeLessThanOrEqual(strip.getBoundingClientRect().left + 0.5);
+    last.focus({ preventScroll: true });
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    await expect(Math.round(window.scrollY)).toBe(600);
+    window.scrollTo(0, 0);
+  },
+};
+
 export const BackToTopStaysClearOfTheStripWhereverItIs: Story = {
   tags: ['desktop-only'],
   render: () => <Example compact={false} tall />,
