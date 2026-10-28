@@ -1150,7 +1150,7 @@ with named values; there are no colour-named variants.
   navigation drawer and the sheet each have a visible close control at the top; Escape and a
   tap on the dimmed area close them too, and focus returns to the button that opened them.
 - **SourceStrip.** Props: `summary`, `compactSummary` (*Sources* by default), `sources`,
-  `definitions`, `methodNotes`, and `open` / `defaultOpen` / `onOpenChange`. Sticky at the
+  `definitions`, `methodNotes`, `detailsLabel` (the control's words, *Methodology* by default), `detailsHref` and `onDetailsClick` (an app whose details have a page of their own passes the address and the control becomes a link to it, no longer opening the panel; `onDetailsClick` is for navigating without a page load, as `Rail`'s `onBrandClick` is), and `open` / `defaultOpen` / `onOpenChange`. Sticky at the
   bottom; the disclosure button exposes `aria-expanded` and `aria-controls`, and Escape closes
   the panel. In the compact shell (a phone) the strip tucks into a small tab at the start edge once the page has been scrolled on by a few dozen pixels from where it was last shown, so the page has the whole view; it is back in full at the very end of the page, where it rests above the footer, or when the tab is pressed, and it never tucks while its panel is open. The tab keeps the strip's place at the bottom, so *BackToTop* still clears it. Wide screens are unchanged.
 

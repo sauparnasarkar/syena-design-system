@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useShell } from '../AppShell/ShellContext';
 import styles from './SourceStrip.module.css';
@@ -14,6 +14,12 @@ export interface SourceStripProps {
   definitions?: ReactNode;
   /** Method notes: how projections and ranges are produced. */
   methodNotes?: ReactNode;
+  /** The words on the control at the end of the line. */
+  detailsLabel?: string;
+  /** Where the details live, when they have a page of their own. The control then becomes a link to it and no longer opens the panel. */
+  detailsHref?: string;
+  /** Called when the link is activated, for an app that navigates without a page load (it should call `preventDefault`). */
+  onDetailsClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -27,7 +33,7 @@ const tuckAfter = 64;
  * bottom edge of the view and, at the end of the page, rests in the canvas's own bottom space, above the footer. On a phone it tucks into
  * a small tab while the page is scrolled, and is back in full at the end of the page or when the tab is pressed.
  */
-export function SourceStrip({ summary, compactSummary = 'Sources', sources, definitions, methodNotes, open, defaultOpen = false, onOpenChange }: SourceStripProps) {
+export function SourceStrip({ summary, compactSummary = 'Sources', sources, definitions, methodNotes, detailsLabel = 'Methodology', detailsHref, onDetailsClick, open, defaultOpen = false, onOpenChange }: SourceStripProps) {
   const [own, setOwn] = useState(defaultOpen);
   const isOpen = open ?? own;
   const compact = useIsMobile();
@@ -80,9 +86,13 @@ export function SourceStrip({ summary, compactSummary = 'Sources', sources, defi
       {tucked ? null : (
         <div className={[styles.line, phone ? styles.phoneLine : ''].filter(Boolean).join(' ')}>
           <span className={styles.text}>{compact ? compactSummary : summary}</span>
-          <button type="button" className={styles.button} aria-expanded={isOpen} aria-controls={isOpen ? panel : undefined} onClick={() => set(!isOpen)}>
-            Methodology
-          </button>
+          {detailsHref ? (
+            <a className={styles.button} href={detailsHref} onClick={onDetailsClick}>{detailsLabel}</a>
+          ) : (
+            <button type="button" className={styles.button} aria-expanded={isOpen} aria-controls={isOpen ? panel : undefined} onClick={() => set(!isOpen)}>
+              {detailsLabel}
+            </button>
+          )}
         </div>
       )}
       </div>
