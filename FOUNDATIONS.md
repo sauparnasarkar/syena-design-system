@@ -1031,6 +1031,7 @@ drawn at the width of their module, so their text is never scaled.
 - The disclosure button exposes `aria-expanded` and `aria-controls`.
 - Focus is never lost when the rail collapses or expands: the control that was activated
   keeps focus.
+- A control reached by the keyboard is never left hidden under a pinned bar (WCAG 2.2, *Focus Not Obscured*): the browser scrolls it only just into view, so after focus lands the shell brings it clear of the strip at the bottom and the bars pinned to the top (found by `data-syn-sticky`). A control inside a pinned bar or an overlay is not moved.
 
 ### 4.4 Tokens consumed
 

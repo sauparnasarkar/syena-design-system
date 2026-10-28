@@ -1,7 +1,8 @@
-import { useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { Button } from '../Button/Button';
+import { pinnedClearance } from '../../lib/pinnedClearance';
 import { scrollToJumpTarget } from '../../lib/scrollToJumpTarget';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useShortScreen } from '../../hooks/useShortScreen';
@@ -55,6 +56,27 @@ export function AppShell({ rail, topBar, analysisBar, strip, children, footer, n
   const [ownControls, setOwnControls] = useState(false);
   const navOpen = navigationOpen ?? ownNav;
   const ctrlOpen = controlsOpen ?? ownControls;
+  // A control reached by the keyboard is scrolled into view by the browser, which does not know about the shell's pinned bars: it can come to rest under the strip at the bottom or the
+  // bars at the top, hidden while it has focus. So after focus lands, a control that sits under a pinned bar is brought clear of it. (This is done by hand, not with `scroll-padding`:
+  // that would also push the page about whenever focus moves to a control inside a pinned bar.) Controls inside a pinned bar, or an overlay, are left where they are.
+  useEffect(() => {
+    const onFocus = (event: FocusEvent) => {
+      const el = event.target;
+      if (!(el instanceof HTMLElement) || el.closest('[data-syn-sticky], [role="dialog"]')) return;
+      requestAnimationFrame(() => {
+        if (document.activeElement !== el) return;
+        const { top, bottom } = pinnedClearance();
+        const box = el.getBoundingClientRect();
+        const floor = window.innerHeight - bottom;
+        // Nothing to do for something taller than the room left, or already clear.
+        if (box.height > floor - top) return;
+        if (box.bottom > floor) window.scrollBy({ top: box.bottom - floor + 8, behavior: 'auto' });
+        else if (box.top < top) window.scrollBy({ top: box.top - top - 8, behavior: 'auto' });
+      });
+    };
+    document.addEventListener('focusin', onFocus);
+    return () => document.removeEventListener('focusin', onFocus);
+  }, []);
   const state = useMemo(() => ({
     compact,
     navigationOpen: navOpen,

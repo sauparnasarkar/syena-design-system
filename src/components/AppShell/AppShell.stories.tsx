@@ -27,7 +27,7 @@ const modulesOf = (suffix: string) => ['Key figures', 'Trend', 'Composition', 'C
 ));
 const modules = modulesOf('');
 
-function Example({ compact, slots, tall, groups = navGroups }: { compact?: boolean; slots?: boolean; tall?: boolean; groups?: typeof navGroups }) {
+function Example({ compact, slots, tall, groups = navGroups, controls }: { compact?: boolean; slots?: boolean; tall?: boolean; groups?: typeof navGroups; controls?: boolean }) {
   return (
     <AppShell
       compact={compact}
@@ -42,6 +42,7 @@ function Example({ compact, slots, tall, groups = navGroups }: { compact?: boole
       footer={<Footer copyright="© 2026 Example organisation" links={[{ label: 'Privacy', href: '#privacy' }]} />}
     >
       {tall ? [' one', ' two', ' three'].map((n) => <div key={n} style={{ display: 'contents' }}>{modulesOf(n)}</div>) : modules}
+      {controls ? <div style={{ display: 'grid', gap: 'var(--syn-space-6)' }}>{Array.from({ length: 14 }, (_, i) => <button key={i} type="button">{`Control ${i + 1}`}</button>)}</div> : null}
       <BackToTop targetId="content" />
     </AppShell>
   );
@@ -268,6 +269,38 @@ export const TheStripTakesNoRoomAndNeverCoversContent: Story = {
     await waitFor(() => expect(Math.abs(strip.getBoundingClientRect().bottom - footer.getBoundingClientRect().top)).toBeLessThanOrEqual(1));
     const last = main.querySelector('section:last-of-type') as HTMLElement;
     await expect(strip.getBoundingClientRect().top).toBeGreaterThanOrEqual(last.getBoundingClientRect().bottom - 0.5);
+    window.scrollTo(0, 0);
+  },
+};
+
+export const AControlReachedByKeyboardIsNeverHiddenUnderAPinnedBar: Story = {
+  tags: ['desktop-only'],
+  render: () => <Example compact={false} tall controls />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const strip = canvas.getByRole('complementary', { name: 'Sources and methodology' }).firstElementChild as HTMLElement;
+    const pinnedTop = () => Math.max(0, ...[...document.querySelectorAll('[data-syn-sticky="top"]')].map((el) => (getComputedStyle(el).position === 'sticky' || getComputedStyle(el).position === 'fixed' ? el.getBoundingClientRect().bottom : 0)));
+    window.scrollTo(0, 0);
+    const probes = canvas.getAllByRole('button', { name: /^Control \d+$/ });
+    // Walk the controls in order with the Tab key, as a keyboard user does, and check each one is fully clear of both the strip at the bottom and the bars at the top once it has focus.
+    probes[0].focus();
+    for (let i = 0; i < probes.length; i += 1) {
+      if (i > 0) await userEvent.tab();
+      await expect(document.activeElement).toBe(probes[i]);
+      await new Promise((resolve) => setTimeout(resolve, 60));
+      const box = probes[i].getBoundingClientRect();
+      await expect(box.bottom).toBeLessThanOrEqual(strip.getBoundingClientRect().top + 0.5);
+      await expect(box.top).toBeGreaterThanOrEqual(pinnedTop() - 0.5);
+    }
+    // Shift+Tab back up: the same at the top edge.
+    for (let i = probes.length - 2; i >= 0; i -= 1) {
+      await userEvent.tab({ shift: true });
+      await expect(document.activeElement).toBe(probes[i]);
+      await new Promise((resolve) => setTimeout(resolve, 60));
+      const box = probes[i].getBoundingClientRect();
+      await expect(box.bottom).toBeLessThanOrEqual(strip.getBoundingClientRect().top + 0.5);
+      await expect(box.top).toBeGreaterThanOrEqual(pinnedTop() - 0.5);
+    }
     window.scrollTo(0, 0);
   },
 };
