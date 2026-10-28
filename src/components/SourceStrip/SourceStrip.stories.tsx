@@ -39,5 +39,30 @@ export const OpensAndClosesWithEscape: Story = {
   },
 };
 
+export const RenamedControl: Story = {
+  args: { detailsLabel: 'About this data' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('button', { name: 'About this data' })).toHaveAttribute('aria-expanded', 'false');
+    await expect(canvas.queryByRole('button', { name: 'Methodology' })).toBeNull();
+  },
+};
+
+/** With a page of its own, the control is a link to it and no longer opens the panel; `onDetailsClick` lets an app navigate without a page load. */
+export const LinksToItsPage: Story = {
+  args: { detailsLabel: 'Methods & data', detailsHref: '/about' },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const link = canvas.getByRole('link', { name: 'Methods & data' });
+    await expect(link).toHaveAttribute('href', '/about');
+    await expect(canvas.queryByRole('button', { name: 'Methods & data' })).toBeNull();
+    await expect(link).not.toHaveAttribute('aria-expanded');
+    link.addEventListener('click', (e) => e.preventDefault(), { once: true }); // a story must not leave the page
+    await userEvent.click(link);
+    await expect(canvas.queryByRole('heading', { name: 'Definitions' })).toBeNull();
+    void args;
+  },
+};
+
 export const Open: Story = { args: { defaultOpen: true } };
 export const OpenTidewater: Story = { args: { defaultOpen: true }, globals: { theme: 'tidewater' } };

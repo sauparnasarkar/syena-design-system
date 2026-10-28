@@ -34,6 +34,12 @@
   text-decoration: underline;
 }
 
+/* The control as a link: it sits on the line like the button does, and needs the line's height to centre. */
+a.button {
+  display: inline-flex;
+  align-items: center;
+}
+
 .line {
   display: flex;
   align-items: center;
