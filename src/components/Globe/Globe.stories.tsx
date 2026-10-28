@@ -367,6 +367,19 @@ export const TheOrderOfTheLabelsDecidesWhichOverlapperStays: Story = {
   },
 };
 
+/** The picture shrinks with its container while `size` and the labels stay the same: the labels are checked again, so two that now meet are separated. */
+export const LabelsAreCheckedAgainWhenThePictureIsResized: Story = {
+  args: { autoRotate: false, size: 900, center: [112, 34], labels: [{ id: 'CHN', text: 'China 12,289' }, { id: 'KOR', text: 'South Korea 584' }] },
+  decorators: [(Story) => <div id="globe-room" style={{ width: 900 }}><Story /></div>],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await waitFor(async () => { await expect(getComputedStyle(await canvas.findByText('South Korea 584')).visibility).toBe('visible'); });
+    canvasElement.querySelector<HTMLElement>('#globe-room')!.style.width = '300px';
+    await waitFor(async () => { await expect(getComputedStyle(await canvas.findByText('South Korea 584')).visibility).toBe('hidden'); });
+    await expect(getComputedStyle(await canvas.findByText('China 12,289')).visibility).toBe('visible');
+  },
+};
+
 export const ALargerGlobeHasRoomForBoth: Story = {
   args: { autoRotate: false, size: 900, center: [112, 34], labels: [{ id: 'CHN', text: 'China 12,289' }, { id: 'KOR', text: 'South Korea 584' }] },
   decorators: [page],

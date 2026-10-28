@@ -1,5 +1,5 @@
 import { geoArea, geoCentroid, geoContains, geoDistance, geoGraticule10, geoOrthographic, geoPath } from 'd3-geo';
-import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
 import { coded } from '../../charts/map/countries';
 import { tableRows } from '../../charts/map/tableRows';
 import { HeatLegend } from '../../charts/map/HeatLegend';
@@ -212,15 +212,25 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
   // (The globe draws nothing until its tokens are resolved, so that is part of it too: the labels have no boxes before.)
   const drawing = Boolean(t);
   const placement = `${drawing}|${size}|${placed.map((l) => `${l.id}@${l.x.toFixed(1)},${l.y.toFixed(1)}:${l.text}`).join('|')}`;
-  useLayoutEffect(() => {
+  const measure = useCallback(() => {
     const next = collidingLabels(drawn.current.flatMap((l) => { const el = labelBoxes.current.get(l.id); return el ? [{ id: l.id, box: el.getBoundingClientRect() }] : []; }));
     setHiddenLabels((prev) => (prev.size === next.size && [...next].every((id) => prev.has(id)) ? prev : next));
-  }, [placement]);
+  }, []);
+  useLayoutEffect(measure, [measure, placement]);
+  // The picture may be narrower than `size` (it shrinks with its container) with nothing else changing, which moves and rescales the boxes: measure again whenever it is resized.
+  const stage = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = stage.current;
+    if (!el || typeof ResizeObserver === 'undefined') return undefined;
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [measure, drawing]);
 
   if (!t) return null;
   return (
     <figure className={dense ? `${styles.globe} ${styles.dense}` : styles.globe}>
-      <div className={styles.stage} style={{ width: size }}>
+      <div ref={stage} className={styles.stage} style={{ width: size }}>
         {/* Focusable so the keyboard can turn and zoom it; the turn pauses while it has the pointer or focus. */}
         {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
         <canvas
