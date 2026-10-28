@@ -336,6 +336,79 @@ export const LabelsNameTheCountriesTheyAreGiven: Story = {
   },
 };
 
+/** Two neighbours whose names would meet on a small globe: the earlier label in the list stays, the later one is hidden, and the order decides which. */
+export const LabelsThatWouldOverlapKeepTheEarlierOne: Story = {
+  args: { autoRotate: false, size: 300, center: [112, 34], labels: [{ id: 'CHN', text: 'China 12,289' }, { id: 'KOR', text: 'South Korea 584' }, { id: 'IND', text: 'India 3,193' }] },
+  decorators: [page],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const china = await canvas.findByText('China 12,289');
+    const korea = await canvas.findByText('South Korea 584');
+    // The two really do meet: this would overlap if both were drawn.
+    const a = china.getBoundingClientRect();
+    const b = korea.getBoundingClientRect();
+    await expect(a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom).toBe(true);
+    await waitFor(() => expect(getComputedStyle(korea).visibility).toBe('hidden'));
+    await expect(getComputedStyle(china).visibility).toBe('visible');
+    // A label that touches nothing is drawn.
+    await expect(getComputedStyle(await canvas.findByText('India 3,193')).visibility).toBe('visible');
+  },
+};
+
+export const TheOrderOfTheLabelsDecidesWhichOverlapperStays: Story = {
+  args: { autoRotate: false, size: 300, center: [112, 34], labels: [{ id: 'KOR', text: 'South Korea 584' }, { id: 'CHN', text: 'China 12,289' }] },
+  decorators: [page],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const korea = await canvas.findByText('South Korea 584');
+    const china = await canvas.findByText('China 12,289');
+    await waitFor(() => expect(getComputedStyle(china).visibility).toBe('hidden'));
+    await expect(getComputedStyle(korea).visibility).toBe('visible');
+  },
+};
+
+/** The picture shrinks with its container while `size` and the labels stay the same: the labels are checked again, so two that now meet are separated. */
+export const LabelsAreCheckedAgainWhenThePictureIsResized: Story = {
+  args: { autoRotate: false, size: 900, center: [112, 34], labels: [{ id: 'CHN', text: 'China 12,289' }, { id: 'KOR', text: 'South Korea 584' }] },
+  decorators: [(Story) => <div id="globe-room" style={{ width: 900 }}><Story /></div>],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await waitFor(async () => { await expect(getComputedStyle(await canvas.findByText('South Korea 584')).visibility).toBe('visible'); });
+    canvasElement.querySelector<HTMLElement>('#globe-room')!.style.width = '300px';
+    await waitFor(async () => { await expect(getComputedStyle(await canvas.findByText('South Korea 584')).visibility).toBe('hidden'); });
+    await expect(getComputedStyle(await canvas.findByText('China 12,289')).visibility).toBe('visible');
+  },
+};
+
+/** A label's own width changes when its font loads or swaps, with the picture the same size: the labels are checked again. */
+export const LabelsAreCheckedAgainWhenALabelChangesSize: Story = {
+  args: { autoRotate: false, size: 900, center: [112, 34], labels: [{ id: 'CHN', text: 'China 12,289' }, { id: 'KOR', text: 'South Korea 584' }] },
+  decorators: [page],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const korea = await canvas.findByText('South Korea 584');
+    const china = await canvas.findByText('China 12,289');
+    await waitFor(() => expect(getComputedStyle(korea).visibility).toBe('visible'));
+    china.style.fontSize = '64px'; // what a late font does to the width of the words
+    korea.style.fontSize = '64px';
+    await waitFor(() => expect(getComputedStyle(korea).visibility).toBe('hidden'));
+    await expect(getComputedStyle(china).visibility).toBe('visible');
+  },
+};
+
+export const ALargerGlobeHasRoomForBoth: Story = {
+  args: { autoRotate: false, size: 900, center: [112, 34], labels: [{ id: 'CHN', text: 'China 12,289' }, { id: 'KOR', text: 'South Korea 584' }] },
+  decorators: [page],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // The hidden ones come back as soon as the picture gives them room (here the globe is three times as wide).
+    await waitFor(async () => {
+      await expect(getComputedStyle(await canvas.findByText('China 12,289')).visibility).toBe('visible');
+      await expect(getComputedStyle(await canvas.findByText('South Korea 584')).visibility).toBe('visible');
+    });
+  },
+};
+
 export const LabelsAreNotReadTwice: Story = {
   args: { autoRotate: false, size: 300, center: [78, 22], labels: [{ id: 'IND', text: 'India 3,200' }] },
   play: async ({ canvasElement }) => {

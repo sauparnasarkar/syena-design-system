@@ -1,5 +1,5 @@
 import { geoArea, geoCentroid, geoContains, geoDistance, geoGraticule10, geoOrthographic, geoPath } from 'd3-geo';
-import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
 import { coded } from '../../charts/map/countries';
 import { tableRows } from '../../charts/map/tableRows';
 import { HeatLegend } from '../../charts/map/HeatLegend';
@@ -7,6 +7,7 @@ import { MapControls } from '../../charts/map/MapControls';
 import { formatTick, heatColour, type Domain } from '../../charts/map/heat';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { useResolvedTokens } from '../../theme/SynThemeProvider';
+import { collidingLabels } from './labels';
 import { defaultTurnPeriod, degreesPerMillisecond } from './turn';
 import styles from './Globe.module.css';
 
@@ -34,7 +35,7 @@ export interface GlobeProps {
   caption?: ReactNode;
   /** A shorter figure for a wide setting: the caption and the pointed-at country are drawn on the picture's corners, and the legend's name shares a row with its scale. */
   compact?: boolean;
-  /** Words kept on the picture for a few countries, for example the largest values: each names a country by its alpha-3 code. A label is drawn only while its country faces the viewer, and not in the table view. */
+  /** Words kept on the picture for a few countries, for example the largest values: each names a country by its alpha-3 code. A label is drawn only while its country faces the viewer, and not in the table view. Where two labels would overlap, the one earlier in the list is kept and the later one is hidden until the view moves them apart, so list them in order of importance (for example the largest value first). */
   labels?: { id: string; text: string }[];
   /** More controls, drawn in the same row as zoom, reset and table view (for example play and a slider for the year). */
   controls?: ReactNode;
@@ -55,7 +56,6 @@ const turnStep = 10;
 const maxTilt = 70;
 /** How far a press may move and still be a tap, in pixels. */
 const tapSlop = 6;
-
 /** The middle of the country's largest part, so a country with far islands is labelled on its mainland. */
 const anchorOf = (shape: (typeof coded)[number]['shape']): [number, number] => {
   const g = shape.geometry;
@@ -201,10 +201,38 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
     return xy && xy[0] >= 0 && xy[0] <= size && xy[1] >= 0 && xy[1] <= size ? [{ ...l, x: xy[0], y: xy[1] }] : [];
   });
 
+  // A label has no size until it is laid out, so the words are drawn, measured, and the ones that would overlap an earlier (more important) label are hidden, not removed:
+  // a hidden label keeps its box, so it comes back as soon as the view moves it clear. Runs after every drawing of the labels (they move as the globe turns); the state only
+  // changes when the set of hidden labels does.
+  const labelBoxes = useRef(new Map<string, HTMLSpanElement>());
+  const drawn = useRef(placed);
+  drawn.current = placed; // in the order given: the effect below reads the labels as of this drawing
+  const [hiddenLabels, setHiddenLabels] = useState<ReadonlySet<string>>(new Set());
+  // What the labels' boxes depend on: which are drawn, where, and what they say (and the width of the picture they sit on).
+  // (The globe draws nothing until its tokens are resolved, so that is part of it too: the labels have no boxes before.)
+  const drawing = Boolean(t);
+  const placement = `${drawing}|${size}|${placed.map((l) => `${l.id}@${l.x.toFixed(1)},${l.y.toFixed(1)}:${l.text}`).join('|')}`;
+  const measure = useCallback(() => {
+    const next = collidingLabels(drawn.current.flatMap((l) => { const el = labelBoxes.current.get(l.id); return el ? [{ id: l.id, box: el.getBoundingClientRect() }] : []; }));
+    setHiddenLabels((prev) => (prev.size === next.size && [...next].every((id) => prev.has(id)) ? prev : next));
+  }, []);
+  useLayoutEffect(measure, [measure, placement]);
+  // The boxes also change without `size` or the labels changing: the picture shrinks with its container (it may be narrower than `size`), and a label's own width changes when its
+  // font loads or swaps. So the stage and every drawn label are watched, and the labels are checked again whenever any of them is resized.
+  const stage = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = stage.current;
+    if (!el || typeof ResizeObserver === 'undefined') return undefined;
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    labelBoxes.current.forEach((label) => observer.observe(label));
+    return () => observer.disconnect();
+  }, [measure, drawing, placement]);
+
   if (!t) return null;
   return (
     <figure className={dense ? `${styles.globe} ${styles.dense}` : styles.globe}>
-      <div className={styles.stage} style={{ width: size }}>
+      <div ref={stage} className={styles.stage} style={{ width: size }}>
         {/* Focusable so the keyboard can turn and zoom it; the turn pauses while it has the pointer or focus. */}
         {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
         <canvas
@@ -230,7 +258,16 @@ export function Globe({ values, valueLabel, ariaLabel, domain = defaultDomain, a
         {tight && caption && !tableView ? <div className={styles.corner}>{caption}</div> : null}
         {placed.length ? (
           <div className={styles.labels} aria-hidden="true">
-            {placed.map((l) => <span key={l.id} className={styles.label} style={{ left: `${(l.x / size) * 100}%`, top: `${(l.y / size) * 100}%` }}>{l.text}</span>)}
+            {placed.map((l) => (
+              <span
+                key={l.id}
+                ref={(el) => { if (el) labelBoxes.current.set(l.id, el); else labelBoxes.current.delete(l.id); }}
+                className={styles.label}
+                style={{ left: `${(l.x / size) * 100}%`, top: `${(l.y / size) * 100}%`, visibility: hiddenLabels.has(l.id) ? 'hidden' : undefined }}
+              >
+                {l.text}
+              </span>
+            ))}
           </div>
         ) : null}
         {tableView ? null : tight ? (shownText ? <p className={styles.readoutCorner} aria-hidden="true">{shownText}</p> : null) : <p className={styles.readout} aria-hidden="true">{shownText ?? ' '}</p>}
