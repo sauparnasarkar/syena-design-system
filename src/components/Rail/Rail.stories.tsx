@@ -126,6 +126,17 @@ export const BrandLinksToTheStartPage: Story = {
   },
 };
 
+export const ALongerProductNameStaysOnOneLine: Story = {
+  args: { productName: 'Degrees of Carbon' },
+  play: async ({ canvasElement }) => {
+    const name = within(canvasElement).getByText('Degrees of Carbon');
+    const lineHeight = parseFloat(getComputedStyle(name).lineHeight);
+    await expect(name.getBoundingClientRect().height).toBeLessThan(lineHeight * 1.5); // not wrapped
+    const rail = canvasElement.querySelector('nav') as HTMLElement;
+    await expect(name.getBoundingClientRect().right).toBeLessThanOrEqual(rail.getBoundingClientRect().right); // not pushed past the rail's edge
+  },
+};
+
 export const BrandIsPlainWithoutALink: Story = {
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).queryByRole('link', { name: /Climate analysis|Example product/ })).toBeNull();
