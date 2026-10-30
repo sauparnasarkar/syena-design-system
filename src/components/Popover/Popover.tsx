@@ -26,6 +26,8 @@ export interface PopoverProps {
   side?: PopoverSide;
   /** Which edges line up: `end` lines the panel's far edge (right, or bottom beside the trigger) with the trigger's. */
   align?: PopoverAlign;
+  /** An element the panel must clear on the side it opens (a rail the trigger sits in): it starts beyond that element's edge, not beside the trigger. */
+  clearOf?: () => Element | null;
   /** The panel's width, in CSS; it never exceeds the screen. */
   width?: string;
   open?: boolean;
@@ -41,7 +43,7 @@ const MARGIN = 8;
  * or focus leaving it closes it. Escape and the close button return focus to the trigger. It sits above the page (in a portal, so a
  * narrow rail does not clip it), on the side of the trigger with room, and scrolls inside when the screen is short.
  */
-export function Popover({ trigger, title, children, side = 'bottom', align = 'end', width = '22.5rem', open: controlled, defaultOpen = false, onOpenChange }: PopoverProps) {
+export function Popover({ trigger, title, children, side = 'bottom', align = 'end', clearOf, width = '22.5rem', open: controlled, defaultOpen = false, onOpenChange }: PopoverProps) {
   const [own, setOwn] = useState(defaultOpen);
   const open = controlled ?? own;
   const [placement, setPlacement] = useState<(PopoverPlacement & { maxWidth: number }) | null>(null);
@@ -63,6 +65,10 @@ export function Popover({ trigger, title, children, side = 'bottom', align = 'en
     if (returnFocus) triggerEl?.focus();
   }, [setOpen, triggerEl]);
 
+  // Read when the panel is placed, not a reason to place it again: a caller's inline function is a new one every render.
+  const clearOfRef = useRef(clearOf);
+  useLayoutEffect(() => { clearOfRef.current = clearOf; });
+
   // Placed after layout and before paint, so it never shows in the wrong place; kept in place as the page moves or the panel changes size.
   const place = useCallback((fromContent = false) => {
     // The panel grew or shrank (a list opened inside it, say) after the reader started using it: it stays where it is, within the room it
@@ -83,8 +89,10 @@ export function Popover({ trigger, title, children, side = 'bottom', align = 'en
     panel.style.maxWidth = `${maxWidth}px`;
     const size = { width: panel.offsetWidth, height: panel.scrollHeight + (panel.offsetHeight - panel.clientHeight) };
     panel.style.maxHeight = held;
-    const seen = { left: anchor.left - origin.left, right: anchor.right - origin.left, top: anchor.top - origin.top, bottom: anchor.bottom - origin.top };
-    const placed = placePopover(seen, size, viewport, side, align, GAP, MARGIN);
+    const around = clearOfRef.current?.()?.getBoundingClientRect();
+    const toView = (r: { left: number; right: number; top: number; bottom: number }) => ({ left: r.left - origin.left, right: r.right - origin.left, top: r.top - origin.top, bottom: r.bottom - origin.top });
+    const seen = toView(anchor);
+    const placed = placePopover(seen, size, viewport, side, align, GAP, MARGIN, around ? toView(around) : undefined);
     const next = { ...placed, top: placed.top + origin.top, left: placed.left + origin.left, maxWidth };
     setPlacement((was) => (was && was.top === next.top && was.left === next.left && was.maxHeight === next.maxHeight && was.side === next.side && was.maxWidth === next.maxWidth ? was : next));
   }, [side, align, triggerEl]);

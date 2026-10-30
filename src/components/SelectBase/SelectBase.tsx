@@ -135,7 +135,8 @@ export function SelectBase(props: SelectBaseProps) {
     ? `${selected.length} selected${atLimit ? ', limit reached' : `, up to ${props.maxSelected}`}`
     : `${selected.length} selected`;
 
-  const chosen = options.filter((o) => selected.includes(o.value));
+  // In the order the reader chose them, not the order of the options: "India and 2 more" for India, Brazil, Indonesia.
+  const chosen = selected.map((v) => options.find((o) => o.value === v)).filter((o): o is Option => !!o);
   const text = chosen.length === 0 ? placeholder : chosen.length <= 2 || !multiple ? chosen.map((o) => o.label).join(', ') : `${chosen[0].label} and ${chosen.length - 1} more`;
 
   return (

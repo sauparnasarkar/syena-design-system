@@ -36,4 +36,15 @@ describe('placePopover', () => {
     const p = placePopover(box(8, 20), { width: 360, height: 300 }, phone, 'bottom', 'end', 8, 8);
     expect(p.left).toBe(8);
   });
+
+  it('clears the element around the trigger on the side it lands on, whichever that is', () => {
+    const rail = { left: 0, top: 0, right: 60, bottom: 700 };
+    const gear = box(10, 640);
+    expect(placePopover(gear, size, viewport, 'right', 'end', 8, 8, rail).left).toBe(68); // beyond the rail, not beside the gear (58)
+    // Too little room on the right: it flips to the left of the element's near edge, not the trigger's.
+    const wide = { left: 700, top: 0, right: 1000, bottom: 700 };
+    const flipped = placePopover(box(940, 640), { width: 360, height: 400 }, viewport, 'right', 'end', 8, 8, wide);
+    expect(flipped.side).toBe('left');
+    expect(flipped.left).toBe(700 - 8 - 360);
+  });
 });
