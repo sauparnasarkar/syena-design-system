@@ -89,17 +89,10 @@ export function Popover({ trigger, title, children, side = 'bottom', align = 'en
     panel.style.maxWidth = `${maxWidth}px`;
     const size = { width: panel.offsetWidth, height: panel.scrollHeight + (panel.offsetHeight - panel.clientHeight) };
     panel.style.maxHeight = held;
-    // The edge the panel opens from: the trigger's own, or (clearOf) the far edge of the element around it, so it never covers that element.
     const around = clearOfRef.current?.()?.getBoundingClientRect();
-    const edge = {
-      left: side === 'left' && around ? Math.min(anchor.left, around.left) : anchor.left,
-      right: side === 'right' && around ? Math.max(anchor.right, around.right) : anchor.right,
-      top: side === 'top' && around ? Math.min(anchor.top, around.top) : anchor.top,
-      bottom: side === 'bottom' && around ? Math.max(anchor.bottom, around.bottom) : anchor.bottom,
-    };
-    const seen = { left: edge.left - origin.left, right: edge.right - origin.left, top: anchor.top - origin.top, bottom: anchor.bottom - origin.top };
-    if (side === 'top' || side === 'bottom') { seen.top = edge.top - origin.top; seen.bottom = edge.bottom - origin.top; seen.left = anchor.left - origin.left; seen.right = anchor.right - origin.left; }
-    const placed = placePopover(seen, size, viewport, side, align, GAP, MARGIN);
+    const toView = (r: { left: number; right: number; top: number; bottom: number }) => ({ left: r.left - origin.left, right: r.right - origin.left, top: r.top - origin.top, bottom: r.bottom - origin.top });
+    const seen = toView(anchor);
+    const placed = placePopover(seen, size, viewport, side, align, GAP, MARGIN, around ? toView(around) : undefined);
     const next = { ...placed, top: placed.top + origin.top, left: placed.left + origin.left, maxWidth };
     setPlacement((was) => (was && was.top === next.top && was.left === next.left && was.maxHeight === next.maxHeight && was.side === next.side && was.maxWidth === next.maxWidth ? was : next));
   }, [side, align, triggerEl]);

@@ -19,12 +19,17 @@ interface Box { top: number; left: number; right: number; bottom: number }
  * preferred side, or the opposite one when the panel does not fit there and the opposite has more room; it is then slid along that side
  * to stay in view, and given a `maxHeight` so that what does not fit scrolls inside it.
  */
-export function placePopover(anchor: Box, size: { width: number; height: number }, viewport: { width: number; height: number }, side: PopoverSide, align: PopoverAlign, gap: number, margin: number): PopoverPlacement {
+export function placePopover(anchor: Box, size: { width: number; height: number }, viewport: { width: number; height: number }, side: PopoverSide, align: PopoverAlign, gap: number, margin: number, around?: Box): PopoverPlacement {
+  // The edge each side opens from: the trigger's own, or (around) the far edge of the element that holds it, so the panel never covers that
+  // element on whichever side it lands. Along the side it is aligned with the trigger.
+  const edge: Box = around
+    ? { left: Math.min(anchor.left, around.left), right: Math.max(anchor.right, around.right), top: Math.min(anchor.top, around.top), bottom: Math.max(anchor.bottom, around.bottom) }
+    : anchor;
   const room: Record<PopoverSide, number> = {
-    bottom: viewport.height - anchor.bottom - gap - margin,
-    top: anchor.top - gap - margin,
-    right: viewport.width - anchor.right - gap - margin,
-    left: anchor.left - gap - margin,
+    bottom: viewport.height - edge.bottom - gap - margin,
+    top: edge.top - gap - margin,
+    right: viewport.width - edge.right - gap - margin,
+    left: edge.left - gap - margin,
   };
   const need = side === 'bottom' || side === 'top' ? size.height : size.width;
   const chosen = room[side] >= need || room[side] >= room[opposite[side]] ? side : opposite[side];
@@ -38,12 +43,12 @@ export function placePopover(anchor: Box, size: { width: number; height: number 
   if (vertical) {
     maxHeight = Math.max(0, room[chosen]);
     const height = Math.min(size.height, maxHeight);
-    top = chosen === 'bottom' ? anchor.bottom + gap : anchor.top - gap - height;
+    top = chosen === 'bottom' ? edge.bottom + gap : edge.top - gap - height;
     left = align === 'end' ? anchor.right - width : anchor.left;
   } else {
     maxHeight = Math.max(0, viewport.height - 2 * margin);
     const height = Math.min(size.height, maxHeight);
-    left = chosen === 'right' ? anchor.right + gap : anchor.left - gap - width;
+    left = chosen === 'right' ? edge.right + gap : edge.left - gap - width;
     top = align === 'end' ? anchor.bottom - height : anchor.top;
   }
   const height = Math.min(size.height, maxHeight);
