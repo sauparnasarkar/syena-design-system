@@ -95,3 +95,14 @@ export const OpenInNight: Story = {
   globals: { theme: 'night' },
   play: async ({ canvasElement }) => { await userEvent.click(within(canvasElement).getByRole('combobox')); },
 };
+
+// The field names the choices in the order they were made, not the options' order: "Net zero pathway and 2 more" for net zero, current, pledges.
+export const SummaryKeepsTheReadersOrder: Story = {
+  render: () => <Controlled value={['netzero', 'current', 'pledges']} />,
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('combobox')).toHaveTextContent('Net zero pathway and 2 more');
+    await userEvent.click(within(canvasElement).getByRole('combobox'));
+    await userEvent.click(await within(canvasElement).findByRole('option', { name: /Delayed/ }));
+    await expect(within(canvasElement).getByRole('combobox')).toHaveTextContent('Net zero pathway and 3 more');
+  },
+};

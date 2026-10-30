@@ -200,6 +200,26 @@ export const StaysPutOnceUsed: Story = {
   },
 };
 
+// A trigger inside a narrow column (a rail): the panel starts beyond the column's edge, bottom-aligned with the trigger, not beside the trigger.
+export const ClearsTheRailItIsOpenedFrom: Story = {
+  render: () => (
+    <div style={{ position: 'fixed', left: 0, bottom: 0, top: 0, width: '4rem', boxSizing: 'border-box', paddingBottom: '3rem', borderRight: '1px solid var(--syn-color-border-default)', display: 'flex', alignItems: 'end' }} data-syn-rail="">
+      <Popover title="Settings" side="right" align="end" clearOf={() => document.querySelector('[data-syn-rail=""]')} trigger={(props) => <Button variant="ghost" icon="settings" aria-label="Settings" {...props} />}>
+        <p>Panel</p>
+      </Popover>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Settings' }));
+    const dialog = await waitFor(() => { const d = panel(); if (!d || d.style.visibility !== 'visible') throw new Error('not placed'); return d; });
+    const rail = canvasElement.querySelector('[data-syn-rail=""]')!.getBoundingClientRect();
+    const gear = within(canvasElement).getByRole('button', { name: 'Settings' }).getBoundingClientRect();
+    const box = dialog.getBoundingClientRect();
+    await expect(Math.round(box.left)).toBe(Math.round(rail.right + 8));
+    await expect(Math.abs(box.bottom - gear.bottom)).toBeLessThan(2);
+  },
+};
+
 export const OpenTidewater: Story = {
   globals: { theme: 'tidewater' },
   args: { align: 'start' },
