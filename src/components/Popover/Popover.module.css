@@ -8,7 +8,8 @@
   max-width: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: var(--syn-space-4) var(--syn-space-5) calc(var(--syn-space-4) + env(safe-area-inset-bottom, 0px));
+  /* No padding above: the header carries it, so that it can stay pinned at the very top while the rest scrolls. */
+  padding: 0 var(--syn-space-5) calc(var(--syn-space-4) + env(safe-area-inset-bottom, 0px));
   border: var(--syn-layout-border-hairline) solid var(--syn-color-border-default);
   border-radius: var(--syn-radius-card);
   background: var(--syn-color-surface-raised);
@@ -21,6 +22,12 @@
 }
 
 .header {
+  /* The title and the close button stay in view while the content scrolls under them. */
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding-block: var(--syn-space-4) var(--syn-space-2);
+  background: var(--syn-color-surface-raised);
   display: flex;
   align-items: center;
   justify-content: space-between;

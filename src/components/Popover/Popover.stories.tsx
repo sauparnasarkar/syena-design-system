@@ -160,6 +160,44 @@ export const StaysInTheViewportBesideATrigger: Story = {
   },
 };
 
+function Growing() {
+  const [more, setMore] = useState(false);
+  return (
+    <div style={{ position: 'fixed', left: 0, bottom: 0, padding: 'var(--syn-space-4)' }}>
+      <Popover title="Settings" side="right" align="end" trigger={(props) => <Button variant="ghost" icon="settings" aria-label="Settings" {...props} />}>
+        <Button variant="secondary" onClick={() => setMore((m) => !m)}>{more ? 'Show less' : 'Show more'}</Button>
+        <div style={{ height: more ? 'calc(100vh - 120px)' : '4rem' }}>Content</div>
+      </Popover>
+    </div>
+  );
+}
+
+// Opened at the bottom, then used: when its content grows it does not climb up the screen; it keeps its place and scrolls inside.
+export const StaysPutOnceUsed: Story = {
+  render: () => <Growing />,
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Settings' }));
+    const dialog = await waitFor(() => { const d = panel(); if (!d || d.style.visibility !== 'visible') throw new Error('not placed'); return d; });
+    const before = dialog.getBoundingClientRect();
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Show more' }));
+    await waitFor(() => expect(within(dialog).getByRole('button', { name: 'Show less' })).toBeInTheDocument());
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    const after = dialog.getBoundingClientRect();
+    await expect(Math.abs(after.top - before.top)).toBeLessThan(2);
+    await expect(Math.abs(after.bottom - before.bottom)).toBeLessThan(2);
+    await expect(dialog.scrollHeight).toBeGreaterThan(dialog.clientHeight);
+    // The title and the close button stay at the top while the content scrolls.
+    dialog.scrollTop = dialog.scrollHeight;
+    await waitFor(() => expect(dialog.scrollTop).toBeGreaterThan(50));
+    const heading = within(dialog).getByRole('heading', { name: 'Settings' });
+    const close = within(dialog).getByRole('button', { name: 'Close settings' });
+    const top = dialog.getBoundingClientRect().top;
+    await expect(heading.getBoundingClientRect().top).toBeGreaterThanOrEqual(top);
+    await expect(heading.getBoundingClientRect().top - top).toBeLessThan(40);
+    await expect(close.getBoundingClientRect().top - top).toBeLessThan(40);
+  },
+};
+
 export const OpenTidewater: Story = {
   globals: { theme: 'tidewater' },
   args: { align: 'start' },

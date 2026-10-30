@@ -47,6 +47,8 @@ export function Popover({ trigger, title, children, side = 'bottom', align = 'en
   const [placement, setPlacement] = useState<(PopoverPlacement & { maxWidth: number }) | null>(null);
   const [triggerEl, setTriggerEl] = useState<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  // Set once the reader has pressed or typed inside the panel: from then on a change in the panel's own size does not move it (see `place`).
+  const used = useRef(false);
   const panelId = useId();
   const titleId = useId();
   const theme = useOptionalSynTheme();
@@ -62,7 +64,11 @@ export function Popover({ trigger, title, children, side = 'bottom', align = 'en
   }, [setOpen, triggerEl]);
 
   // Placed after layout and before paint, so it never shows in the wrong place; kept in place as the page moves or the panel changes size.
-  const place = useCallback(() => {
+  const place = useCallback((fromContent = false) => {
+    // The panel grew or shrank (a list opened inside it, say) after the reader started using it: it stays where it is, within the room it
+    // was given, and scrolls inside. Moving it out from under their pointer would be worse than a scrollbar. Before that, and for a change
+    // of the window or the page, it is placed afresh.
+    if (fromContent && used.current) return;
     const anchor = triggerEl?.getBoundingClientRect();
     const panel = panelRef.current;
     if (!anchor || !panel) return;
@@ -85,21 +91,31 @@ export function Popover({ trigger, title, children, side = 'bottom', align = 'en
 
   useLayoutEffect(() => {
     if (!open) return undefined;
+    used.current = false;
     place();
-    const resized = new ResizeObserver(place);
+    const resized = new ResizeObserver(() => place(true));
     if (panelRef.current) resized.observe(panelRef.current);
-    window.addEventListener('resize', place);
-    window.addEventListener('scroll', place, true);
-    window.visualViewport?.addEventListener('resize', place);
-    window.visualViewport?.addEventListener('scroll', place);
+    const again = () => place();
+    window.addEventListener('resize', again);
+    window.addEventListener('scroll', again, true);
+    window.visualViewport?.addEventListener('resize', again);
+    window.visualViewport?.addEventListener('scroll', again);
     return () => {
       resized.disconnect();
-      window.removeEventListener('resize', place);
-      window.removeEventListener('scroll', place, true);
-      window.visualViewport?.removeEventListener('resize', place);
-      window.visualViewport?.removeEventListener('scroll', place);
+      window.removeEventListener('resize', again);
+      window.removeEventListener('scroll', again, true);
+      window.visualViewport?.removeEventListener('resize', again);
+      window.visualViewport?.removeEventListener('scroll', again);
     };
   }, [open, place]);
+
+  // The reader has started using the panel: it keeps the place and the height it has now, so what grows inside it scrolls inside it.
+  const settle = () => {
+    if (used.current) return;
+    used.current = true;
+    const height = panelRef.current?.offsetHeight;
+    if (height) setPlacement((was) => (was ? { ...was, maxHeight: Math.min(was.maxHeight, height) } : was));
+  };
 
   // Focus moves into the panel once it is placed: a hidden element cannot take it.
   const placed = placement !== null;
@@ -135,7 +151,8 @@ export function Popover({ trigger, title, children, side = 'bottom', align = 'en
         className={styles.panel}
         // A control inside that handles Escape itself (an open list) has already said so with preventDefault, and stopped it; then only it closes.
         // Otherwise the panel closes and the Escape goes no further, so it does not also close a drawer or an opened rail around the trigger.
-        onKeyDown={(event) => { if (event.key === 'Escape' && !event.defaultPrevented) { event.preventDefault(); event.stopPropagation(); close(); } }}
+        onPointerDown={settle}
+        onKeyDown={(event) => { settle(); if (event.key === 'Escape' && !event.defaultPrevented) { event.preventDefault(); event.stopPropagation(); close(); } }}
         style={{ width, maxWidth: placement ? `${placement.maxWidth}px` : `calc(100vw - ${2 * MARGIN}px)`, top: placement?.top ?? 0, left: placement?.left ?? 0, maxHeight: placement ? placement.maxHeight : undefined, visibility: placement ? 'visible' : 'hidden' }}
       >
         <div className={styles.header}>
