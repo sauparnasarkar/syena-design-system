@@ -96,6 +96,28 @@ export const EscapeStaysInsideThePanel: Story = {
   },
 };
 
+export const EscapeOnTheTriggerStaysWithThePopover: Story = {
+  play: async ({ canvasElement }) => {
+    const outer = fn();
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') outer(); };
+    document.addEventListener('keydown', onKey);
+    try {
+      const button = trigger(canvasElement);
+      await userEvent.click(button);
+      await waitFor(() => expect(panel()).not.toBeNull());
+      // Focus back on the trigger leaves the panel open; Escape there closes it and goes no further.
+      button.focus();
+      await expect(panel()).not.toBeNull();
+      await userEvent.keyboard('{Escape}');
+      await waitFor(() => expect(panel()).toBeNull());
+      await expect(button).toHaveFocus();
+      await expect(outer).not.toHaveBeenCalled();
+    } finally {
+      document.removeEventListener('keydown', onKey);
+    }
+  },
+};
+
 export const CloseButtonReturnsFocus: Story = {
   play: async ({ canvasElement }) => {
     const button = trigger(canvasElement);

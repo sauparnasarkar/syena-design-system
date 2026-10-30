@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode, type Ref } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode, type Ref } from 'react';
 import { createPortal } from 'react-dom';
 import { useOptionalSynTheme } from '../../theme/SynThemeProvider';
 import { Button } from '../Button/Button';
@@ -12,6 +12,7 @@ export interface PopoverTriggerProps {
   'aria-controls': string | undefined;
   'aria-haspopup': 'dialog';
   onClick: () => void;
+  onKeyDown: (event: ReactKeyboardEvent) => void;
 }
 
 export interface PopoverProps {
@@ -109,18 +110,13 @@ export function Popover({ trigger, title, children, side = 'bottom', align = 'en
   useEffect(() => {
     if (!open) return undefined;
     const outside = (target: EventTarget | null) => !panelRef.current?.contains(target as Node) && !triggerEl?.contains(target as Node);
-    // Escape inside the panel is handled by the panel itself (below), which keeps it from a drawer or rail around the trigger. This is for
-    // Escape pressed with focus elsewhere, such as on the trigger, while the panel is open.
-    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape' && !event.defaultPrevented && !panelRef.current?.contains(event.target as Node)) close(); };
     // The trigger counts as inside: its own click toggles, and a press that closed the panel first would let that click reopen it.
     // A press, not a click, so a tap on a touch screen closes at once. Focus is not pulled back from what was pressed.
     const onPress = (event: PointerEvent) => { if (outside(event.target)) close(false); };
     const onFocusIn = (event: FocusEvent) => { if (outside(event.target)) close(false); };
-    document.addEventListener('keydown', onKey);
     document.addEventListener('pointerdown', onPress, true);
     document.addEventListener('focusin', onFocusIn);
     return () => {
-      document.removeEventListener('keydown', onKey);
       document.removeEventListener('pointerdown', onPress, true);
       document.removeEventListener('focusin', onFocusIn);
     };
@@ -153,7 +149,12 @@ export function Popover({ trigger, title, children, side = 'bottom', align = 'en
 
   return (
     <>
-      {trigger({ ref: setTriggerEl, 'aria-expanded': open, 'aria-controls': open ? panelId : undefined, 'aria-haspopup': 'dialog', onClick: () => (open ? close(false) : setOpen(true)) }, open)}
+      {trigger({
+        ref: setTriggerEl, 'aria-expanded': open, 'aria-controls': open ? panelId : undefined, 'aria-haspopup': 'dialog',
+        onClick: () => (open ? close(false) : setOpen(true)),
+        // Escape with focus on the trigger, which keeps the panel open (it is not a press outside): close it here and go no further, so a drawer or an opened rail around the trigger does not close too.
+        onKeyDown: (event) => { if (open && event.key === 'Escape' && !event.defaultPrevented) { event.preventDefault(); event.stopPropagation(); close(); } },
+      }, open)}
       {panel ? createPortal(panel, document.body) : null}
     </>
   );
