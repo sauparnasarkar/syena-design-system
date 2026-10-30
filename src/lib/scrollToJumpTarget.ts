@@ -1,3 +1,5 @@
+import { prefersReducedMotion } from './motion';
+
 /**
  * The bottom edge of the bars pinned to the top of the page, so a target lands below them: where a pinned bar sits once the page has
  * scrolled, not where it is now. A bar that is not pinned (it scrolls away with the page, as on a short screen) is not counted.
@@ -16,7 +18,7 @@ export function stickyOffset() {
  * screen-reader users arrive there too. Scrolls smoothly unless motion is reduced. With `skipIfVisible`, a target
  * that is already fully in view is not scrolled to (focus still moves).
  */
-export function scrollToJumpTarget(id: string, { reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches, skipIfVisible = false } = {}) {
+export function scrollToJumpTarget(id: string, { reducedMotion = prefersReducedMotion(), skipIfVisible = false } = {}) {
   const target = document.getElementById(id);
   if (!target) return false;
   const box = target.getBoundingClientRect();

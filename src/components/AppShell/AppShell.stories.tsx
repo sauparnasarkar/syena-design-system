@@ -27,11 +27,11 @@ const modulesOf = (suffix: string) => ['Key figures', 'Trend', 'Composition', 'C
 ));
 const modules = modulesOf('');
 
-function Example({ compact, slots, tall, groups = navGroups, controls }: { compact?: boolean; slots?: boolean; tall?: boolean; groups?: typeof navGroups; controls?: boolean }) {
+function Example({ compact, slots, tall, groups = navGroups, controls, tallUtilities }: { compact?: boolean; slots?: boolean; tall?: boolean; groups?: typeof navGroups; controls?: boolean; tallUtilities?: boolean }) {
   return (
     <AppShell
       compact={compact}
-      rail={<Rail logo={placeholderMark} productName="Climate analysis" groups={groups} footerItems={navFooter} current="country" onItemClick={(_item, event) => event.preventDefault()} actions={slots ? <button type="button">Ask the agent</button> : undefined} utilities={slots ? <button type="button">Theme</button> : undefined} />}
+      rail={<Rail logo={placeholderMark} productName="Climate analysis" groups={groups} footerItems={navFooter} current="country" onItemClick={(_item, event) => event.preventDefault()} actions={slots ? <button type="button">Ask the agent</button> : undefined} utilities={tallUtilities ? <div style={{ display: 'grid', gap: 'var(--syn-space-3)' }}>{Array.from({ length: 12 }, (_, i) => <button key={i} type="button">{`Setting ${i + 1}`}</button>)}</div> : slots ? <button type="button">Theme</button> : undefined} utilitiesScroll={tallUtilities} />}
       topBar={<TopBar logo={placeholderMark} title="Country profile" summary="Example country · 1990 to 2024" />}
       analysisBar={
         <AnalysisBar title="Country profile" purpose="How one country's emissions have changed and where current policy leads.">
@@ -102,6 +102,23 @@ export const CompactDrawerKeepsUtilitiesInView: Story = {
     await expect(drawer.scrollHeight).toBeLessThanOrEqual(drawer.clientHeight + 1);
     const list = within(drawer).getByRole('link', { name: 'Destination 1' }).closest('nav')!.querySelector('[class*="destinations"]')!;
     await expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
+  },
+};
+
+// Utilities too tall to stay in view (a settings form) scroll with the destinations instead of being pinned and clipped.
+export const CompactDrawerScrollsTallUtilities: Story = {
+  render: () => <Example compact groups={manyGroups} tallUtilities />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Open navigation' }));
+    const drawer = await canvas.findByRole('dialog', { name: 'Navigation' });
+    const last = within(drawer).getByRole('button', { name: 'Setting 12' });
+    const list = within(drawer).getByRole('link', { name: 'Destination 1' }).closest('nav')!.querySelector('[class*="destinations"]')!;
+    await expect(list.contains(last)).toBe(true);
+    await expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
+    // Scrolled to the end, the last setting is reachable, inside the drawer.
+    list.scrollTop = list.scrollHeight;
+    await waitFor(() => expect(last.getBoundingClientRect().bottom).toBeLessThanOrEqual(drawer.getBoundingClientRect().bottom + 1));
   },
 };
 
