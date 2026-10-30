@@ -23,6 +23,8 @@ export interface RailProps extends Pick<SidebarNavProps, 'groups' | 'footerItems
   actions?: RailSlot;
   /** Utilities at the foot, above the collapse control, for example a theme switch. They are in the drawer too. */
   utilities?: RailSlot;
+  /** In the drawer, put the utilities under the destinations, in the part that scrolls, instead of pinned at the foot. For utilities too tall to stay in view, such as a settings form. Has no effect outside the drawer. */
+  utilitiesScroll?: boolean;
   /** The rail's own state, expanded or collapsed. On a short, narrow screen (a phone turned sideways) the rail is always narrow, and opening it lays it over the content for as long as it is wanted; this state is neither read nor changed there, so it is as it was when the screen is no longer short. */
   collapsed?: boolean;
   defaultCollapsed?: boolean;
@@ -30,7 +32,7 @@ export interface RailProps extends Pick<SidebarNavProps, 'groups' | 'footerItems
   ariaLabel?: string;
 }
 
-export function Rail({ logo, productName, brandHref, onBrandClick, productSwitcher, actions, utilities, groups, footerItems, current, onItemClick, collapsed, defaultCollapsed = false, onCollapsedChange, ariaLabel = 'Primary' }: RailProps) {
+export function Rail({ logo, productName, brandHref, onBrandClick, productSwitcher, actions, utilities, utilitiesScroll = false, groups, footerItems, current, onItemClick, collapsed, defaultCollapsed = false, onCollapsedChange, ariaLabel = 'Primary' }: RailProps) {
   const shell = useShell();
   const short = useShortScreen();
   const [own, setOwn] = useState(defaultCollapsed);
@@ -100,9 +102,10 @@ export function Rail({ logo, productName, brandHref, onBrandClick, productSwitch
       {/* In the drawer only the destinations scroll, so the utilities stay in view; a collapsed rail needs its tooltips to overflow. */}
       <div className={drawer ? styles.destinations : styles.destinationsFree}>
         <SidebarNav groups={groups} footerItems={footerItems} current={current} collapsed={isCollapsed} onItemClick={(item, event) => { onItemClick?.(item, event); if (drawer) shell?.setNavigationOpen(false); if (overlaid) close(); }} />
+        {drawer && utilitiesScroll && utilities ? <div className={styles.scrolledUtilities}>{typeof utilities === 'function' ? utilities(isCollapsed) : utilities}</div> : null}
       </div>
       <div className={styles.foot}>
-        {utilities ? <div className={styles.utilities}>{typeof utilities === 'function' ? utilities(isCollapsed) : utilities}</div> : null}
+        {utilities && !(drawer && utilitiesScroll) ? <div className={styles.utilities}>{typeof utilities === 'function' ? utilities(isCollapsed) : utilities}</div> : null}
         {drawer ? null : (
           <button ref={toggleButton} type="button" className={styles.toggle} aria-expanded={!isCollapsed} aria-label={isCollapsed ? 'Expand navigation' : 'Collapse navigation'} onClick={toggle}>
             <Icon name="collapse" className={isCollapsed ? styles.turned : undefined} />

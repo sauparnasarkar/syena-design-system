@@ -1,0 +1,35 @@
+.panel {
+  position: fixed;
+  z-index: var(--syn-layer-overlay);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--syn-space-4);
+  max-width: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--syn-space-4) var(--syn-space-5) calc(var(--syn-space-4) + env(safe-area-inset-bottom, 0px));
+  border: var(--syn-layout-border-hairline) solid var(--syn-color-border-default);
+  border-radius: var(--syn-radius-card);
+  background: var(--syn-color-surface-raised);
+  color: var(--syn-color-text-secondary);
+  box-shadow: var(--syn-elevation-3);
+}
+
+.panel:focus {
+  outline: none;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--syn-space-3);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--syn-space-4);
+  min-width: 0;
+}

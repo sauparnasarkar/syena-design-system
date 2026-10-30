@@ -115,6 +115,9 @@ export function SynThemeProvider({ theme: forced, defaultChoice = 'system', stor
   );
 }
 
+/** The theme context where there is one, else null: for a part that renders outside the provider's wrapper (a portal) and must still carry the theme. */
+export const useOptionalSynTheme = () => useContext(ThemeContext);
+
 export function useSynTheme(): ThemeContextValue {
   const value = useContext(ThemeContext);
   if (!value) throw new Error('useSynTheme must be used inside SynThemeProvider');

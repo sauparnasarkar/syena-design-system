@@ -130,6 +130,16 @@
   margin-top: auto;
 }
 
+/* Utilities that scroll with the destinations (the drawer, `utilitiesScroll`): set apart from them, and free to be as tall as they need. */
+.scrolledUtilities {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-top: var(--syn-space-4);
+  padding: var(--syn-space-4) var(--syn-space-1) 0;
+  border-top: var(--syn-layout-border-hairline) solid var(--syn-color-border-default);
+}
+
 /* Whatever a utility draws stays inside the rail, expanded or collapsed. */
 .utilities {
   display: flex;

@@ -72,15 +72,25 @@ a {
   display: none !important;
 }
 
+/* Reduced motion: the device asks for it (unless an app has forced full motion), or an app has forced it. SynMotionProvider sets data-syn-motion. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  :root:not([data-syn-motion='full']) *,
+  :root:not([data-syn-motion='full']) *::before,
+  :root:not([data-syn-motion='full']) *::after {
     animation-duration: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0s !important;
     scroll-behavior: auto !important;
   }
+}
+
+:root[data-syn-motion='reduce'] *,
+:root[data-syn-motion='reduce'] *::before,
+:root[data-syn-motion='reduce'] *::after {
+  animation-duration: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0s !important;
+  scroll-behavior: auto !important;
 }
 
 /* Built-in controls, and the scrollbars of scrolling regions, follow the theme. */
