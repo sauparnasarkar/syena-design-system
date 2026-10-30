@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { placePopover } from './position';
+import { placePopover } from '../../src/components/Popover/position';
 
 const viewport = { width: 1000, height: 700 };
 const size = { width: 360, height: 400 };
