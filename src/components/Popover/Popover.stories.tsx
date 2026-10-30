@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { Button } from '../Button/Button';
 import { MultiSelect } from '../MultiSelect/MultiSelect';
 import { Popover } from './Popover';
@@ -75,6 +75,24 @@ export const OutsidePressClosesAndTheTriggerToggles: Story = {
     await userEvent.click(after);
     await waitFor(() => expect(panel()).toBeNull());
     await expect(after).toHaveFocus();
+  },
+};
+
+export const EscapeStaysInsideThePanel: Story = {
+  play: async ({ canvasElement }) => {
+    // Something around the trigger that closes on Escape (a drawer, an opened rail) must not also receive the key.
+    const outer = fn();
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') outer(); };
+    document.addEventListener('keydown', onKey);
+    try {
+      await userEvent.click(trigger(canvasElement));
+      await waitFor(() => expect(panel()).not.toBeNull());
+      await userEvent.keyboard('{Escape}');
+      await waitFor(() => expect(panel()).toBeNull());
+      await expect(outer).not.toHaveBeenCalled();
+    } finally {
+      document.removeEventListener('keydown', onKey);
+    }
   },
 };
 

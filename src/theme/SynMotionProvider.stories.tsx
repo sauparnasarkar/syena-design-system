@@ -47,6 +47,10 @@ export const ReduceForcesReducedMotion: Story = {
     document.body.append(probe);
     await expect(getComputedStyle(probe).transitionDuration).toBe('0s');
     probe.remove();
+    // The document's own smooth scrolling is turned off too, not only its descendants'.
+    document.documentElement.style.scrollBehavior = 'smooth';
+    await expect(getComputedStyle(document.documentElement).scrollBehavior).toBe('auto');
+    document.documentElement.style.scrollBehavior = '';
   },
 };
 

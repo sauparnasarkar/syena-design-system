@@ -74,6 +74,7 @@ a {
 
 /* Reduced motion: the device asks for it (unless an app has forced full motion), or an app has forced it. SynMotionProvider sets data-syn-motion. */
 @media (prefers-reduced-motion: reduce) {
+  :root:not([data-syn-motion='full']),
   :root:not([data-syn-motion='full']) *,
   :root:not([data-syn-motion='full']) *::before,
   :root:not([data-syn-motion='full']) *::after {
@@ -84,6 +85,7 @@ a {
   }
 }
 
+:root[data-syn-motion='reduce'],
 :root[data-syn-motion='reduce'] *,
 :root[data-syn-motion='reduce'] *::before,
 :root[data-syn-motion='reduce'] *::after {

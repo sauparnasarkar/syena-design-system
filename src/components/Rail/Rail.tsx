@@ -67,7 +67,12 @@ export function Rail({ logo, productName, brandHref, onBrandClick, productSwitch
   useEffect(() => {
     if (!overlaid) return;
     const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') close(); };
-    const onPointer = (event: PointerEvent) => { if (!nav.current?.contains(event.target as Node)) close(false); };
+    // A press inside a popover opened from the rail (its panel is in a portal, outside the nav) is not a press outside the rail.
+    const ownedPopover = (target: EventTarget | null) => {
+      const panel = (target as Element | null)?.closest?.('[data-syn-popover]');
+      return panel ? Boolean(panel.id && nav.current?.querySelector(`[aria-controls="${panel.id}"]`)) : false;
+    };
+    const onPointer = (event: PointerEvent) => { if (!nav.current?.contains(event.target as Node) && !ownedPopover(event.target)) close(false); };
     // A tap on the rail's action (which the app defines) closes it too, as a destination does.
     const onClick = (event: Event) => { if (actionsBox.current?.contains(event.target as Node)) close(); };
     document.addEventListener('keydown', onKey);
