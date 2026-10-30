@@ -96,14 +96,16 @@ export function Popover({ trigger, title, children, side = 'bottom', align = 'en
     const resized = new ResizeObserver(() => place(true));
     if (panelRef.current) resized.observe(panelRef.current);
     const again = () => place();
+    // The page or an ancestor scrolling moves the trigger, so the panel follows; the panel's own content scrolling does not.
+    const scrolled = (event: Event) => { if (!panelRef.current?.contains(event.target as Node)) place(); };
     window.addEventListener('resize', again);
-    window.addEventListener('scroll', again, true);
+    window.addEventListener('scroll', scrolled, true);
     window.visualViewport?.addEventListener('resize', again);
     window.visualViewport?.addEventListener('scroll', again);
     return () => {
       resized.disconnect();
       window.removeEventListener('resize', again);
-      window.removeEventListener('scroll', again, true);
+      window.removeEventListener('scroll', scrolled, true);
       window.visualViewport?.removeEventListener('resize', again);
       window.visualViewport?.removeEventListener('scroll', again);
     };

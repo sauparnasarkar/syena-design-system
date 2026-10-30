@@ -186,9 +186,11 @@ export const StaysPutOnceUsed: Story = {
     await expect(Math.abs(after.top - before.top)).toBeLessThan(2);
     await expect(Math.abs(after.bottom - before.bottom)).toBeLessThan(2);
     await expect(dialog.scrollHeight).toBeGreaterThan(dialog.clientHeight);
-    // The title and the close button stay at the top while the content scrolls.
+    // The title and the close button stay at the top while the content scrolls, and scrolling the content does not move the panel.
     dialog.scrollTop = dialog.scrollHeight;
     await waitFor(() => expect(dialog.scrollTop).toBeGreaterThan(50));
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    await expect(Math.abs(dialog.getBoundingClientRect().top - before.top)).toBeLessThan(2);
     const heading = within(dialog).getByRole('heading', { name: 'Settings' });
     const close = within(dialog).getByRole('button', { name: 'Close settings' });
     const top = dialog.getBoundingClientRect().top;
