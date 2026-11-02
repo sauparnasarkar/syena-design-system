@@ -33,8 +33,7 @@
   list-style: none;
 }
 
-.band,
-.nodata {
+.band {
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -42,8 +41,23 @@
   text-align: center;
 }
 
-.nodata {
-  flex: 0 0 4rem;
+/* The keys beside the bands: No data (hatched) and, when the map outlines chosen countries, the outline's own swatch. */
+.keys {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--syn-space-1);
+}
+
+.key {
+  display: flex;
+  align-items: center;
+  gap: var(--syn-space-2);
+  white-space: nowrap;
+}
+
+.key .swatch {
+  width: var(--syn-space-5);
 }
 
 .swatch {
@@ -59,6 +73,12 @@
     var(--syn-data-no-data);
   outline: var(--syn-layout-border-hairline) solid var(--syn-data-text-muted);
   outline-offset: calc(-1 * var(--syn-layout-border-hairline));
+}
+
+.outlined {
+  border: var(--syn-layout-border-hairline) solid var(--syn-data-text);
+  background: none;
+  box-shadow: 0 0 0 var(--syn-space-1) var(--syn-data-surface), inset 0 0 0 var(--syn-layout-border-hairline) var(--syn-data-text);
 }
 
 .range {
@@ -92,17 +112,12 @@
     grid-row: 1;
   }
 
-  .nodata {
+  .keys {
     grid-column: 2;
     grid-row: 1;
-    flex: none;
     flex-direction: row;
     align-items: center;
-    gap: var(--syn-space-2);
-  }
-
-  .nodata .swatch {
-    width: var(--syn-space-5);
+    gap: var(--syn-space-4);
   }
 
   .bands {
@@ -124,6 +139,11 @@
   color: var(--syn-data-map-ink-muted);
 }
 
+.onMap .outlined {
+  border-color: var(--syn-data-map-ink);
+  box-shadow: 0 0 0 var(--syn-space-1) var(--syn-data-map-stroke);
+}
+
 .onMap .hatched {
   background:
     repeating-linear-gradient(45deg, color-mix(in srgb, var(--syn-data-map-ink) 35%, transparent) 0 1px, transparent 1px 4px),
@@ -131,8 +151,15 @@
   outline-color: var(--syn-data-map-ink-muted);
 }
 
-/* A phone: the ranges only, as the swatches are about a quarter of the width each; the counts stay for a screen reader, and the table lists every value. */
+/* A phone: the keys take a row of their own under the bands; the ranges only, as the swatches are about a quarter of the width each; the counts stay for a screen reader, and the table lists every value. */
 @container (max-width: 26rem) {
+  .keys {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    flex-wrap: wrap;
+    gap: var(--syn-space-1) var(--syn-space-4);
+  }
+
   .count {
     position: absolute;
     width: 1px;

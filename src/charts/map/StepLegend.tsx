@@ -10,9 +10,11 @@ export interface StepLegendProps {
   counts?: number[];
   /** How a count is written; "12 countries" by default. */
   formatCount?: (count: number) => string;
-  /** How many countries have no data, written under the No data swatch so the legend adds up to all of them; nothing is drawn when it is 0 or not given. */
+  /** How many countries have no data, written after "No data" ("No data · 3 countries") so the legend adds up to all of them; nothing is added when it is 0 or not given. */
   noDataCount?: number;
   noDataLabel?: string;
+  /** A key for the outline the map draws round chosen countries, written beside No data ("Selected"): a swatch of the same double stroke. Nothing when not given. */
+  outlineLabel?: string;
   /** Drawn on the mid-tone map panel rather than the dark data panel. */
   onMap?: boolean;
 }
@@ -23,7 +25,7 @@ const defaultCount = (n: number) => `${n} ${n === 1 ? 'country' : 'countries'}`;
  * The legend of a banded map: eight equal swatches in a row, the range under each (and, optionally, how many countries are in it), then a hatched
  * No data swatch. On a narrow screen the bands are two rows of four.
  */
-export function StepLegend({ label, bandLabels, counts, formatCount = defaultCount, noDataLabel = 'No data', noDataCount, onMap = false }: StepLegendProps) {
+export function StepLegend({ label, bandLabels, counts, formatCount = defaultCount, noDataLabel = 'No data', noDataCount, outlineLabel, onMap = false }: StepLegendProps) {
   return (
     <div className={onMap ? `${styles.legend} ${styles.onMap}` : styles.legend}>
       <div className={styles.inner}>
@@ -38,11 +40,18 @@ export function StepLegend({ label, bandLabels, counts, formatCount = defaultCou
             </li>
           ))}
         </ol>
-        <span className={styles.nodata}>
-          <span className={`${styles.swatch} ${styles.hatched}`} aria-hidden="true" />
-          <span className={styles.range}>{noDataLabel}</span>
-          {noDataCount ? <span className={styles.count}>{formatCount(noDataCount)}</span> : null}
-        </span>
+        <div className={styles.keys}>
+          <span className={styles.key}>
+            <span className={`${styles.swatch} ${styles.hatched}`} aria-hidden="true" />
+            <span className={styles.range}>{noDataCount ? `${noDataLabel} · ${formatCount(noDataCount)}` : noDataLabel}</span>
+          </span>
+          {outlineLabel ? (
+            <span className={styles.key}>
+              <span className={`${styles.swatch} ${styles.outlined}`} aria-hidden="true" />
+              <span className={styles.range}>{outlineLabel}</span>
+            </span>
+          ) : null}
+        </div>
       </div>
       </div>
     </div>
