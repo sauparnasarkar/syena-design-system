@@ -26,6 +26,7 @@ const defaultCount = (n: number) => `${n} ${n === 1 ? 'country' : 'countries'}`;
 export function StepLegend({ label, bandLabels, counts, formatCount = defaultCount, noDataLabel = 'No data', noDataCount, onMap = false }: StepLegendProps) {
   return (
     <div className={onMap ? `${styles.legend} ${styles.onMap}` : styles.legend}>
+      <div className={styles.inner}>
       <span className={styles.label}>{label}</span>
       <div className={styles.row}>
         <ol className={styles.bands} aria-label={`${label}, in ${bandTokens.length} bands from lowest to highest`}>
@@ -42,6 +43,7 @@ export function StepLegend({ label, bandLabels, counts, formatCount = defaultCou
           <span className={styles.range}>{noDataLabel}</span>
           {noDataCount ? <span className={styles.count}>{formatCount(noDataCount)}</span> : null}
         </span>
+      </div>
       </div>
     </div>
   );

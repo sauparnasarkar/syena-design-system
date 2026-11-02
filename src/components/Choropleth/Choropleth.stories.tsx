@@ -410,3 +410,24 @@ export const OverlayControlsLeaveTheTapReadoutItsRoom: Story = {
     await expect(long.scrollWidth).toBeLessThanOrEqual(long.clientWidth + 1);
   },
 };
+
+// The compact layout holds no line for the hover read-out (it appears over the picture's bottom-right corner), and at a narrow width the No data swatch shares the legend label's row.
+export const CompactHoverReadoutOverlaysAndNoDataSharesTheLabelRow: Story = {
+  args: { ...bandedArgs, controls: 'overlay', noDataCount: 3 },
+  decorators: [frame('min(100%, 36rem)')],
+  play: async ({ canvasElement }) => {
+    await waitFor(() => expect(bandPixels(bandedMap(canvasElement)).filter((n) => n > 20).length).toBeGreaterThanOrEqual(4), { timeout: 8000 });
+    const picture = bandedMap(canvasElement);
+    const figureHeight = canvasElement.querySelector('figure')!.getBoundingClientRect().height;
+    await expect(canvasElement.querySelector('[class*="_readout"]:not([class*="_readoutTap"])')).toBeNull(); // nothing held for it
+    const china = place(picture, [104, 35]);
+    fireEvent.pointerMove(picture, { clientX: china.x, clientY: china.y, pointerType: 'mouse' });
+    const readout = await waitFor(() => { const el = canvasElement.querySelector('[class*="_readoutOverlay"]') as HTMLElement; expect(el).not.toBeNull(); return el; });
+    await expect(readout.getBoundingClientRect().bottom).toBeLessThanOrEqual(picture.getBoundingClientRect().bottom);
+    await expect(canvasElement.querySelector('figure')!.getBoundingClientRect().height).toBe(figureHeight); // hovering moves nothing
+    // narrow legend: the No data swatch sits on the label's row
+    const label = within(canvasElement).getByText(/CO₂ emitted in 2024/, { selector: 'span' });
+    const noData = within(canvasElement).getByText('No data', { selector: 'span' });
+    await expect(Math.abs(noData.getBoundingClientRect().top - label.getBoundingClientRect().top)).toBeLessThan(12);
+  },
+};

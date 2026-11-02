@@ -247,7 +247,7 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
         ) : null}
         {overlay && !tableView ? <p id={hintId} className={focused ? styles.hintOverlay : `${styles.hintOverlay} ${styles.hintHidden}`}>Arrow keys move the map, + and − zoom, 0 resets.</p> : null}
         {tapped ? <p className={styles.readoutTap} aria-hidden="true">{tapped}</p> : null}
-        {tableView ? null : <p className={styles.readout} aria-hidden="true">{hover ?? ' '}</p>}
+        {tableView ? null : overlay ? (hover ? <p className={`${styles.readout} ${styles.readoutOverlay}`} aria-hidden="true">{hover}</p> : null) : <p className={styles.readout} aria-hidden="true">{hover ?? ' '}</p>}
       </div>
       {caption ? <div className={styles.caption}>{caption}</div> : null}
       {banded
