@@ -310,6 +310,13 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
   const panelTokens = Object.fromEntries(panelPaths.map((path) => [path.join('-'), GEN(polarity === 'light' ? hex(panelColours[path.join('-')]) : `{color.${path.join('.')}}`)]));
 
   // Tokens
+  // Banded maps (choropleth with fixed bands, darker = more): the eight band colours are the same in both themes; the panel they sit on is a mid tone, so the
+  // darkest bands read on it and the largest values are the most visible. The panel, borders, no-data fill and ink are per theme.
+  const bandColours = ['#fbe7a3', '#f9cb73', '#f5a651', '#ec7f3d', '#da5a33', '#bb3a2e', '#8e2329', '#5c1424'];
+  const mapColours = name === 'night'
+    ? { panel: '#97a3b8', stroke: '#c3cbd8', noData: '#7b879c', ink: '#0d1628', inkMuted: '#1f2d47' }
+    : { panel: '#c9d6dc', stroke: '#eef4f6', noData: '#a3b1b9', ink: '#071c24', inkMuted: '#2f4752' };
+
   const t = {
     color: {
       surface: {
@@ -333,6 +340,12 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
       shadow: GEN(hex(shadow)),
     },
     data: {
+      band: Object.fromEntries(bandColours.map((c, i) => [String(i + 1), GEN(c)])),
+      'map-panel': GEN(mapColours.panel),
+      'map-stroke': GEN(mapColours.stroke),
+      'map-no-data': GEN(mapColours.noData),
+      'map-ink': GEN(mapColours.ink),
+      'map-ink-muted': GEN(mapColours.inkMuted),
       surface: GEN(hex(ground)),
       text: GEN(hex(dataText)),
       'text-muted': GEN(hex(dataTextMuted)),
@@ -380,6 +393,13 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
   // Country borders are drawn in the ground colour, so they stay visible exactly when the step reaches 3:1 against it.
   heat.forEach((c, i) => check(`data-heat-${i + 1} on data-surface (and the borders drawn in it)`, c, ground, 3));
   check('the deepest heat step on data-surface', heat[heatN - 1], ground, Math.sqrt(3 * 4.5));
+  // Banded maps: the darkest band and the ink read on the map panel. The middle bands sit near the panel's luminance by design (they are told apart from it by hue and by
+  // the border stroke), so they are recorded, not required: an accepted exception.
+  check('data-band-8 on data-map-panel', bandColours[7], mapColours.panel, 5);
+  check('data-map-ink on data-map-panel', mapColours.ink, mapColours.panel, 4.5);
+  check('data-map-ink-muted on data-map-panel', mapColours.inkMuted, mapColours.panel, 4.5);
+  bandColours.slice(0, 7).forEach((c, i) => check(`data-band-${i + 1} on data-map-panel (accepted exception: told apart by hue and the border stroke)`, c, mapColours.panel, 3, 'informational'));
+  check('data-map-stroke on data-map-panel (the border drawn between countries)', mapColours.stroke, mapColours.panel, 1.1, 'informational');
   Object.entries(diverging).forEach(([i, c]) => check(`data-div-${i} on data-surface`, c, ground, 3));
   check('data-change-decrease on data-surface', change.decrease, ground, 3);
   check('data-change-increase on data-surface', change.increase, ground, 3);

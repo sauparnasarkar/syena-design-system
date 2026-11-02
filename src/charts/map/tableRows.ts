@@ -6,12 +6,12 @@ export const tableValue = (value: number) => {
   return new Intl.NumberFormat('en-GB', { maximumFractionDigits: decimals }).format(value);
 };
 
-export interface TableRow { code: string; name: string; text: string }
+export interface TableRow { code: string; name: string; text: string; /** The band's range, for a banded map */ band?: string }
 
 /** The rows of a map's table, which is its text alternative: the countries with a value first, largest first, then every other country by name, as having no data. */
-export function tableRows(values: Record<string, number>, formatValue?: (value: number) => string, noDataLabel = 'No data'): TableRow[] {
+export function tableRows(values: Record<string, number>, formatValue?: (value: number) => string, noDataLabel = 'No data', bandOf?: (value: number) => string): TableRow[] {
   const show = formatValue ?? tableValue;
-  const withValue = coded.filter((r) => r.code in values).sort((a, b) => values[b.code] - values[a.code]).map((r) => ({ code: r.code, name: r.name, text: show(values[r.code]) }));
-  const without = coded.filter((r) => !(r.code in values)).sort((a, b) => a.name.localeCompare(b.name)).map((r) => ({ code: r.code, name: r.name, text: noDataLabel }));
+  const withValue = coded.filter((r) => r.code in values).sort((a, b) => values[b.code] - values[a.code]).map((r) => ({ code: r.code, name: r.name, text: show(values[r.code]), ...(bandOf ? { band: bandOf(values[r.code]) } : {}) }));
+  const without = coded.filter((r) => !(r.code in values)).sort((a, b) => a.name.localeCompare(b.name)).map((r) => ({ code: r.code, name: r.name, text: noDataLabel, ...(bandOf ? { band: '' } : {}) }));
   return [...withValue, ...without];
 }

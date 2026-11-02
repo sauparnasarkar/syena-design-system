@@ -219,3 +219,61 @@ export const AMouseClickLeavesTheNamingToHover: Story = {
     await expect(tapReadout(canvasElement)).toBe('');
   },
 };
+
+// Banded scale on the mid-tone map panel: eight fixed bands, darker = more, a step legend with counts, and a hatched no-data fill.
+const bandPixels = (canvas: HTMLCanvasElement, tolerance = 6) => [1, 2, 3, 4, 5, 6, 7, 8].map((i) => pixelsNear(canvas, `var(--syn-data-band-${i})`, tolerance));
+const bandedArgs = {
+  scale: 'bands' as const,
+  surface: 'map' as const,
+  valueLabel: 'CO₂ emitted in 2024, MtCO₂ (illustrative)',
+  ariaLabel: 'World map of annual CO₂ emissions by country in 2024, illustrative values coloured in 8 bands from pale yellow (lowest) to dark red (highest). A few countries are dark red and most are pale to orange; some have no data.',
+};
+const bandedMap = (el: HTMLElement) => within(el).getByRole('img', { name: /coloured in 8 bands/ }) as HTMLCanvasElement;
+
+const bandedPlay: Story['play'] = async ({ canvasElement }) => {
+  const canvas = within(canvasElement);
+  await waitFor(() => expect(bandPixels(bandedMap(canvasElement)).filter((n) => n > 20).length).toBeGreaterThanOrEqual(4), { timeout: 8000 });
+  // The step legend: eight swatches with a range under each and a count line, then the hatched No data swatch.
+  const legend = canvas.getByRole('list', { name: /in 8 bands from lowest to highest/ });
+  await expect(within(legend).getAllByRole('listitem')).toHaveLength(8);
+  await expect(within(legend).getByText('<1')).toBeInTheDocument();
+  await expect(within(legend).getByText('2.5k+')).toBeInTheDocument();
+  await expect(within(legend).getAllByText(/countr(y|ies)$/)).toHaveLength(8);
+  await expect(canvas.getByText('No data', { selector: 'span' })).toBeInTheDocument();
+  // The table says which band each value is in.
+  await userEvent.click(canvas.getByRole('button', { name: 'Table view' }));
+  const table = canvas.getByRole('table');
+  await expect(within(table).getByRole('columnheader', { name: 'Band' })).toBeInTheDocument();
+  await expect(within(table).getAllByText('2.5k+').length).toBeGreaterThan(0);
+};
+
+export const BandsOnTheMapPanel: Story = { args: bandedArgs, decorators: [frame()], globals: { theme: 'tidewater' }, play: bandedPlay };
+export const BandsOnTheMapPanelNight: Story = { args: bandedArgs, decorators: [frame()], globals: { theme: 'night' }, play: bandedPlay };
+
+export const BandedNarrowShowsTwoRowsOfFour: Story = {
+  args: bandedArgs,
+  decorators: [frame('min(100%, 22rem)')],
+  play: async ({ canvasElement }) => {
+    const legend = within(canvasElement).getByRole('list', { name: /in 8 bands from lowest to highest/ });
+    await waitFor(() => {
+      const tops = [...legend.children].map((li) => Math.round(li.getBoundingClientRect().top));
+      expect(new Set(tops).size).toBe(2);
+      expect(tops.filter((t) => t === tops[0])).toHaveLength(4);
+    });
+  },
+};
+
+export const BandedHoverNamesTheBand: Story = {
+  args: bandedArgs,
+  decorators: [frame()],
+  play: async ({ canvasElement }) => {
+    await waitFor(() => expect(bandPixels(bandedMap(canvasElement)).filter((n) => n > 20).length).toBeGreaterThanOrEqual(4), { timeout: 8000 });
+    const canvas = bandedMap(canvasElement);
+    const rect = canvas.getBoundingClientRect();
+    // China, by its place on the natural-earth projection of this width.
+    const p = geoNaturalEarth1().fitWidth(rect.width, { type: 'FeatureCollection', features: coded.map((c) => c.shape) });
+    const at = p([104, 35])!;
+    fireEvent.pointerMove(canvas, { clientX: rect.left + at[0], clientY: rect.top + at[1], pointerType: 'mouse' });
+    await waitFor(() => expect(within(canvasElement).getByText(/China: .* · band /)).toBeInTheDocument());
+  },
+};
