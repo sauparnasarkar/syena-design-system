@@ -50,6 +50,8 @@ export { ChartCard, type ChartCardProps, type ChartCardState } from './component
 export { Progress, type ProgressProps } from './components/Progress/Progress';
 export { Globe, type GlobeProps } from './components/Globe/Globe';
 export { Choropleth, type ChoroplethProps } from './components/Choropleth/Choropleth';
+/** Which of a banded map's eight bands a value is in (a value equal to a break is in the upper band): for a page that lists the bands a country moved between. */
+export { bandIndex } from './charts/map/bands';
 export { YearControl, type YearControlProps } from './components/YearControl/YearControl';
 export { Treemap, type TreemapProps, type TreemapItem } from './components/Treemap/Treemap';
 export { Sparkline, type SparklineProps } from './components/Sparkline/Sparkline';
