@@ -33,6 +33,12 @@ const panelScope = (tokens) => {
   return `.syn-data-panel {\n  color-scheme: dark;\n${roles.map((r) => `  --syn-color-${r}: var(--syn-data-panel-${r});`).join('\n')}\n}`;
 };
 
+/** The scope of the mid-tone map panel: the same roles, taking their values as they read on that panel in either theme. */
+const mapPanelScope = (tokens) => {
+  const roles = tokens.filter((t) => t.path[0] === 'data' && t.path[1] === 'map').map((t) => t.path[2]);
+  return `.syn-map-panel {\n  color-scheme: light;\n${roles.map((r) => `  --syn-color-${r}: var(--syn-data-map-${r});`).join('\n')}\n}`;
+};
+
 const emitted = (token) => token.isSource && token.path.join('.') !== 'figure.size-adjust';
 const declarations = (dictionary) => dictionary.allTokens.filter(emitted).map((t) => `  ${t.name}: ${cssValue(t)};`);
 
@@ -88,6 +94,7 @@ export async function buildTokens() {
     base.output.trimEnd(),
     ...themeNames.map((n) => themes[n].output.trimEnd()),
     panelScope(themes.night.tokens),
+    mapPanelScope(themes.night.tokens),
   ].join('\n\n');
 
   const px = (group) => Object.fromEntries(Object.entries(group).map(([k, v]) => [k, Math.round(parseFloat(v) * rootPx)]));

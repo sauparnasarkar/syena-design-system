@@ -769,6 +769,12 @@ contrast matrix records as an accepted exception rather than a requirement. No-d
 with a 45° hatch (1 px, the ink at 35%), so it is not mistaken for a band. Like the heat ramp, it
 passes through the amber and red zones because it orders magnitude and carries no good or bad meaning.
 
+The map panel is also a **scope of colour roles** (`.syn-map-panel`, from `data-map-surface-*`, `-text-*`, `-border-*`, `-accent-*`, `-signal-*`), as the dark data panel is
+(`.syn-data-panel`): `ChartCard surface="map"` makes the whole card body that panel, so the year controls, buttons, the map, its legend and the caption all read on it in
+either theme. Dark ink on the panel; fills are the ink with the panel's colour as their text; lines are the ink mixed into the panel; signals are the theme's hues darkened
+until they read on the panel. The same text and graphics targets as the data panel's apply and are checked (§3.7); no step is darker than the panel, since the Night ink only
+just reaches 7:1 on it.
+
 **Diverging** (`data-div-neg-3` … `data-div-pos-3`, with `data-div-mid`). For signed values
 around a stated baseline. The cool side (below baseline) uses the accent hue. The warm side
 (above baseline) uses the hue at distance `D` from the negative signal: the warmest hue the
@@ -798,7 +804,7 @@ every colour-vision view. Change marks are always paired with a sign or arrow gl
 UI boundaries, icons and chart marks. Primary text and chart text aim higher (7:1).
 
 <!-- generated:contrast-count -->
-night: 131 required pairs; tidewater: 176 required pairs.
+night: 199 required pairs; tidewater: 244 required pairs.
 <!-- /generated:contrast-count -->
 
 The table shows each pair family at its worst surface in each theme:
@@ -877,6 +883,74 @@ The table shows each pair family at its worst surface in each theme:
 | data-panel-signal-positive-fill | 3:1 | 7.68 | 4.41 | pass |
 | data-panel-signal-negative-fill | 3:1 | 5.66 | 3.52 | pass |
 | data-panel-signal-caution-fill | 3:1 | 8.34 | 7.91 | pass |
+| data-map-text-primary on data-map-panel | 7:1 | 7.09 | 11.77 | pass |
+| data-map-text-primary on data-map-surface-raised | 7:1 | 7.79 | 12.73 | pass |
+| data-map-text-primary on data-map-surface-sunken | 7:1 | 7.44 | 12.24 | pass |
+| data-map-text-primary on data-map-surface-overlay | 7:1 | 8.35 | 13.60 | pass |
+| data-map-text-secondary on data-map-panel | 4.5:1 | 7.09 | 11.77 | pass |
+| data-map-text-secondary on data-map-surface-raised | 4.5:1 | 7.79 | 12.73 | pass |
+| data-map-text-secondary on data-map-surface-sunken | 4.5:1 | 7.44 | 12.24 | pass |
+| data-map-text-secondary on data-map-surface-overlay | 4.5:1 | 8.35 | 13.60 | pass |
+| data-map-text-muted on data-map-panel | 4.5:1 | 5.41 | 6.59 | pass |
+| data-map-text-muted on data-map-surface-raised | 4.5:1 | 5.94 | 7.13 | pass |
+| data-map-text-muted on data-map-surface-sunken | 4.5:1 | 5.67 | 6.86 | pass |
+| data-map-text-muted on data-map-surface-overlay | 4.5:1 | 6.37 | 7.62 | pass |
+| data-map-text-link on data-map-panel | 4.5:1 | 7.09 | 11.77 | pass |
+| data-map-text-link on data-map-surface-raised | 4.5:1 | 7.79 | 12.73 | pass |
+| data-map-text-link on data-map-surface-sunken | 4.5:1 | 7.44 | 12.24 | pass |
+| data-map-text-link on data-map-surface-overlay | 4.5:1 | 8.35 | 13.60 | pass |
+| data-map-accent-text on data-map-panel | 4.5:1 | 7.09 | 11.77 | pass |
+| data-map-accent-text on data-map-surface-raised | 4.5:1 | 7.79 | 12.73 | pass |
+| data-map-accent-text on data-map-surface-sunken | 4.5:1 | 7.44 | 12.24 | pass |
+| data-map-accent-text on data-map-surface-overlay | 4.5:1 | 8.35 | 13.60 | pass |
+| data-map-signal-positive-text on data-map-panel | 4.5:1 | 4.98 | 4.98 | pass |
+| data-map-signal-positive-text on data-map-surface-raised | 4.5:1 | 5.47 | 5.38 | pass |
+| data-map-signal-positive-text on data-map-surface-sunken | 4.5:1 | 5.22 | 5.18 | pass |
+| data-map-signal-positive-text on data-map-surface-overlay | 4.5:1 | 5.86 | 5.75 | pass |
+| data-map-signal-negative-text on data-map-panel | 4.5:1 | 4.96 | 5.01 | pass |
+| data-map-signal-negative-text on data-map-surface-raised | 4.5:1 | 5.44 | 5.42 | pass |
+| data-map-signal-negative-text on data-map-surface-sunken | 4.5:1 | 5.20 | 5.21 | pass |
+| data-map-signal-negative-text on data-map-surface-overlay | 4.5:1 | 5.83 | 5.79 | pass |
+| data-map-signal-caution-text on data-map-panel | 4.5:1 | 4.96 | 4.99 | pass |
+| data-map-signal-caution-text on data-map-surface-raised | 4.5:1 | 5.45 | 5.39 | pass |
+| data-map-signal-caution-text on data-map-surface-sunken | 4.5:1 | 5.20 | 5.19 | pass |
+| data-map-signal-caution-text on data-map-surface-overlay | 4.5:1 | 5.84 | 5.76 | pass |
+| data-map-signal-info-text on data-map-panel | 4.5:1 | 7.09 | 11.77 | pass |
+| data-map-signal-info-text on data-map-surface-raised | 4.5:1 | 7.79 | 12.73 | pass |
+| data-map-signal-info-text on data-map-surface-sunken | 4.5:1 | 7.44 | 12.24 | pass |
+| data-map-signal-info-text on data-map-surface-overlay | 4.5:1 | 8.35 | 13.60 | pass |
+| data-map-signal-positive-text on data-map-signal-positive-tint | 4.5:1 | 4.52 | 4.50 | pass |
+| data-map-signal-negative-text on data-map-signal-negative-tint | 4.5:1 | 4.50 | 4.52 | pass |
+| data-map-signal-caution-text on data-map-signal-caution-tint | 4.5:1 | 4.52 | 4.51 | pass |
+| data-map-signal-info-text on data-map-signal-info-tint | 4.5:1 | 6.60 | 10.89 | pass |
+| data-map-text-link on data-map-accent-tint | 4.5:1 | 6.60 | 10.89 | pass |
+| data-map-text-on-accent on data-map-accent-fill | 4.5:1 | 7.09 | 11.77 | pass |
+| data-map-text-on-accent on data-map-accent-hover | 4.5:1 | 5.72 | 8.22 | pass |
+| data-map-text-on-accent on data-map-accent-active | 4.5:1 | 4.76 | 6.31 | pass |
+| data-map-border-emphasis on data-map-panel | 3:1 | 5.41 | 6.59 | pass |
+| data-map-border-emphasis on data-map-surface-raised | 3:1 | 5.94 | 7.13 | pass |
+| data-map-border-emphasis on data-map-surface-sunken | 3:1 | 5.67 | 6.86 | pass |
+| data-map-border-emphasis on data-map-surface-overlay | 3:1 | 6.37 | 7.62 | pass |
+| data-map-focus-ring on data-map-panel | 3:1 | 7.09 | 11.77 | pass |
+| data-map-focus-ring on data-map-surface-raised | 3:1 | 7.79 | 12.73 | pass |
+| data-map-focus-ring on data-map-surface-sunken | 3:1 | 7.44 | 12.24 | pass |
+| data-map-focus-ring on data-map-surface-overlay | 3:1 | 8.35 | 13.60 | pass |
+| data-map-accent-fill on data-map-panel | 3:1 | 7.09 | 11.77 | pass |
+| data-map-accent-fill on data-map-surface-raised | 3:1 | 7.79 | 12.73 | pass |
+| data-map-accent-fill on data-map-surface-sunken | 3:1 | 7.44 | 12.24 | pass |
+| data-map-accent-fill on data-map-surface-overlay | 3:1 | 8.35 | 13.60 | pass |
+| data-map-signal-positive-fill on data-map-panel | 3:1 | 3.03 | 3.02 | pass |
+| data-map-signal-positive-fill on data-map-surface-raised | 3:1 | 3.33 | 3.26 | pass |
+| data-map-signal-positive-fill on data-map-surface-sunken | 3:1 | 3.18 | 3.14 | pass |
+| data-map-signal-positive-fill on data-map-surface-overlay | 3:1 | 3.57 | 3.48 | pass |
+| data-map-signal-negative-fill on data-map-panel | 3:1 | 3.00 | 3.28 | pass |
+| data-map-signal-negative-fill on data-map-surface-raised | 3:1 | 3.30 | 3.55 | pass |
+| data-map-signal-negative-fill on data-map-surface-sunken | 3:1 | 3.15 | 3.41 | pass |
+| data-map-signal-negative-fill on data-map-surface-overlay | 3:1 | 3.54 | 3.79 | pass |
+| data-map-signal-caution-fill on data-map-panel | 3:1 | 3.02 | 3.03 | pass |
+| data-map-signal-caution-fill on data-map-surface-raised | 3:1 | 3.32 | 3.28 | pass |
+| data-map-signal-caution-fill on data-map-surface-sunken | 3:1 | 3.17 | 3.15 | pass |
+| data-map-signal-caution-fill on data-map-surface-overlay | 3:1 | 3.56 | 3.50 | pass |
 <!-- /generated:contrast-table -->
 
 Pairs measured and reported but not required (decorative, or never used alone):
@@ -1567,7 +1641,8 @@ with named values; there are no colour-named variants.
 #### ChartCard
 
 - **Purpose and props.** A `Card` that frames a chart. Props: `title`, `supportText`,
-  `asOf`, `headingLevel`, `actions`, `id`, `expandable`, `className`, and the chart as
+  `asOf`, `headingLevel`, `actions`, `id`, `expandable`, `className`, `surface` (`data`, or `map` for
+  the mid-tone map panel: the whole body is that panel and its controls read on it, §3.6), and the chart as
   children, or a function that returns the chart and is told whether the card is expanded (so
   an expanded chart can be given more height).
 - **Anatomy.** `CardHeader` with title and support text; an actions slot (download, view as

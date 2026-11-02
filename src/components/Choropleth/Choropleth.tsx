@@ -37,6 +37,8 @@ export interface ChoroplethProps {
   surface?: 'data' | 'map';
   /** For `bands`: how the number of countries in a band is written; "12 countries" by default. */
   formatCount?: (count: number) => string;
+  /** With `surface="map"`: draw no panel of its own (no padding or background), for a card whose body is already that panel (`ChartCard surface="map"`). */
+  flush?: boolean;
 }
 
 const heatNames = ['data-heat-1', 'data-heat-2', 'data-heat-3', 'data-heat-4', 'data-heat-5', 'data-heat-6', 'data-heat-7'] as const;
@@ -55,7 +57,7 @@ const home: View = { k: 1, x: 0, y: 0 };
  * A flat world map that colours countries by value on the heat scale, drawn on a canvas from resolved tokens.
  * It zooms, pans and resets with buttons, the keyboard or a drag, and its values are also a table.
  */
-export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDomain, formatValue: givenFormat, unit, outline = [], caption, scale = 'log', breaks: givenBreaks, bandLabels: givenLabels, surface = 'data', formatCount }: ChoroplethProps) {
+export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDomain, formatValue: givenFormat, unit, outline = [], caption, scale = 'log', breaks: givenBreaks, bandLabels: givenLabels, surface = 'data', formatCount, flush = false }: ChoroplethProps) {
   const formatValue = givenFormat ?? formatTick;
   const [box, width] = useWidth<HTMLDivElement>();
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -73,7 +75,8 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
   const tableId = useId();
 
   const rows = useMemo(() => tableRows(values, givenFormat, 'No data', banded ? (v) => bandLabels[bandIndex(v, breaks)] : undefined), [values, givenFormat, banded, breaks, bandLabels]);
-  const counts = useMemo(() => (banded ? bandCounts(coded.filter((c) => c.code in values).map((c) => values[c.code]), breaks) : []), [banded, values, breaks]);
+  // Every country with a value counts, drawn or not (a small one may have no shape on the map): the bands add up to the number of values.
+  const counts = useMemo(() => (banded ? bandCounts(Object.values(values).filter((v) => Number.isFinite(v)), breaks) : []), [banded, values, breaks]);
   const stops = t && !banded ? heatNames.map((n) => t[n]) : [];
   // The projection is fitted to the width of the countries shown, so the map is exactly as tall as it needs to be.
   const { projection, height } = useMemo(() => {
@@ -131,8 +134,12 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
       // Borders in the panel's colour: visible wherever a step has 3:1 against it, which every step does.
       ctx.strokeStyle = border; ctx.lineWidth = 0.6 / view.k; ctx.stroke();
     }
-    ctx.strokeStyle = ink; ctx.lineWidth = 1.6 / view.k;
-    for (const { code, shape } of coded) if (outlined.has(code)) { ctx.beginPath(); path(shape); ctx.stroke(); }
+    // On the map panel the outline is two strokes, a light one under the ink, so it reads on all eight bands (dark red and pale yellow alike).
+    const strokes: Array<[string, number]> = onMap ? [[t['data-map-stroke'], 2.5], [ink, 1.25]] : [[ink, 1.6]];
+    for (const [colour, w] of strokes) {
+      ctx.strokeStyle = colour; ctx.lineWidth = w / view.k;
+      for (const { code, shape } of coded) if (outlined.has(code)) { ctx.beginPath(); path(shape); ctx.stroke(); }
+    }
     ctx.restore();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t, projection, view, width, height, values, domain, outlined, tableView, banded, onMap, breaks]);
@@ -189,7 +196,7 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
   const tapped = !tableView && selected ? describe(selected) : null;
 
   return (
-    <figure className={onMap ? `${styles.map} ${styles.onMap}` : styles.map}>
+    <figure className={onMap ? [styles.map, styles.onMap, flush ? styles.flush : ''].filter(Boolean).join(' ') : styles.map}>
       <div ref={box} className={styles.stage}>
         {t && width > 0 ? (
           // Focusable so the keyboard can pan and zoom it.

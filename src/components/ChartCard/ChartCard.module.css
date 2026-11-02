@@ -9,6 +9,11 @@
   color: var(--syn-data-text);
 }
 
+.mapPanel {
+  background: var(--syn-data-map-panel);
+  color: var(--syn-data-map-ink);
+}
+
 .tableView {
   min-width: 0;
 }

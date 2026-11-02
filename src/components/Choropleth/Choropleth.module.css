@@ -102,6 +102,12 @@
   color: var(--syn-data-map-ink);
 }
 
+.onMap.flush {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+}
+
 .onMap .readoutTap {
   background: var(--syn-data-map-panel);
   color: var(--syn-data-map-ink);

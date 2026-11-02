@@ -281,3 +281,31 @@ export const BandedHoverNamesTheBand: Story = {
     await waitFor(() => expect(within(canvasElement).getByText(/China: .* · band /)).toBeInTheDocument());
   },
 };
+
+// Every country with a value is counted in its band, drawn or not: the bands add up to the number of values (a code with no shape on the map still counts).
+export const BandCountsAddUpToEveryValue: Story = {
+  args: { ...bandedArgs, values: { ...illustrativeEmissions, ZZZ: 50, ZZY: 0 } },
+  decorators: [frame()],
+  play: async ({ canvasElement }) => {
+    const legend = within(canvasElement).getByRole('list', { name: /in 8 bands from lowest to highest/ });
+    await waitFor(() => {
+      const counts = within(legend).getAllByText(/countr(y|ies)$/).map((e) => Number((e.textContent ?? '').match(/\d+/)![0]));
+      expect(counts.reduce((a, b) => a + b, 0)).toBe(Object.keys({ ...illustrativeEmissions, ZZZ: 50, ZZY: 0 }).length);
+    });
+  },
+};
+
+// The selected countries' outline on the map panel is two strokes: a light one under the ink one, so it reads on all eight bands.
+export const OutlineIsADoubleStrokeOnTheMapPanel: Story = {
+  args: { ...bandedArgs, outline: ['USA', 'CHN', 'IND', 'RUS'] },
+  decorators: [frame()],
+  play: async ({ canvasElement }) => {
+    await waitFor(() => expect(bandPixels(bandedMap(canvasElement)).filter((n) => n > 20).length).toBeGreaterThanOrEqual(4), { timeout: 8000 });
+    // One look once drawn: the ink stroke and the light stroke under it are both there.
+    const canvas = bandedMap(canvasElement);
+    const ink = pixelsNear(canvas, 'var(--syn-data-map-ink)', 8);
+    const light = pixelsNear(canvas, 'var(--syn-data-map-stroke)', 8);
+    await expect(ink).toBeGreaterThan(10); // a 1.25px line, anti-aliased: few pixels are exactly the ink
+    await expect(light).toBeGreaterThan(15); // the rims of a 2.5px stroke under a 1.25px one, plus the borders
+  },
+};
