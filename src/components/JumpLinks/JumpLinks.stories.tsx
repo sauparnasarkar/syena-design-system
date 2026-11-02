@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { JumpLinks } from './JumpLinks';
@@ -37,6 +37,35 @@ export const ScrollsAndMovesFocus: Story = {
     // The section lands below the sticky bar, not under it.
     const bar = canvasElement.querySelector('[data-syn-sticky="top"]')!.getBoundingClientRect().bottom;
     await waitFor(() => expect(document.getElementById('comparison')!.getBoundingClientRect().top).toBeGreaterThanOrEqual(bar - 1));
+    window.scrollTo(0, 0);
+  },
+};
+
+/** A page whose header condenses once it has scrolled (as the apps' analysis bars do), so everything below moves up while the jump is under way. */
+function CondensingPage() {
+  const [tall, setTall] = useState(true);
+  useEffect(() => {
+    const onScroll = () => setTall(window.scrollY < 20);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  return (
+    <div>
+      <div style={{ height: tall ? 360 : 120, background: 'var(--syn-color-surface-raised)' }}>Header</div>
+      <Page />
+    </div>
+  );
+}
+
+/** The first click lands the section at the pinned bar even though the page above it changed height during the scroll. */
+export const LandsRightWhenThePageChangesShapeMidScroll: Story = {
+  render: () => <CondensingPage />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    window.scrollTo(0, 0);
+    await userEvent.click(canvas.getByRole('link', { name: 'Composition' }));
+    const bar = () => canvasElement.querySelector('[data-syn-sticky="top"]')!.getBoundingClientRect().bottom;
+    await waitFor(() => expect(Math.abs(document.getElementById('composition')!.getBoundingClientRect().top - bar())).toBeLessThanOrEqual(2), { timeout: 4000 });
     window.scrollTo(0, 0);
   },
 };
