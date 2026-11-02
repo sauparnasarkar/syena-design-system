@@ -41,6 +41,27 @@ export const ScrollsAndMovesFocus: Story = {
   },
 };
 
+/** The chosen section's id goes into the address, replacing rather than adding a history entry and leaving the path and query alone. */
+export const PutsTheSectionInTheAddress: Story = {
+  render: () => <Page />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const { pathname, search } = window.location;
+    const entries = window.history.length;
+    const state = { kept: true };
+    window.history.replaceState(state, '');
+    await userEvent.click(canvas.getByRole('link', { name: 'Comparison' }));
+    await waitFor(() => expect(window.location.hash).toBe('#comparison'));
+    await expect(window.location.pathname + window.location.search).toBe(pathname + search);
+    await expect(window.history.length).toBe(entries);
+    await expect(window.history.state).toEqual(state);
+    await userEvent.click(canvas.getByRole('link', { name: 'Trend' }));
+    await waitFor(() => expect(window.location.hash).toBe('#trend'));
+    window.history.replaceState(null, '', pathname + search);
+    window.scrollTo(0, 0);
+  },
+};
+
 function OpensFirst() {
   const [open, setOpen] = useState(false);
   const list = [
