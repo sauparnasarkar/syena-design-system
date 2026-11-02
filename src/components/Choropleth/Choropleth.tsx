@@ -41,6 +41,8 @@ export interface ChoroplethProps {
   flush?: boolean;
   /** For `bands`: how many countries have no data, written under the No data swatch (nothing when 0 or omitted). The map cannot know it: a country with no value may have no shape, or not exist in `values` at all. */
   noDataCount?: number;
+  /** `below` (default): the controls and the keyboard hint sit under the legend. `overlay`: zoom, reset and table are one group in the picture's top-right corner (touch-sized), and the hint is drawn only while the map has focus; for a card that must fit its space. */
+  controls?: 'below' | 'overlay';
 }
 
 const heatNames = ['data-heat-1', 'data-heat-2', 'data-heat-3', 'data-heat-4', 'data-heat-5', 'data-heat-6', 'data-heat-7'] as const;
@@ -59,7 +61,10 @@ const home: View = { k: 1, x: 0, y: 0 };
  * A flat world map that colours countries by value on the heat scale, drawn on a canvas from resolved tokens.
  * It zooms, pans and resets with buttons, the keyboard or a drag, and its values are also a table.
  */
-export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDomain, formatValue: givenFormat, unit, outline = [], caption, scale = 'log', breaks: givenBreaks, bandLabels: givenLabels, surface = 'data', formatCount, flush = false, noDataCount }: ChoroplethProps) {
+export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDomain, formatValue: givenFormat, unit, outline = [], caption, scale = 'log', breaks: givenBreaks, bandLabels: givenLabels, surface = 'data', formatCount, flush = false, noDataCount, controls = 'below' }: ChoroplethProps) {
+  const overlay = controls === 'overlay';
+  const [focused, setFocused] = useState(false);
+  const hintId = useId();
   const formatValue = givenFormat ?? formatTick;
   const [box, width] = useWidth<HTMLDivElement>();
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -198,7 +203,7 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
   const tapped = !tableView && selected ? describe(selected) : null;
 
   return (
-    <figure className={onMap ? [styles.map, styles.onMap, flush ? styles.flush : ''].filter(Boolean).join(' ') : styles.map}>
+    <figure className={[styles.map, onMap ? styles.onMap : '', onMap && flush ? styles.flush : '', overlay ? styles.withOverlay : ''].filter(Boolean).join(' ')}>
       <div ref={box} className={styles.stage}>
         {t && width > 0 ? (
           // Focusable so the keyboard can pan and zoom it.
@@ -207,13 +212,15 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
             ref={canvas}
             role="img"
             aria-label={ariaLabel}
-            aria-describedby={tableId}
+            aria-describedby={overlay ? `${tableId} ${hintId}` : tableId}
             aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown + - 0"
             hidden={tableView}
             tabIndex={tableView ? -1 : 0}
             className={styles.canvas}
             style={{ width, height }}
             onKeyDown={onKeyDown}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             onPointerLeave={() => { setHover(null); drag.current = null; }}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
@@ -221,6 +228,24 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
             onPointerCancel={() => { drag.current = null; }}
           />
         ) : null}
+        {overlay ? (
+          <div className={tableView ? `${styles.overlay} ${styles.overlayStatic}` : styles.overlay}>
+            <MapControls
+              subject="map"
+              onZoomIn={() => zoomAbout(zoomStep)}
+              onZoomOut={() => zoomAbout(1 / zoomStep)}
+              onReset={() => setView(home)}
+              zoomInDisabled={view.k >= zoomMax}
+              zoomOutDisabled={view.k <= 1}
+              tableView={tableView}
+              onTableViewChange={setTableView}
+              hint=""
+              onMap={onMap}
+              overlay
+            />
+          </div>
+        ) : null}
+        {overlay && !tableView ? <p id={hintId} className={focused ? styles.hintOverlay : `${styles.hintOverlay} ${styles.hintHidden}`}>Arrow keys move the map, + and − zoom, 0 resets.</p> : null}
         {tapped ? <p className={styles.readoutTap} aria-hidden="true">{tapped}</p> : null}
         {tableView ? null : <p className={styles.readout} aria-hidden="true">{hover ?? ' '}</p>}
       </div>
@@ -228,18 +253,20 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
       {banded
         ? <StepLegend label={valueLabel} bandLabels={bandLabels} counts={counts} formatCount={formatCount} noDataCount={noDataCount} onMap={onMap} />
         : <HeatLegend label={valueLabel} domain={domain} formatValue={formatValue} />}
-      <MapControls
-        subject="map"
-        onZoomIn={() => zoomAbout(zoomStep)}
-        onZoomOut={() => zoomAbout(1 / zoomStep)}
-        onReset={() => setView(home)}
-        zoomInDisabled={view.k >= zoomMax}
-        zoomOutDisabled={view.k <= 1}
-        tableView={tableView}
-        onTableViewChange={setTableView}
-        hint="Arrow keys move the map, + and − zoom, 0 resets."
-        onMap={onMap}
-      />
+      {overlay ? null : (
+        <MapControls
+          subject="map"
+          onZoomIn={() => zoomAbout(zoomStep)}
+          onZoomOut={() => zoomAbout(1 / zoomStep)}
+          onReset={() => setView(home)}
+          zoomInDisabled={view.k >= zoomMax}
+          zoomOutDisabled={view.k <= 1}
+          tableView={tableView}
+          onTableViewChange={setTableView}
+          hint="Arrow keys move the map, + and − zoom, 0 resets."
+          onMap={onMap}
+        />
+      )}
       <div className={tableView ? styles.tableView : styles.hidden} {...(tableView ? { role: 'region', 'aria-label': 'Table of values', tabIndex: 0 } : {})}>
         <table id={tableId}>
           <caption>{ariaLabel}</caption>

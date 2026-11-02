@@ -22,6 +22,8 @@ export interface MapControlsProps {
   dense?: boolean;
   /** Drawn on the mid-tone map panel (a banded map's `surface="map"`) rather than the dark data panel. */
   onMap?: boolean;
+  /** Only the four buttons, icon only at a touch-sized target, no hint: for a group laid over a corner of the picture. */
+  overlay?: boolean;
 }
 
 export function PanelButton({ icon, children, label, pressed, disabled, onClick, dense }: { icon: IconProps['name']; children?: ReactNode; label?: string; pressed?: boolean; disabled?: boolean; onClick: () => void; dense?: boolean }) {
@@ -37,7 +39,17 @@ export function PanelButton({ icon, children, label, pressed, disabled, onClick,
  * Zoom in and out, reset the view, switch to the table, and say which keys do the same. The buttons sit on the
  * dark data panel in both themes, so they are drawn in the panel's own colours.
  */
-export function MapControls({ onZoomIn, onZoomOut, onReset, zoomInDisabled, zoomOutDisabled, tableView, onTableViewChange, subject, hint, hintVisibility = 'visible', extra, dense = false, onMap = false }: MapControlsProps) {
+export function MapControls({ onZoomIn, onZoomOut, onReset, zoomInDisabled, zoomOutDisabled, tableView, onTableViewChange, subject, hint, hintVisibility = 'visible', extra, dense = false, onMap = false, overlay = false }: MapControlsProps) {
+  if (overlay) {
+    return (
+      <div className={onMap ? `${styles.overlayGroup} ${styles.onMap}` : styles.overlayGroup} role="group" aria-label={`${subject} view`}>
+        <PanelButton icon="zoomIn" label={`Zoom in ${subject}`} onClick={onZoomIn} disabled={zoomInDisabled || tableView} dense />
+        <PanelButton icon="zoomOut" label={`Zoom out ${subject}`} onClick={onZoomOut} disabled={zoomOutDisabled || tableView} dense />
+        <PanelButton icon="reset" label="Reset view" onClick={onReset} disabled={tableView} dense />
+        <PanelButton icon="table" label="Table view" pressed={tableView} onClick={() => onTableViewChange(!tableView)} dense />
+      </div>
+    );
+  }
   const buttons = dense ? (
     <div className={styles.buttons} role="group" aria-label={`${subject} view`}>
       <PanelButton icon="table" label="Table view" pressed={tableView} onClick={() => onTableViewChange(!tableView)} dense />

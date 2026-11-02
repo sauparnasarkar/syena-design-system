@@ -55,6 +55,25 @@
   min-height: var(--syn-layout-control-height);
 }
 
+/* The four buttons as one group laid over a corner of the picture, with a quiet backing so they read on any colour under them. */
+.overlayGroup {
+  display: flex;
+  gap: var(--syn-space-1);
+  padding: var(--syn-space-1);
+  border-radius: var(--syn-radius-control);
+  background: color-mix(in srgb, var(--syn-data-surface) 82%, transparent);
+}
+
+.overlayGroup .buttonDense {
+  min-width: var(--syn-layout-control-height-touch);
+  min-height: var(--syn-layout-control-height-touch);
+  padding: 0;
+}
+
+.overlayGroup.onMap {
+  background: color-mix(in srgb, var(--syn-data-map-panel) 82%, transparent);
+}
+
 /* Kept for a screen reader, not drawn. */
 .srOnly {
   position: absolute;
