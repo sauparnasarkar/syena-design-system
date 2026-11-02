@@ -2,7 +2,7 @@
   container-type: inline-size;
   display: flex;
   flex-direction: column;
-  gap: var(--syn-space-2);
+  gap: var(--syn-space-1);
   width: 100%;
   color: var(--syn-data-text);
   font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
@@ -33,7 +33,7 @@
 .nodata {
   display: flex;
   flex-direction: column;
-  gap: var(--syn-space-1);
+  gap: 0;
   min-width: 0;
   text-align: center;
 }

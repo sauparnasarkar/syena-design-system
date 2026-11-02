@@ -338,3 +338,50 @@ export const NoDataCountOfZeroIsHidden: Story = {
     await expect(within(canvasElement).queryByText('0 countries')).not.toBeInTheDocument();
   },
 };
+
+// Compact: the controls are one touch-sized group over the picture's top-right corner, and the keyboard hint is drawn only while the map has focus.
+export const OverlayControlsAndFocusOnlyHint: Story = {
+  args: { ...bandedArgs, controls: 'overlay', flush: false },
+  decorators: [frame()],
+  play: async ({ canvasElement }) => {
+    await waitFor(() => expect(bandPixels(bandedMap(canvasElement)).filter((n) => n > 20).length).toBeGreaterThanOrEqual(4), { timeout: 8000 });
+    const canvas = within(canvasElement);
+    const group = canvas.getByRole('group', { name: 'map view' });
+    const buttons = within(group).getAllByRole('button');
+    await expect(buttons.map((b) => b.getAttribute('aria-label'))).toEqual(['Zoom in map', 'Zoom out map', 'Reset view', 'Table view']);
+    // touch-sized, and in the picture's top-right corner
+    for (const b of buttons) { const r = b.getBoundingClientRect(); await expect(Math.min(r.width, r.height)).toBeGreaterThanOrEqual(44); }
+    const map = bandedMap(canvasElement).getBoundingClientRect();
+    const g = group.getBoundingClientRect();
+    await expect(g.right).toBeLessThanOrEqual(map.right);
+    await expect(g.top).toBeGreaterThanOrEqual(map.top);
+    await expect(g.top - map.top).toBeLessThan(40);
+    // the hint is in the page (aria-describedby) but not drawn until the map has focus
+    const hint = canvasElement.querySelector('[id]:not(canvas):not(table)') && canvas.getByText(/Arrow keys move the map/);
+    await expect(bandedMap(canvasElement).getAttribute('aria-describedby')).toContain(hint!.id);
+    await expect(hint!.getBoundingClientRect().width).toBeLessThanOrEqual(1);
+    bandedMap(canvasElement).focus();
+    await waitFor(() => expect(hint!.getBoundingClientRect().width).toBeGreaterThan(100));
+    bandedMap(canvasElement).blur();
+    await waitFor(() => expect(hint!.getBoundingClientRect().width).toBeLessThanOrEqual(1));
+    // the group still works: zoom, then the table, and back
+    const image = () => bandedMap(canvasElement).toDataURL();
+    const start = image();
+    await userEvent.click(canvas.getByRole('button', { name: 'Zoom in map' }));
+    await waitFor(() => expect(image()).not.toBe(start));
+    await userEvent.click(canvas.getByRole('button', { name: 'Reset view' }));
+    const toggle = canvas.getByRole('button', { name: 'Table view' });
+    await userEvent.click(toggle);
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(canvas.getByRole('table')).toBeVisible();
+    await userEvent.click(toggle);
+    await expect(canvasElement.querySelector('canvas')).toBeVisible();
+  },
+};
+
+export const OverlayControlsOnTheMapPanelNight: Story = {
+  args: { ...bandedArgs, controls: 'overlay' },
+  decorators: [frame()],
+  globals: { theme: 'night' },
+  play: async ({ canvasElement }) => { await expect(within(canvasElement).getByRole('group', { name: 'map view' })).toBeInTheDocument(); },
+};

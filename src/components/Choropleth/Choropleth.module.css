@@ -126,3 +126,46 @@
 .onMap .tableView td {
   border-bottom-color: color-mix(in srgb, var(--syn-data-map-ink) 16%, var(--syn-data-map-panel));
 }
+
+/* Controls laid over the picture's top-right corner; in the table view there is no picture, so the group sits in a row above the table. */
+.overlay {
+  position: absolute;
+  inset-block-start: var(--syn-space-2);
+  inset-inline-end: var(--syn-space-2);
+  z-index: 1;
+}
+
+.overlayStatic {
+  position: static;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* The keyboard hint: over the picture's foot while the map has focus (it is always in the page, for aria-describedby, and never moves the layout). */
+.hintOverlay {
+  position: absolute;
+  inset-block-end: var(--syn-space-2);
+  inset-inline-start: var(--syn-space-2);
+  max-width: calc(100% - 2 * var(--syn-space-2));
+  padding: 0 var(--syn-space-2);
+  border-radius: var(--syn-radius-control);
+  background: color-mix(in srgb, var(--syn-data-surface) 82%, transparent);
+  color: var(--syn-data-text);
+  font: var(--syn-type-caption-weight) var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-type-caption-family);
+  pointer-events: none;
+}
+
+.onMap .hintOverlay {
+  background: color-mix(in srgb, var(--syn-data-map-panel) 82%, transparent);
+  color: var(--syn-data-map-ink);
+}
+
+.hintHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
