@@ -1,0 +1,108 @@
+.legend {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--syn-space-2);
+  width: 100%;
+  color: var(--syn-data-text);
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+}
+
+.label {
+  color: var(--syn-data-text-muted);
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--syn-space-4);
+}
+
+.bands {
+  display: grid;
+  flex: 1 1 0;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: var(--syn-space-1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.band,
+.nodata {
+  display: flex;
+  flex-direction: column;
+  gap: var(--syn-space-1);
+  min-width: 0;
+  text-align: center;
+}
+
+.nodata {
+  flex: 0 0 4rem;
+}
+
+.swatch {
+  display: block;
+  height: var(--syn-space-3);
+  border-radius: var(--syn-radius-control);
+}
+
+/* No data: the quiet fill with a 45° hatch of the panel's ink, so it is not mistaken for a band. */
+.hatched {
+  background:
+    repeating-linear-gradient(45deg, color-mix(in srgb, var(--syn-data-text) 35%, transparent) 0 1px, transparent 1px 4px),
+    var(--syn-data-no-data);
+  outline: var(--syn-layout-border-hairline) solid var(--syn-data-text-muted);
+  outline-offset: calc(-1 * var(--syn-layout-border-hairline));
+}
+
+.range {
+  font-family: var(--syn-family-figure);
+  font-feature-settings: var(--syn-figure-feature-settings);
+}
+
+.count {
+  color: var(--syn-data-text-muted);
+  font: var(--syn-type-caption-weight) var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-type-caption-family);
+}
+
+/* Narrow: two rows of four bands, the no-data swatch after them. */
+@container (max-width: 34rem) {
+  .row {
+    flex-direction: column;
+  }
+
+  .bands {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    row-gap: var(--syn-space-3);
+    width: 100%;
+  }
+
+  .nodata {
+    flex-direction: row;
+    align-items: center;
+    flex-basis: auto;
+  }
+
+  .nodata .swatch {
+    width: var(--syn-space-5);
+  }
+}
+
+/* On the mid-tone map panel the ink and the no-data fill are the map's own. */
+.onMap {
+  color: var(--syn-data-map-ink);
+}
+
+.onMap .label,
+.onMap .count {
+  color: var(--syn-data-map-ink-muted);
+}
+
+.onMap .hatched {
+  background:
+    repeating-linear-gradient(45deg, color-mix(in srgb, var(--syn-data-map-ink) 35%, transparent) 0 1px, transparent 1px 4px),
+    var(--syn-data-map-no-data);
+  outline-color: var(--syn-data-map-ink-muted);
+}

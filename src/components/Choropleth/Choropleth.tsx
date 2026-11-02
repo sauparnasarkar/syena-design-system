@@ -3,6 +3,8 @@ import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type P
 import { coded } from '../../charts/map/countries';
 import { tableRows } from '../../charts/map/tableRows';
 import { HeatLegend } from '../../charts/map/HeatLegend';
+import { StepLegend } from '../../charts/map/StepLegend';
+import { bandCounts, bandIndex, bandTokens, defaultBandLabels, defaultBreaks, validBreaks } from '../../charts/map/bands';
 import { MapControls } from '../../charts/map/MapControls';
 import { formatTick, heatColour, type Domain } from '../../charts/map/heat';
 import { useWidth } from '../../hooks/useWidth';
@@ -25,10 +27,20 @@ export interface ChoroplethProps {
   outline?: string[];
   /** Content drawn directly under the picture and above the legend, for example the year in view. */
   caption?: ReactNode;
+  /** `log` (default): the continuous heat scale on a log axis. `bands`: eight fixed bands between `breaks`, darker = more, with a step legend. */
+  scale?: 'log' | 'bands';
+  /** For `bands`: seven ascending values, the edges of eight bands. A value equal to an edge is in the upper band. Defaults to annual emissions in MtCO₂ (1 to 2,500). */
+  breaks?: number[];
+  /** For `bands`: the range written under each band (eight). Worked out from `breaks` when omitted. */
+  bandLabels?: string[];
+  /** `data` (default): the dark data panel. `map`: a mid-tone panel, with its own ink, borders and hatched no-data fill. */
+  surface?: 'data' | 'map';
+  /** For `bands`: how the number of countries in a band is written; "12 countries" by default. */
+  formatCount?: (count: number) => string;
 }
 
 const heatNames = ['data-heat-1', 'data-heat-2', 'data-heat-3', 'data-heat-4', 'data-heat-5', 'data-heat-6', 'data-heat-7'] as const;
-const tokenNames = ['data-surface', 'data-text', 'data-text-muted', 'data-no-data', ...heatNames] as const;
+const tokenNames = ['data-surface', 'data-text', 'data-text-muted', 'data-no-data', 'data-map-panel', 'data-map-stroke', 'data-map-no-data', 'data-map-ink', ...heatNames, ...bandTokens] as const;
 const defaultDomain: Domain = [0.01, 10000];
 const zoomMax = 8;
 const zoomStep = 1.5;
@@ -43,11 +55,15 @@ const home: View = { k: 1, x: 0, y: 0 };
  * A flat world map that colours countries by value on the heat scale, drawn on a canvas from resolved tokens.
  * It zooms, pans and resets with buttons, the keyboard or a drag, and its values are also a table.
  */
-export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDomain, formatValue: givenFormat, unit, outline = [], caption }: ChoroplethProps) {
+export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDomain, formatValue: givenFormat, unit, outline = [], caption, scale = 'log', breaks: givenBreaks, bandLabels: givenLabels, surface = 'data', formatCount }: ChoroplethProps) {
   const formatValue = givenFormat ?? formatTick;
   const [box, width] = useWidth<HTMLDivElement>();
   const canvas = useRef<HTMLCanvasElement>(null);
-  const t = useResolvedTokens(tokenNames);
+  const banded = scale === 'bands';
+  const breaks = banded && givenBreaks && validBreaks(givenBreaks) ? givenBreaks : defaultBreaks;
+  const bandLabels = givenLabels && givenLabels.length === bandTokens.length ? givenLabels : defaultBandLabels(breaks);
+  const onMap = surface === 'map';
+  const t = useResolvedTokens(tokenNames) as Record<string, string> | null;
   const [view, setView] = useState<View>(home);
   const [tableView, setTableView] = useState(false);
   const [hover, setHover] = useState<string | null>(null);
@@ -56,8 +72,9 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
   const drag = useRef<{ startX: number; startY: number; x: number; y: number; moved: boolean } | null>(null);
   const tableId = useId();
 
-  const rows = useMemo(() => tableRows(values, givenFormat), [values, givenFormat]);
-  const stops = t ? heatNames.map((n) => t[n]) : [];
+  const rows = useMemo(() => tableRows(values, givenFormat, 'No data', banded ? (v) => bandLabels[bandIndex(v, breaks)] : undefined), [values, givenFormat, banded, breaks, bandLabels]);
+  const counts = useMemo(() => (banded ? bandCounts(coded.filter((c) => c.code in values).map((c) => values[c.code]), breaks) : []), [banded, values, breaks]);
+  const stops = t && !banded ? heatNames.map((n) => t[n]) : [];
   // The projection is fitted to the width of the countries shown, so the map is exactly as tall as it needs to be.
   const { projection, height } = useMemo(() => {
     const p = geoNaturalEarth1().fitWidth(Math.max(1, width), land);
@@ -84,23 +101,41 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
     const ctx = el.getContext('2d');
     if (!ctx) return;
     ctx.scale(ratio, ratio);
-    ctx.fillStyle = t['data-surface']; ctx.fillRect(0, 0, width, height);
+    const ground = onMap ? t['data-map-panel'] : t['data-surface'];
+    const border = onMap ? t['data-map-stroke'] : t['data-surface'];
+    const noData = onMap ? t['data-map-no-data'] : t['data-no-data'];
+    const ink = onMap ? t['data-map-ink'] : t['data-text'];
+    ctx.fillStyle = ground; ctx.fillRect(0, 0, width, height);
     ctx.save();
     ctx.translate(view.x, view.y);
     ctx.scale(view.k, view.k);
     const path = geoPath(projection, ctx);
+    // Banded maps hatch the no-data fill (45°, 1px, the ink at 35%), so it is not mistaken for a band; the hatch keeps its size on screen however far the map is zoomed.
+    let hatch: CanvasPattern | null = null;
+    if (banded) {
+      const tile = document.createElement('canvas');
+      tile.width = tile.height = 4 * ratio;
+      const tc = tile.getContext('2d');
+      if (tc) {
+        tc.fillStyle = noData; tc.fillRect(0, 0, tile.width, tile.height);
+        tc.strokeStyle = ink; tc.globalAlpha = 0.35; tc.lineWidth = ratio;
+        tc.beginPath(); tc.moveTo(0, tile.height); tc.lineTo(tile.width, 0); tc.moveTo(-1, 1); tc.lineTo(1, -1); tc.moveTo(tile.width - 1, tile.height + 1); tc.lineTo(tile.width + 1, tile.height - 1); tc.stroke();
+        hatch = ctx.createPattern(tile, 'repeat');
+        hatch?.setTransform(new DOMMatrix().scale(1 / (ratio * view.k)));
+      }
+    }
     for (const { code, shape } of coded) {
       ctx.beginPath(); path(shape);
-      ctx.fillStyle = code in values ? heatColour(values[code], domain, stops) : t['data-no-data'];
+      ctx.fillStyle = code in values ? (banded ? t[bandTokens[bandIndex(values[code], breaks)]] : heatColour(values[code], domain, stops)) : (hatch ?? noData);
       ctx.fill();
       // Borders in the panel's colour: visible wherever a step has 3:1 against it, which every step does.
-      ctx.strokeStyle = t['data-surface']; ctx.lineWidth = 0.6 / view.k; ctx.stroke();
+      ctx.strokeStyle = border; ctx.lineWidth = 0.6 / view.k; ctx.stroke();
     }
-    ctx.strokeStyle = t['data-text']; ctx.lineWidth = 1.6 / view.k;
+    ctx.strokeStyle = ink; ctx.lineWidth = 1.6 / view.k;
     for (const { code, shape } of coded) if (outlined.has(code)) { ctx.beginPath(); path(shape); ctx.stroke(); }
     ctx.restore();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [t, projection, view, width, height, values, domain, outlined, tableView]);
+  }, [t, projection, view, width, height, values, domain, outlined, tableView, banded, onMap, breaks]);
 
   const onKeyDown = (event: KeyboardEvent<HTMLCanvasElement>) => {
     const k = event.key;
@@ -124,7 +159,7 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
   // Worked out from the code each time, so the figure follows the values (for example while a year plays).
   const describe = (code: string) => {
     const found = coded.find((c) => c.code === code);
-    return found ? `${found.name}: ${code in values ? [formatValue(values[code]), unit].filter(Boolean).join(' ') : 'No data'}` : null;
+    return found ? `${found.name}: ${code in values ? [formatValue(values[code]), unit].filter(Boolean).join(' ') + (banded ? ` · band ${bandLabels[bandIndex(values[code], breaks)]}` : '') : 'No data'}` : null;
   };
   // Capture keeps a drag going outside the picture; it is only an aid, and the pointer may already be gone.
   const capture = (el: HTMLElement, id: number, on: boolean) => { try { if (on) el.setPointerCapture(id); else el.releasePointerCapture?.(id); } catch { /* the pointer ended */ } };
@@ -154,7 +189,7 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
   const tapped = !tableView && selected ? describe(selected) : null;
 
   return (
-    <figure className={styles.map}>
+    <figure className={onMap ? `${styles.map} ${styles.onMap}` : styles.map}>
       <div ref={box} className={styles.stage}>
         {t && width > 0 ? (
           // Focusable so the keyboard can pan and zoom it.
@@ -181,7 +216,9 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
         {tableView ? null : <p className={styles.readout} aria-hidden="true">{hover ?? ' '}</p>}
       </div>
       {caption ? <div className={styles.caption}>{caption}</div> : null}
-      <HeatLegend label={valueLabel} domain={domain} formatValue={formatValue} />
+      {banded
+        ? <StepLegend label={valueLabel} bandLabels={bandLabels} counts={counts} formatCount={formatCount} onMap={onMap} />
+        : <HeatLegend label={valueLabel} domain={domain} formatValue={formatValue} />}
       <MapControls
         subject="map"
         onZoomIn={() => zoomAbout(zoomStep)}
@@ -192,13 +229,14 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
         tableView={tableView}
         onTableViewChange={setTableView}
         hint="Arrow keys move the map, + and − zoom, 0 resets."
+        onMap={onMap}
       />
       <div className={tableView ? styles.tableView : styles.hidden} {...(tableView ? { role: 'region', 'aria-label': 'Table of values', tabIndex: 0 } : {})}>
         <table id={tableId}>
           <caption>{ariaLabel}</caption>
-          <thead><tr><th scope="col">Country</th><th scope="col">{valueLabel}</th></tr></thead>
+          <thead><tr><th scope="col">Country</th><th scope="col">{valueLabel}</th>{banded ? <th scope="col">Band</th> : null}</tr></thead>
           <tbody>
-            {rows.map((r) => <tr key={r.code}><th scope="row">{r.name}</th><td>{r.text}</td></tr>)}
+            {rows.map((r) => <tr key={r.code}><th scope="row">{r.name}</th><td>{r.text}</td>{banded ? <td>{r.band}</td> : null}</tr>)}
           </tbody>
         </table>
       </div>

@@ -93,3 +93,30 @@
   font-feature-settings: var(--syn-figure-feature-settings);
   text-align: end;
 }
+
+/* The mid-tone panel (surface="map"): the map and its legend sit on one panel of their own, with their own ink. */
+.onMap {
+  padding: var(--syn-space-4);
+  border-radius: var(--syn-radius-card);
+  background: var(--syn-data-map-panel);
+  color: var(--syn-data-map-ink);
+}
+
+.onMap .readoutTap {
+  background: var(--syn-data-map-panel);
+  color: var(--syn-data-map-ink);
+}
+
+.onMap .readout,
+.onMap .tableView {
+  color: var(--syn-data-map-ink);
+}
+
+.onMap .tableView caption {
+  color: var(--syn-data-map-ink-muted);
+}
+
+.onMap .tableView th,
+.onMap .tableView td {
+  border-bottom-color: color-mix(in srgb, var(--syn-data-map-ink) 16%, var(--syn-data-map-panel));
+}

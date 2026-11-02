@@ -20,6 +20,8 @@ export interface MapControlsProps {
   extra?: ReactNode;
   /** For a narrow, short space: only the table button is drawn, as an icon at a finger-sized target, in the row with `extra`. Zoom and reset stay on the keys. */
   dense?: boolean;
+  /** Drawn on the mid-tone map panel (a banded map's `surface="map"`) rather than the dark data panel. */
+  onMap?: boolean;
 }
 
 export function PanelButton({ icon, children, label, pressed, disabled, onClick, dense }: { icon: IconProps['name']; children?: ReactNode; label?: string; pressed?: boolean; disabled?: boolean; onClick: () => void; dense?: boolean }) {
@@ -35,7 +37,7 @@ export function PanelButton({ icon, children, label, pressed, disabled, onClick,
  * Zoom in and out, reset the view, switch to the table, and say which keys do the same. The buttons sit on the
  * dark data panel in both themes, so they are drawn in the panel's own colours.
  */
-export function MapControls({ onZoomIn, onZoomOut, onReset, zoomInDisabled, zoomOutDisabled, tableView, onTableViewChange, subject, hint, hintVisibility = 'visible', extra, dense = false }: MapControlsProps) {
+export function MapControls({ onZoomIn, onZoomOut, onReset, zoomInDisabled, zoomOutDisabled, tableView, onTableViewChange, subject, hint, hintVisibility = 'visible', extra, dense = false, onMap = false }: MapControlsProps) {
   const buttons = dense ? (
     <div className={styles.buttons} role="group" aria-label={`${subject} view`}>
       <PanelButton icon="table" label="Table view" pressed={tableView} onClick={() => onTableViewChange(!tableView)} dense />
@@ -49,7 +51,7 @@ export function MapControls({ onZoomIn, onZoomOut, onReset, zoomInDisabled, zoom
     </div>
   );
   return (
-    <div className={styles.controls}>
+    <div className={onMap ? `${styles.controls} ${styles.onMap}` : styles.controls}>
       {extra ? <div className={dense ? `${styles.row} ${styles.rowDense}` : styles.row}><div className={styles.extra}>{extra}</div>{buttons}</div> : buttons}
       {tableView ? null : <p className={hintVisibility === 'sr-only' ? `${styles.hint} ${styles.srOnly}` : styles.hint}>{hint}</p>}
     </div>

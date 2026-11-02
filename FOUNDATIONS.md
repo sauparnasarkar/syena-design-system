@@ -757,6 +757,18 @@ colour, so they stay visible exactly when a step reaches 3:1 against the ground,
 does (checked below). Lightness is monotonic, so order survives any colour-vision deficiency and
 greyscale printing.
 
+**Bands** (`data-band-1` … `data-band-8`). For magnitudes drawn as eight *fixed* bands between seven
+breaks, darker = more, on a mid-tone map panel (`data-map-panel`, with `data-map-stroke` for the
+country borders, `data-map-no-data` for the no-data fill, and `data-map-ink` / `data-map-ink-muted`
+for text on the panel). The bands do not depend on the data shown, so a country that changes colour
+across years has crossed a band; on the log heat scale the largest values share the top stops and a
+year's change is invisible. Pale yellow to near-black red, the same eight colours in both themes (the
+panel is what changes). The deepest band reaches 5:1 against the panel and the ink 4.5:1; the middle
+bands sit near the panel's luminance by design, told apart by hue and by the border stroke, which the
+contrast matrix records as an accepted exception rather than a requirement. No-data is the quiet fill
+with a 45° hatch (1 px, the ink at 35%), so it is not mistaken for a band. Like the heat ramp, it
+passes through the amber and red zones because it orders magnitude and carries no good or bad meaning.
+
 **Diverging** (`data-div-neg-3` … `data-div-pos-3`, with `data-div-mid`). For signed values
 around a stated baseline. The cool side (below baseline) uses the accent hue. The warm side
 (above baseline) uses the hue at distance `D` from the negative signal: the warmest hue the
@@ -786,7 +798,7 @@ every colour-vision view. Change marks are always paired with a sign or arrow gl
 UI boundaries, icons and chart marks. Primary text and chart text aim higher (7:1).
 
 <!-- generated:contrast-count -->
-night: 128 required pairs; tidewater: 173 required pairs.
+night: 131 required pairs; tidewater: 176 required pairs.
 <!-- /generated:contrast-count -->
 
 The table shows each pair family at its worst surface in each theme:
@@ -836,6 +848,9 @@ The table shows each pair family at its worst surface in each theme:
 | data-heat-6 on data-surface (and the borders drawn in it) | 3:1 | 4.70 | 4.67 | pass |
 | data-heat-7 on data-surface (and the borders drawn in it) | 3:1 | 3.68 | 3.68 | pass |
 | the deepest heat step | 3.6742346141747673:1 | 3.68 | 3.68 | pass |
+| data-band-8 on data-map-panel | 5:1 | 5.22 | 8.94 | pass |
+| data-map-ink on data-map-panel | 4.5:1 | 7.09 | 11.77 | pass |
+| data-map-ink-muted on data-map-panel | 4.5:1 | 5.41 | 6.59 | pass |
 | data-div-* | 3:1 | 4.54 | 4.52 | pass |
 | data-change-decrease | 3:1 | 11.19 | 10.69 | pass |
 | data-change-increase | 3:1 | 3.78 | 3.52 | pass |
@@ -870,11 +885,27 @@ Pairs measured and reported but not required (decorative, or never used alone):
 | Theme | Pair (reported only) | Guide ratio | Measured |
 |---|---|---|---|
 | night | data-gridline on data-surface | 1.7 | 1.74 |
+| night | data-band-1 on data-map-panel (accepted exception: told apart by hue and the border stroke) | 3 | 2.07 |
+| night | data-band-2 on data-map-panel (accepted exception: told apart by hue and the border stroke) | 3 | 1.68 |
+| night | data-band-3 on data-map-panel (accepted exception: told apart by hue and the border stroke) | 3 | 1.27 |
+| night | data-band-4 on data-map-panel (accepted exception: told apart by hue and the border stroke) | 3 | 1.08 |
+| night | data-band-5 on data-map-panel (accepted exception: told apart by hue and the border stroke) | 3 | 1.50 |
+| night | data-band-6 on data-map-panel (accepted exception: told apart by hue and the border stroke) | 3 | 2.19 |
+| night | data-band-7 on data-map-panel (accepted exception: told apart by hue and the border stroke) | 3 | 3.40 |
+| night | data-map-stroke on data-map-panel (the border drawn between countries) | 1.1 | 1.56 |
 | night | signal-positive-fill on surface-base | 3 | 7.01 |
 | night | signal-negative-fill on surface-base | 3 | 5.17 |
 | night | signal-caution-fill on surface-base | 3 | 7.62 |
 | night | signal-info-fill on surface-base | 3 | 5.23 |
 | tidewater | data-gridline on data-surface | 1.7 | 1.75 |
+| tidewater | data-band-1 on data-map-panel (accepted exception: told apart by hue and the border stroke) | 3 | 1.21 |
+| tidewater | data-band-2 on data-map-panel (accepted exception: told apart by hue and the border stroke) | 3 | 1.02 |
+| tidewater | data-band-3 on data-map-panel (accepted exception: told apart by hue and the border stroke) | 3 | 1.35 |
+| tidewater | data-band-4 on data-map-panel (accepted exception: told apart by hue and the border stroke) | 3 | 1.84 |
+| tidewater | data-band-5 on data-map-panel (accepted exception: told apart by hue and the border stroke) | 3 | 2.57 |
+| tidewater | data-band-6 on data-map-panel (accepted exception: told apart by hue and the border stroke) | 3 | 3.76 |
+| tidewater | data-band-7 on data-map-panel (accepted exception: told apart by hue and the border stroke) | 3 | 5.83 |
+| tidewater | data-map-stroke on data-map-panel (the border drawn between countries) | 1.1 | 1.34 |
 | tidewater | signal-positive-fill on surface-base | 3 | 3.12 |
 | tidewater | signal-negative-fill on surface-base | 3 | 3.90 |
 | tidewater | signal-caution-fill on surface-base | 3 | 1.74 |
@@ -1579,7 +1610,13 @@ with named values; there are no colour-named variants.
 
 - **Purpose and props.** A flat world map coloured by the same heat scale. Props: `values`,
   `valueLabel`, `ariaLabel`, `domain`, `unit`, `formatValue`, `outline` (countries to outline, for
-  example the ones selected; changing it never resets the zoom).
+  example the ones selected; changing it never resets the zoom). Opt-in, defaults unchanged:
+  `scale` (`log` or `bands`), `breaks` (seven ascending values, so eight bands; a value equal to a
+  break is in the upper band), `bandLabels`, `formatCount`, and `surface` (`data`, or `map` for the
+  mid-tone panel). With `scale="bands"` the fill is the band's token (no blending) and the legend is
+  a *step legend*: eight equal swatches in a row with the range under each and how many countries
+  are in it, then a hatched No data swatch (two rows of four on a narrow screen). The hover read-out
+  and the table name the band beside the value.
 - **Anatomy, states, behaviour and accessibility.** As the globe: a natural-earth projection
   fitted to the width, zoom to 8×, drag or arrow keys to pan within the map, the same controls,
   hint, legend, no-data treatment and table view, and the same optional `caption`. The legend

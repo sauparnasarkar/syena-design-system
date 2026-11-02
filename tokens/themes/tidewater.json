@@ -160,6 +160,60 @@
     }
   },
   "data": {
+    "band": {
+      "1": {
+        "$type": "color",
+        "$value": "#fbe7a3"
+      },
+      "2": {
+        "$type": "color",
+        "$value": "#f9cb73"
+      },
+      "3": {
+        "$type": "color",
+        "$value": "#f5a651"
+      },
+      "4": {
+        "$type": "color",
+        "$value": "#ec7f3d"
+      },
+      "5": {
+        "$type": "color",
+        "$value": "#da5a33"
+      },
+      "6": {
+        "$type": "color",
+        "$value": "#bb3a2e"
+      },
+      "7": {
+        "$type": "color",
+        "$value": "#8e2329"
+      },
+      "8": {
+        "$type": "color",
+        "$value": "#5c1424"
+      }
+    },
+    "map-panel": {
+      "$type": "color",
+      "$value": "#c9d6dc"
+    },
+    "map-stroke": {
+      "$type": "color",
+      "$value": "#eef4f6"
+    },
+    "map-no-data": {
+      "$type": "color",
+      "$value": "#a3b1b9"
+    },
+    "map-ink": {
+      "$type": "color",
+      "$value": "#071c24"
+    },
+    "map-ink-muted": {
+      "$type": "color",
+      "$value": "#2f4752"
+    },
     "surface": {
       "$type": "color",
       "$value": "#061e28"
