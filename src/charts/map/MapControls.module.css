@@ -57,7 +57,8 @@
 
 /* The four buttons as one group laid over a corner of the picture, with a quiet backing so they read on any colour under them. */
 .overlayGroup {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, var(--syn-layout-control-height-touch));
   gap: var(--syn-space-1);
   padding: var(--syn-space-1);
   border-radius: var(--syn-radius-control);

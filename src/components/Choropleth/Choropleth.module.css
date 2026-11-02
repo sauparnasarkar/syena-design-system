@@ -127,24 +127,24 @@
   border-bottom-color: color-mix(in srgb, var(--syn-data-map-ink) 16%, var(--syn-data-map-panel));
 }
 
-/* Controls laid over the picture's top-right corner; in the table view there is no picture, so the group sits in a row above the table. */
+/* Controls laid over the picture's bottom-left corner (the Pacific, away from the land the eye reads); in the table view there is no picture, so the group sits in a row above the table. */
 .overlay {
   position: absolute;
-  inset-block-start: var(--syn-space-2);
-  inset-inline-end: var(--syn-space-2);
+  inset-block-end: var(--syn-space-2);
+  inset-inline-start: var(--syn-space-2);
   z-index: 1;
 }
 
 .overlayStatic {
   position: static;
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
-/* The keyboard hint: over the picture's foot while the map has focus (it is always in the page, for aria-describedby, and never moves the layout). */
+/* The keyboard hint: over the picture's top-left while the map has focus (it is always in the page, for aria-describedby, and never moves the layout). */
 .hintOverlay {
   position: absolute;
-  inset-block-end: var(--syn-space-2);
+  inset-block-start: var(--syn-space-2);
   inset-inline-start: var(--syn-space-2);
   max-width: calc(100% - 2 * var(--syn-space-2));
   padding: 0 var(--syn-space-2);
@@ -170,18 +170,15 @@
   white-space: nowrap;
 }
 
-/* With the controls over the top-right corner, a tapped country's read-out (top-left) leaves their room and wraps instead of running under them. */
-.withOverlay .readoutTap {
-  max-width: calc(100% - 4 * var(--syn-layout-control-height-touch) - 5 * var(--syn-space-1) - 3 * var(--syn-space-2));
-  overflow-wrap: anywhere; /* a long name (Turkmenistan) breaks rather than running under the group */
-}
-
-/* In the compact layout no line is held for the hover read-out: it appears over the picture's bottom-right corner (the hint is bottom-left, the controls top-right), and the parts sit closer. */
+/* In the compact layout no line is held for the hover read-out: it appears over the picture's bottom-right corner (the hint is top-left, the controls bottom-left), and the parts sit closer. */
 .readoutOverlay {
   position: absolute;
   inset-block-end: var(--syn-space-2);
   inset-inline-end: var(--syn-space-2);
-  max-width: calc(100% - 2 * var(--syn-space-2));
+  /* The controls fill the bottom-left corner (two touch targets and their gap): the read-out takes what is left of the row and wraps rather than running under them. */
+  max-width: calc(100% - 2 * var(--syn-layout-control-height-touch) - 6 * var(--syn-space-1) - 2 * var(--syn-space-2));
+  overflow-wrap: anywhere;
+  text-align: end;
   min-height: 0;
   padding: 0 var(--syn-space-2);
   border-radius: var(--syn-radius-control);

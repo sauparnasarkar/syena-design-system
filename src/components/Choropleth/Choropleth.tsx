@@ -45,6 +45,8 @@ export interface ChoroplethProps {
   controls?: 'below' | 'overlay';
   /** For `bands`, when `outline` has countries: the key written beside No data for their outline ("Selected"). Nothing when omitted. */
   outlineLabel?: string;
+  /** For `bands` with counts: written once after the legend's label ("countries per band below"), so `formatCount` can return a bare number. */
+  countsLabel?: string;
 }
 
 const heatNames = ['data-heat-1', 'data-heat-2', 'data-heat-3', 'data-heat-4', 'data-heat-5', 'data-heat-6', 'data-heat-7'] as const;
@@ -63,7 +65,7 @@ const home: View = { k: 1, x: 0, y: 0 };
  * A flat world map that colours countries by value on the heat scale, drawn on a canvas from resolved tokens.
  * It zooms, pans and resets with buttons, the keyboard or a drag, and its values are also a table.
  */
-export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDomain, formatValue: givenFormat, unit, outline = [], caption, scale = 'log', breaks: givenBreaks, bandLabels: givenLabels, surface = 'data', formatCount, flush = false, noDataCount, controls = 'below', outlineLabel }: ChoroplethProps) {
+export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDomain, formatValue: givenFormat, unit, outline = [], caption, scale = 'log', breaks: givenBreaks, bandLabels: givenLabels, surface = 'data', formatCount, flush = false, noDataCount, controls = 'below', outlineLabel, countsLabel }: ChoroplethProps) {
   const overlay = controls === 'overlay';
   const [focused, setFocused] = useState(false);
   const hintId = useId();
@@ -253,7 +255,7 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
       </div>
       {caption ? <div className={styles.caption}>{caption}</div> : null}
       {banded
-        ? <StepLegend label={valueLabel} bandLabels={bandLabels} counts={counts} formatCount={formatCount} noDataCount={noDataCount} outlineLabel={outline.length > 0 ? outlineLabel : undefined} onMap={onMap} />
+        ? <StepLegend label={valueLabel} bandLabels={bandLabels} counts={counts} formatCount={formatCount} noDataCount={noDataCount} outlineLabel={outline.length > 0 ? outlineLabel : undefined} countsLabel={countsLabel} onMap={onMap} />
         : <HeatLegend label={valueLabel} domain={domain} formatValue={formatValue} />}
       {overlay ? null : (
         <MapControls
