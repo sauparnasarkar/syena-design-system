@@ -10,6 +10,8 @@ export interface StepLegendProps {
   counts?: number[];
   /** How a count is written; "12 countries" by default. */
   formatCount?: (count: number) => string;
+  /** How many countries have no data, written under the No data swatch so the legend adds up to all of them; nothing is drawn when it is 0 or not given. */
+  noDataCount?: number;
   noDataLabel?: string;
   /** Drawn on the mid-tone map panel rather than the dark data panel. */
   onMap?: boolean;
@@ -21,7 +23,7 @@ const defaultCount = (n: number) => `${n} ${n === 1 ? 'country' : 'countries'}`;
  * The legend of a banded map: eight equal swatches in a row, the range under each (and, optionally, how many countries are in it), then a hatched
  * No data swatch. On a narrow screen the bands are two rows of four.
  */
-export function StepLegend({ label, bandLabels, counts, formatCount = defaultCount, noDataLabel = 'No data', onMap = false }: StepLegendProps) {
+export function StepLegend({ label, bandLabels, counts, formatCount = defaultCount, noDataLabel = 'No data', noDataCount, onMap = false }: StepLegendProps) {
   return (
     <div className={onMap ? `${styles.legend} ${styles.onMap}` : styles.legend}>
       <span className={styles.label}>{label}</span>
@@ -38,6 +40,7 @@ export function StepLegend({ label, bandLabels, counts, formatCount = defaultCou
         <span className={styles.nodata}>
           <span className={`${styles.swatch} ${styles.hatched}`} aria-hidden="true" />
           <span className={styles.range}>{noDataLabel}</span>
+          {noDataCount ? <span className={styles.count}>{formatCount(noDataCount)}</span> : null}
         </span>
       </div>
     </div>

@@ -1687,7 +1687,7 @@ with named values; there are no colour-named variants.
   `valueLabel`, `ariaLabel`, `domain`, `unit`, `formatValue`, `outline` (countries to outline, for
   example the ones selected; changing it never resets the zoom). Opt-in, defaults unchanged:
   `scale` (`log` or `bands`), `breaks` (seven ascending values, so eight bands; a value equal to a
-  break is in the upper band), `bandLabels`, `formatCount`, and `surface` (`data`, or `map` for the
+  break is in the upper band), `bandLabels`, `formatCount`, `noDataCount` (written under the No data swatch so the legend adds up to all the countries; hidden at 0), and `surface` (`data`, or `map` for the
   mid-tone panel). With `scale="bands"` the fill is the band's token (no blending) and the legend is
   a *step legend*: eight equal swatches in a row with the range under each and how many countries
   are in it, then a hatched No data swatch (two rows of four on a narrow screen). The hover read-out

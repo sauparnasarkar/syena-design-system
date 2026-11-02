@@ -309,3 +309,32 @@ export const OutlineIsADoubleStrokeOnTheMapPanel: Story = {
     await expect(light).toBeGreaterThan(15); // the rims of a 2.5px stroke under a 1.25px one, plus the borders
   },
 };
+
+// The No data swatch can carry its own count, so the legend adds up to all the countries: band counts + no-data count. Nothing is written when it is 0.
+export const NoDataCountCompletesTheLegend: Story = {
+  args: { ...bandedArgs, noDataCount: 3 },
+  decorators: [frame()],
+  play: async ({ canvasElement }) => {
+    const legend = within(canvasElement).getByRole('list', { name: /in 8 bands from lowest to highest/ });
+    const bands = within(legend).getAllByText(/countr(y|ies)$/).map((e) => Number((e.textContent ?? '').match(/\d+/)![0]));
+    const noData = within(canvasElement).getByText('3 countries', { selector: 'span:not(li span)' });
+    await expect(noData).toBeInTheDocument();
+    await expect(bands.reduce((a, b) => a + b, 0) + 3).toBe(Object.keys(illustrativeEmissions).length + 3);
+  },
+};
+
+export const NoDataCountOfOneIsSingular: Story = {
+  args: { ...bandedArgs, noDataCount: 1 },
+  decorators: [frame()],
+  play: async ({ canvasElement }) => { await expect(within(canvasElement).getByText('1 country', { selector: 'span:not(li span)' })).toBeInTheDocument(); },
+};
+
+export const NoDataCountOfZeroIsHidden: Story = {
+  args: { ...bandedArgs, noDataCount: 0 },
+  decorators: [frame()],
+  play: async ({ canvasElement }) => {
+    const legend = within(canvasElement).getByRole('list', { name: /in 8 bands from lowest to highest/ });
+    await expect(within(legend).getAllByText(/countr(y|ies)$/)).toHaveLength(8); // the eight bands' counts only
+    await expect(within(canvasElement).queryByText('0 countries')).not.toBeInTheDocument();
+  },
+};

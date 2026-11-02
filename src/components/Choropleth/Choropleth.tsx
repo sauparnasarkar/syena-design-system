@@ -39,6 +39,8 @@ export interface ChoroplethProps {
   formatCount?: (count: number) => string;
   /** With `surface="map"`: draw no panel of its own (no padding or background), for a card whose body is already that panel (`ChartCard surface="map"`). */
   flush?: boolean;
+  /** For `bands`: how many countries have no data, written under the No data swatch (nothing when 0 or omitted). The map cannot know it: a country with no value may have no shape, or not exist in `values` at all. */
+  noDataCount?: number;
 }
 
 const heatNames = ['data-heat-1', 'data-heat-2', 'data-heat-3', 'data-heat-4', 'data-heat-5', 'data-heat-6', 'data-heat-7'] as const;
@@ -57,7 +59,7 @@ const home: View = { k: 1, x: 0, y: 0 };
  * A flat world map that colours countries by value on the heat scale, drawn on a canvas from resolved tokens.
  * It zooms, pans and resets with buttons, the keyboard or a drag, and its values are also a table.
  */
-export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDomain, formatValue: givenFormat, unit, outline = [], caption, scale = 'log', breaks: givenBreaks, bandLabels: givenLabels, surface = 'data', formatCount, flush = false }: ChoroplethProps) {
+export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDomain, formatValue: givenFormat, unit, outline = [], caption, scale = 'log', breaks: givenBreaks, bandLabels: givenLabels, surface = 'data', formatCount, flush = false, noDataCount }: ChoroplethProps) {
   const formatValue = givenFormat ?? formatTick;
   const [box, width] = useWidth<HTMLDivElement>();
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -224,7 +226,7 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
       </div>
       {caption ? <div className={styles.caption}>{caption}</div> : null}
       {banded
-        ? <StepLegend label={valueLabel} bandLabels={bandLabels} counts={counts} formatCount={formatCount} onMap={onMap} />
+        ? <StepLegend label={valueLabel} bandLabels={bandLabels} counts={counts} formatCount={formatCount} noDataCount={noDataCount} onMap={onMap} />
         : <HeatLegend label={valueLabel} domain={domain} formatValue={formatValue} />}
       <MapControls
         subject="map"
