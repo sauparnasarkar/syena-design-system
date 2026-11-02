@@ -260,6 +260,10 @@ export const BandedNarrowShowsTwoRowsOfFour: Story = {
       expect(new Set(tops).size).toBe(2);
       expect(tops.filter((t) => t === tops[0])).toHaveLength(4);
     });
+    // the count lines are not drawn at this width (the ranges are), but they stay in the page for a screen reader
+    const counts = within(legend).getAllByText(/countr(y|ies)$/);
+    await expect(counts).toHaveLength(8);
+    await expect(counts[0].getBoundingClientRect().width).toBeLessThanOrEqual(1);
   },
 };
 
