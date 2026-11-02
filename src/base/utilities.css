@@ -127,6 +127,11 @@
   color: var(--syn-data-text);
 }
 
+.syn-map-panel {
+  background: var(--syn-data-map-panel);
+  color: var(--syn-data-map-ink);
+}
+
 .syn-visually-hidden {
   position: absolute;
   width: var(--syn-layout-border-hairline);

@@ -70,6 +70,18 @@ describe('token build', () => {
   });
 });
 
+describe('the map panel scope', () => {
+  const colourRoles = (text: string) => [...text.matchAll(/--syn-color-([a-z-]+):/g)].map((m) => m[1]).sort();
+  beforeAll(async () => { await buildTokens(); });
+
+  it('takes a map-panel value for every colour role, in either theme', () => {
+    const scope = block('.syn-map-panel');
+    const roles = colourRoles(block('[data-syn-theme="tidewater"]'));
+    expect(colourRoles(scope)).toEqual(roles);
+    for (const role of roles) expect(scope).toContain(`--syn-color-${role}: var(--syn-data-map-${role});`);
+  });
+});
+
 describe('the data panel scope', () => {
   const colourRoles = (text: string) => [...text.matchAll(/--syn-color-([a-z-]+):/g)].map((m) => m[1]).sort();
   beforeAll(async () => { await buildTokens(); });
