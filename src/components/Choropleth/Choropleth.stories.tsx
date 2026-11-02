@@ -317,7 +317,7 @@ export const NoDataCountCompletesTheLegend: Story = {
   play: async ({ canvasElement }) => {
     const legend = within(canvasElement).getByRole('list', { name: /in 8 bands from lowest to highest/ });
     const bands = within(legend).getAllByText(/countr(y|ies)$/).map((e) => Number((e.textContent ?? '').match(/\d+/)![0]));
-    const noData = within(canvasElement).getByText('3 countries', { selector: 'span:not(li span)' });
+    const noData = within(canvasElement).getByText('No data · 3 countries', { selector: 'span' });
     await expect(noData).toBeInTheDocument();
     await expect(bands.reduce((a, b) => a + b, 0) + 3).toBe(Object.keys(illustrativeEmissions).length + 3);
   },
@@ -326,7 +326,7 @@ export const NoDataCountCompletesTheLegend: Story = {
 export const NoDataCountOfOneIsSingular: Story = {
   args: { ...bandedArgs, noDataCount: 1 },
   decorators: [frame()],
-  play: async ({ canvasElement }) => { await expect(within(canvasElement).getByText('1 country', { selector: 'span:not(li span)' })).toBeInTheDocument(); },
+  play: async ({ canvasElement }) => { await expect(within(canvasElement).getByText('No data · 1 country', { selector: 'span' })).toBeInTheDocument(); },
 };
 
 export const NoDataCountOfZeroIsHidden: Story = {
@@ -335,7 +335,8 @@ export const NoDataCountOfZeroIsHidden: Story = {
   play: async ({ canvasElement }) => {
     const legend = within(canvasElement).getByRole('list', { name: /in 8 bands from lowest to highest/ });
     await expect(within(legend).getAllByText(/countr(y|ies)$/)).toHaveLength(8); // the eight bands' counts only
-    await expect(within(canvasElement).queryByText('0 countries')).not.toBeInTheDocument();
+    await expect(within(canvasElement).queryByText(/0 countries/)).not.toBeInTheDocument();
+    await expect(within(canvasElement).getByText('No data', { selector: 'span' })).toBeInTheDocument(); // just the label
   },
 };
 
@@ -427,7 +428,25 @@ export const CompactHoverReadoutOverlaysAndNoDataSharesTheLabelRow: Story = {
     await expect(canvasElement.querySelector('figure')!.getBoundingClientRect().height).toBe(figureHeight); // hovering moves nothing
     // narrow legend: the No data swatch sits on the label's row
     const label = within(canvasElement).getByText(/CO₂ emitted in 2024/, { selector: 'span' });
-    const noData = within(canvasElement).getByText('No data', { selector: 'span' });
+    const noData = within(canvasElement).getByText(/^No data/, { selector: 'span' });
     await expect(Math.abs(noData.getBoundingClientRect().top - label.getBoundingClientRect().top)).toBeLessThan(12);
   },
+};
+
+// The legend carries a key for the outline round chosen countries, beside No data, only when there are some and a label is given: the caption line under the map is not needed.
+export const SelectedKeyBesideNoData: Story = {
+  args: { ...bandedArgs, outline: ['USA', 'CHN'], outlineLabel: 'Selected', noDataCount: 3 },
+  decorators: [frame()],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const selected = canvas.getByText('Selected', { selector: 'span' });
+    const noData = canvas.getByText('No data · 3 countries', { selector: 'span' });
+    await expect(Math.abs(selected.getBoundingClientRect().top - noData.getBoundingClientRect().top)).toBeLessThan(30); // in the same keys group
+  },
+};
+
+export const SelectedKeyIsAbsentWithoutAnOutline: Story = {
+  args: { ...bandedArgs, outline: [], outlineLabel: 'Selected', noDataCount: 3 },
+  decorators: [frame()],
+  play: async ({ canvasElement }) => { await expect(within(canvasElement).queryByText('Selected', { selector: 'span' })).not.toBeInTheDocument(); },
 };
