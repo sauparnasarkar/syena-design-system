@@ -1,11 +1,15 @@
+/* The container: the rules that change with its width apply to what is inside it (.inner), never to the container itself. */
 .legend {
   container-type: inline-size;
-  display: flex;
-  flex-direction: column;
-  gap: var(--syn-space-1);
   width: 100%;
   color: var(--syn-data-text);
   font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--syn-space-1);
 }
 
 .label {
@@ -71,26 +75,42 @@
   font: var(--syn-type-caption-weight) var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-type-caption-family);
 }
 
-/* Not wide enough for eight columns with a count each: two rows of four bands, the no-data swatch after them. */
+/* Not wide enough for eight columns with a count each: two rows of four bands, with the No data swatch on the label's row (right-hand end), not on a row of its own. */
 @container (max-width: 48rem) {
-  .row {
-    flex-direction: column;
+  .inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
   }
 
-  .bands {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    row-gap: var(--syn-space-3);
-    width: 100%;
+  .row {
+    display: contents;
+  }
+
+  .label {
+    grid-column: 1;
+    grid-row: 1;
   }
 
   .nodata {
+    grid-column: 2;
+    grid-row: 1;
+    flex: none;
     flex-direction: row;
     align-items: center;
-    flex-basis: auto;
+    gap: var(--syn-space-2);
   }
 
   .nodata .swatch {
     width: var(--syn-space-5);
+  }
+
+  .bands {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    row-gap: var(--syn-space-2);
+    width: 100%;
   }
 }
 

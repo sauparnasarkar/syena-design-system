@@ -175,3 +175,24 @@
   max-width: calc(100% - 4 * var(--syn-layout-control-height-touch) - 5 * var(--syn-space-1) - 3 * var(--syn-space-2));
   overflow-wrap: anywhere; /* a long name (Turkmenistan) breaks rather than running under the group */
 }
+
+/* In the compact layout no line is held for the hover read-out: it appears over the picture's bottom-right corner (the hint is bottom-left, the controls top-right), and the parts sit closer. */
+.readoutOverlay {
+  position: absolute;
+  inset-block-end: var(--syn-space-2);
+  inset-inline-end: var(--syn-space-2);
+  max-width: calc(100% - 2 * var(--syn-space-2));
+  min-height: 0;
+  padding: 0 var(--syn-space-2);
+  border-radius: var(--syn-radius-control);
+  background: color-mix(in srgb, var(--syn-data-surface) 82%, transparent);
+  pointer-events: none;
+}
+
+.onMap .readoutOverlay {
+  background: color-mix(in srgb, var(--syn-data-map-panel) 82%, transparent);
+}
+
+.withOverlay {
+  gap: var(--syn-space-2);
+}
