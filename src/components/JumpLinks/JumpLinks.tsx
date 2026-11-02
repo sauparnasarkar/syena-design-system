@@ -18,7 +18,7 @@ export interface JumpLinksProps {
   onSelect?: (id: string) => void;
 }
 
-/** In-page navigation between the sections of a long view. */
+/** In-page navigation between the sections of a long view. Choosing one scrolls to it, moves focus there and puts its id in the address (`#id`). */
 export function JumpLinks({ items, activeId, onSelect }: JumpLinksProps) {
   const go = (item: JumpLinkItem, index: number) => async (event: MouseEvent) => {
     event.preventDefault();
@@ -27,7 +27,10 @@ export function JumpLinks({ items, activeId, onSelect }: JumpLinksProps) {
       // The change it made (a panel opening) needs a frame or two to lay out before the target's position is known.
       await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     }
-    scrollToJumpTarget(item.id, { skipIfVisible: index === 0 || !!item.topSection });
+    const found = scrollToJumpTarget(item.id, { skipIfVisible: index === 0 || !!item.topSection });
+    // The click is handled here, so the browser does not follow the link: write the section into the address ourselves, so the URL can be copied, shared and
+    // reloaded to the same place. Replaced, not pushed (Back would otherwise step through sections without scrolling), and the router's history state is kept.
+    if (found) window.history.replaceState(window.history.state, '', `#${item.id}`);
     onSelect?.(item.id);
   };
   return (
