@@ -340,7 +340,7 @@ export const NoDataCountOfZeroIsHidden: Story = {
   },
 };
 
-// Compact: the controls are one touch-sized group over the picture's top-right corner, and the keyboard hint is drawn only while the map has focus.
+// Compact: the controls are one touch-sized 2 × 2 group over the picture's bottom-left corner, and the keyboard hint is drawn only while the map has focus.
 export const OverlayControlsAndFocusOnlyHint: Story = {
   args: { ...bandedArgs, controls: 'overlay', flush: false },
   decorators: [frame()],
@@ -350,13 +350,15 @@ export const OverlayControlsAndFocusOnlyHint: Story = {
     const group = canvas.getByRole('group', { name: 'map view' });
     const buttons = within(group).getAllByRole('button');
     await expect(buttons.map((b) => b.getAttribute('aria-label'))).toEqual(['Zoom in map', 'Zoom out map', 'Reset view', 'Table view']);
-    // touch-sized, and in the picture's top-right corner
+    // touch-sized, and in the picture's bottom-left corner
     for (const b of buttons) { const r = b.getBoundingClientRect(); await expect(Math.min(r.width, r.height)).toBeGreaterThanOrEqual(44); }
     const map = bandedMap(canvasElement).getBoundingClientRect();
     const g = group.getBoundingClientRect();
-    await expect(g.right).toBeLessThanOrEqual(map.right);
-    await expect(g.top).toBeGreaterThanOrEqual(map.top);
-    await expect(g.top - map.top).toBeLessThan(40);
+    await expect(g.left).toBeGreaterThanOrEqual(map.left);
+    await expect(g.left - map.left).toBeLessThan(24); // the bottom-left corner: over the Pacific, not over Europe or Russia
+    await expect(g.bottom).toBeLessThanOrEqual(map.bottom);
+    await expect(map.bottom - g.bottom).toBeLessThan(24);
+    await expect(Math.round(g.width)).toBeLessThanOrEqual(110); // two touch targets wide: a 2 × 2 block
     // the hint is in the page (aria-describedby) but not drawn until the map has focus
     const hint = canvasElement.querySelector('[id]:not(canvas):not(table)') && canvas.getByText(/Arrow keys move the map/);
     await expect(bandedMap(canvasElement).getAttribute('aria-describedby')).toContain(hint!.id);
@@ -387,10 +389,28 @@ export const OverlayControlsOnTheMapPanelNight: Story = {
   play: async ({ canvasElement }) => { await expect(within(canvasElement).getByRole('group', { name: 'map view' })).toBeInTheDocument(); },
 };
 
-// On a narrow map the tapped country's read-out and the controls over the corner share the top edge: the read-out stays clear of the group and wraps.
-export const OverlayControlsLeaveTheTapReadoutItsRoom: Story = {
+// On a narrow map the hover read-out (bottom-right) stays clear of the controls (bottom-left): it takes what is left of the row and wraps, even for a long name.
+export const OverlayControlsLeaveTheHoverReadoutItsRoom: Story = {
   args: { ...bandedArgs, controls: 'overlay' },
   decorators: [frame('min(100%, 20rem)')],
+  play: async ({ canvasElement }) => {
+    await waitFor(() => expect(bandPixels(bandedMap(canvasElement)).filter((n) => n > 20).length).toBeGreaterThanOrEqual(4), { timeout: 8000 });
+    const picture = bandedMap(canvasElement);
+    const group = within(canvasElement).getByRole('group', { name: 'map view' });
+    for (const [lon, lat, name] of [[104, 35, 'China'], [59, 39, 'Turkmenistan']] as const) {
+      const at = place(picture, [lon, lat]);
+      fireEvent.pointerMove(picture, { clientX: at.x, clientY: at.y, pointerType: 'mouse' });
+      const readout = await waitFor(() => { const el = canvasElement.querySelector('[class*="_readoutOverlay"]') as HTMLElement; expect(el?.textContent).toMatch(new RegExp(`^${name}: `)); return el; });
+      await expect(readout.getBoundingClientRect().left).toBeGreaterThanOrEqual(group.getBoundingClientRect().right);
+      await expect(readout.scrollWidth).toBeLessThanOrEqual(readout.clientWidth + 1);
+    }
+  },
+};
+
+// A tapped country's name sits at the top-left, where nothing else is (on a map wide enough to hold the 2 × 2 group below it; a phone uses the controls under the legend).
+export const TapReadoutHasTheTopLeftToItself: Story = {
+  args: { ...bandedArgs, controls: 'overlay' },
+  decorators: [frame('min(100%, 30rem)')],
   play: async ({ canvasElement }) => {
     await waitFor(() => expect(bandPixels(bandedMap(canvasElement)).filter((n) => n > 20).length).toBeGreaterThanOrEqual(4), { timeout: 8000 });
     const picture = bandedMap(canvasElement);
@@ -399,16 +419,7 @@ export const OverlayControlsLeaveTheTapReadoutItsRoom: Story = {
     await waitFor(() => expect(tapReadout(canvasElement)).toMatch(/^China: /));
     const chip = canvasElement.querySelector('[class*="_readoutTap"]') as HTMLElement;
     const group = within(canvasElement).getByRole('group', { name: 'map view' });
-    await expect(chip.getBoundingClientRect().right).toBeLessThanOrEqual(group.getBoundingClientRect().left);
-    // and no word runs past the chip's edge: a long name (Turkmenistan) breaks instead
-    await expect(chip.scrollWidth).toBeLessThanOrEqual(chip.clientWidth + 1);
-    press(picture, picture.getBoundingClientRect().left + 2, picture.getBoundingClientRect().top + 2);
-    const turkmenistan = place(picture, [59, 39]);
-    press(picture, turkmenistan.x, turkmenistan.y);
-    await waitFor(() => expect(tapReadout(canvasElement)).toMatch(/^Turkmenistan: /));
-    const long = canvasElement.querySelector('[class*="_readoutTap"]') as HTMLElement;
-    await expect(long.getBoundingClientRect().right).toBeLessThanOrEqual(group.getBoundingClientRect().left);
-    await expect(long.scrollWidth).toBeLessThanOrEqual(long.clientWidth + 1);
+    await expect(chip.getBoundingClientRect().bottom).toBeLessThanOrEqual(group.getBoundingClientRect().top);
   },
 };
 
@@ -449,4 +460,19 @@ export const SelectedKeyIsAbsentWithoutAnOutline: Story = {
   args: { ...bandedArgs, outline: [], outlineLabel: 'Selected', noDataCount: 3 },
   decorators: [frame()],
   play: async ({ canvasElement }) => { await expect(within(canvasElement).queryByText('Selected', { selector: 'span' })).not.toBeInTheDocument(); },
+};
+
+// The legend is one row of eight at every width but a phone's, the counts can be bare numbers with one lead-in after the label, and a phone gets two rows of four.
+export const LegendIsOneRowWithBareCounts: Story = {
+  args: { ...bandedArgs, controls: 'overlay', formatCount: (n: number) => String(n), countsLabel: 'countries per band below', noDataCount: 3 },
+  decorators: [frame('min(100%, 36rem)')],
+  play: async ({ canvasElement }) => {
+    const legend = within(canvasElement).getByRole('list', { name: /in 8 bands from lowest to highest/ });
+    await waitFor(() => { const tops = [...legend.children].map((li) => Math.round(li.getBoundingClientRect().top)); expect(new Set(tops).size).toBe(1); });
+    const counts = within(legend).getAllByText(/^\d+$/);
+    await expect(counts).toHaveLength(8); // bare numbers
+    await expect(within(canvasElement).getByText(/· countries per band below$/)).toBeInTheDocument(); // the lead-in, once
+    await expect(within(canvasElement).getByText('No data · 3 countries')).toBeInTheDocument(); // the no-data count keeps its word
+    for (const li of legend.children) { const r = (li as HTMLElement).getBoundingClientRect(); await expect(r.right).toBeLessThanOrEqual(legend.getBoundingClientRect().right + 1); }
+  },
 };
