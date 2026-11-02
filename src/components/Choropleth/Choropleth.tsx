@@ -203,7 +203,7 @@ export function Choropleth({ values, valueLabel, ariaLabel, domain = defaultDoma
   const tapped = !tableView && selected ? describe(selected) : null;
 
   return (
-    <figure className={onMap ? [styles.map, styles.onMap, flush ? styles.flush : ''].filter(Boolean).join(' ') : styles.map}>
+    <figure className={[styles.map, onMap ? styles.onMap : '', onMap && flush ? styles.flush : '', overlay ? styles.withOverlay : ''].filter(Boolean).join(' ')}>
       <div ref={box} className={styles.stage}>
         {t && width > 0 ? (
           // Focusable so the keyboard can pan and zoom it.

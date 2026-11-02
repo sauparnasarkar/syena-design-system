@@ -169,3 +169,8 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* With the controls over the top-right corner, a tapped country's read-out (top-left) leaves their room and wraps instead of running under them. */
+.withOverlay .readoutTap {
+  max-width: calc(100% - 4 * var(--syn-layout-control-height-touch) - 5 * var(--syn-space-1) - 3 * var(--syn-space-2));
+}

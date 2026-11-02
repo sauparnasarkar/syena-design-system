@@ -385,3 +385,19 @@ export const OverlayControlsOnTheMapPanelNight: Story = {
   globals: { theme: 'night' },
   play: async ({ canvasElement }) => { await expect(within(canvasElement).getByRole('group', { name: 'map view' })).toBeInTheDocument(); },
 };
+
+// On a narrow map the tapped country's read-out and the controls over the corner share the top edge: the read-out stays clear of the group and wraps.
+export const OverlayControlsLeaveTheTapReadoutItsRoom: Story = {
+  args: { ...bandedArgs, controls: 'overlay' },
+  decorators: [frame('min(100%, 20rem)')],
+  play: async ({ canvasElement }) => {
+    await waitFor(() => expect(bandPixels(bandedMap(canvasElement)).filter((n) => n > 20).length).toBeGreaterThanOrEqual(4), { timeout: 8000 });
+    const picture = bandedMap(canvasElement);
+    const china = place(picture, [104, 35]);
+    press(picture, china.x, china.y);
+    await waitFor(() => expect(tapReadout(canvasElement)).toMatch(/^China: /));
+    const chip = canvasElement.querySelector('[class*="_readoutTap"]') as HTMLElement;
+    const group = within(canvasElement).getByRole('group', { name: 'map view' });
+    await expect(chip.getBoundingClientRect().right).toBeLessThanOrEqual(group.getBoundingClientRect().left);
+  },
+};
