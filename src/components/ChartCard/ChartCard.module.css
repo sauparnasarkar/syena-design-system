@@ -9,6 +9,20 @@
   color: var(--syn-data-text);
 }
 
+.mapPanel {
+  background: var(--syn-data-map-panel);
+  color: var(--syn-data-map-ink);
+}
+
+/* The empty message and the loading skeleton are drawn in the dark panel's text and gridline colours: on the map panel they take its ink. */
+.mapPanel .message {
+  color: var(--syn-data-map-ink);
+}
+
+.mapPanel .bar {
+  background: color-mix(in srgb, var(--syn-data-map-ink) 16%, var(--syn-data-map-panel));
+}
+
 .tableView {
   min-width: 0;
 }

@@ -25,6 +25,8 @@ export interface ChartCardProps {
   tableView?: ReactNode;
   /** Adds an expand control that opens the card across the canvas. */
   expandable?: boolean;
+  /** `data` (default): a dark data panel. `map`: the mid-tone map panel, so a card that holds a banded map (and its year controls, buttons and legend) is one panel; its controls read on it in either theme. */
+  surface?: 'data' | 'map';
   state?: ChartCardState;
   /** Shown when `state` is `empty`: why there is nothing to show and what to change. */
   emptyMessage?: string;
@@ -51,7 +53,8 @@ function Frame({ expanded, onClose, label, children }: { expanded: boolean; onCl
 }
 
 /** A card that frames a chart: header, a dark data panel, a footer with the source and the as-of date. */
-export function ChartCard({ title, supportText, headingLevel = 3, source, asOf, stale, actions, tableView, expandable, state = 'ready', emptyMessage = 'Nothing to show for this selection.', errorMessage = 'The chart could not be loaded.', onRetry, id, className, children }: ChartCardProps) {
+export function ChartCard({ title, supportText, headingLevel = 3, source, asOf, stale, actions, tableView, expandable, state = 'ready', emptyMessage = 'Nothing to show for this selection.', errorMessage = 'The chart could not be loaded.', onRetry, id, className, children, surface = 'data' }: ChartCardProps) {
+  const panel = surface === 'map' ? `syn-map-panel ${styles.panel} ${styles.mapPanel}` : `syn-data-panel ${styles.panel}`;
   const [table, setTable] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const footerId = useId();
@@ -71,10 +74,10 @@ export function ChartCard({ title, supportText, headingLevel = 3, source, asOf, 
   );
   const body = (
     <>
-      {state === 'loading' ? <div className={`syn-data-panel ${styles.panel}`} role="status" aria-busy="true" aria-label={`Loading ${title}`}><div className={styles.skeleton}>{[0, 1, 2, 3, 4].map((i) => <span key={i} className={styles.bar} style={{ height: `${30 + i * 12}%` }} />)}</div></div> : null}
-      {state === 'empty' ? <div className={`syn-data-panel ${styles.panel}`}><p className={styles.message}>{emptyMessage}</p></div> : null}
-      {state === 'error' ? <div className={`syn-data-panel ${styles.panel}`}><InlineAlert variant="error" title="Error" onDismiss={undefined}>{errorMessage}</InlineAlert>{onRetry ? <div className={styles.retry}><Button size="small" onClick={onRetry}>Try again</Button></div> : null}</div> : null}
-      {state === 'ready' ? (table && tableView ? <div className={styles.tableView}>{tableView}</div> : <div className={`syn-data-panel ${styles.panel}`}>{typeof children === 'function' ? children(expanded) : children}</div>) : null}
+      {state === 'loading' ? <div className={panel} role="status" aria-busy="true" aria-label={`Loading ${title}`}><div className={styles.skeleton}>{[0, 1, 2, 3, 4].map((i) => <span key={i} className={styles.bar} style={{ height: `${30 + i * 12}%` }} />)}</div></div> : null}
+      {state === 'empty' ? <div className={panel}><p className={styles.message}>{emptyMessage}</p></div> : null}
+      {state === 'error' ? <div className={panel}><InlineAlert variant="error" title="Error" onDismiss={undefined}>{errorMessage}</InlineAlert>{onRetry ? <div className={styles.retry}><Button size="small" onClick={onRetry}>Try again</Button></div> : null}</div> : null}
+      {state === 'ready' ? (table && tableView ? <div className={styles.tableView}>{tableView}</div> : <div className={panel}>{typeof children === 'function' ? children(expanded) : children}</div>) : null}
     </>
   );
   return (

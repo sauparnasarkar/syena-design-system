@@ -2,7 +2,11 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { contrastRatio } from '../../lib/colour';
 import { observed, scenarios } from '../../specimens/data';
+import { illustrativeEmissions } from '../../specimens/countryValues';
+import { Button } from '../Button/Button';
 import { Chart, chartTable, type ChartSeries } from '../Chart/Chart';
+import { Choropleth } from '../Choropleth/Choropleth';
+import { Slider } from '../Slider/Slider';
 import { withScreen } from '../storyScreen';
 import { SegmentedControl } from '../SegmentedControl/SegmentedControl';
 import { Table } from '../Table/Table';
@@ -225,3 +229,42 @@ export const HeaderKeepsOneLineWhenItFits: Story = {
     await expect(control.top).toBeLessThan(title.bottom);
   },
 };
+
+// A card whose body is the mid-tone map panel: the year controls, the buttons, the map and its legend are all on it, and read there in either theme
+// (axe checks every text pair in the story's own run).
+const mapCard = (
+  <>
+    <div style={{ display: 'flex', gap: 'var(--syn-space-3)', alignItems: 'center', flexWrap: 'wrap', marginBlockEnd: 'var(--syn-space-2)' }}>
+      <Button variant="ghost">Play</Button>
+      <div style={{ flex: 1 }}><Slider label="Year" min={1970} max={2024} step={1} value={2024} onChange={() => {}} showValue={false} showRangeLabels showThumbValue /></div>
+    </div>
+    <div style={{ display: 'flex', gap: 'var(--syn-space-2)', flexWrap: 'wrap', marginBlockEnd: 'var(--syn-space-2)' }}>
+      {[1970, 1990, 2024].map((y) => <Button key={y} size="small" variant={y === 2024 ? 'primary' : 'secondary'} aria-pressed={y === 2024}>{y}</Button>)}
+    </div>
+    <Choropleth values={illustrativeEmissions} scale="bands" surface="map" flush outline={['CHN', 'USA', 'IND', 'RUS']} unit="MtCO₂" valueLabel="CO₂ emitted in 2024, MtCO₂ (illustrative)" ariaLabel="World map of annual CO₂ emissions by country in 2024, coloured in 8 bands from pale yellow (lowest) to dark red (highest), illustrative values." />
+  </>
+);
+const onTheMapPanel: Story['play'] = async ({ canvasElement }) => {
+  const canvas = within(canvasElement);
+  const panel = canvasElement.querySelector('.syn-map-panel') as HTMLElement;
+  await expect(panel).not.toBeNull();
+  const colour = (el: Element, prop: 'color' | 'backgroundColor' | 'borderTopColor') => {
+    const [r, g, b] = getComputedStyle(el)[prop].match(/\d+/g)!.map(Number);
+    return `#${[r, g, b].map((c) => c.toString(16).padStart(2, '0')).join('')}`;
+  };
+  // The panel is the map panel, not the dark data panel, and the controls read on it: the ghost button's text, and the pressed button's text on its tint and its border on the panel.
+  const ghost = canvas.getByRole('button', { name: 'Play' });
+  await expect(contrastRatio(colour(ghost, 'color'), colour(panel, 'backgroundColor'))).toBeGreaterThanOrEqual(4.5);
+  const pressed = canvas.getByRole('button', { name: '2024', pressed: true });
+  await expect(contrastRatio(colour(pressed, 'color'), colour(pressed, 'backgroundColor'))).toBeGreaterThanOrEqual(4.5);
+  await expect(contrastRatio(colour(pressed, 'borderTopColor'), colour(panel, 'backgroundColor'))).toBeGreaterThanOrEqual(3); // a pressed button is marked by its border and text, on a faint tint
+  await expect(canvas.getByRole('slider', { name: 'Year' })).toBeInTheDocument();
+};
+export const MapSurface: Story = { args: { surface: 'map', title: 'Where emissions come from, 2024', supportText: 'Annual MtCO₂', children: mapCard }, globals: { theme: 'tidewater' }, play: onTheMapPanel };
+export const MapSurfaceNight: Story = { args: { surface: 'map', title: 'Where emissions come from, 2024', supportText: 'Annual MtCO₂', children: mapCard }, globals: { theme: 'night' }, play: onTheMapPanel };
+
+// The other states on the map panel read there too (axe checks the text in each).
+export const MapSurfaceEmpty: Story = { args: { surface: 'map', state: 'empty', emptyMessage: 'No countries have data for this year.', children: <p>unused</p> }, globals: { theme: 'tidewater' } };
+export const MapSurfaceEmptyNight: Story = { args: { surface: 'map', state: 'empty', emptyMessage: 'No countries have data for this year.', children: <p>unused</p> }, globals: { theme: 'night' } };
+export const MapSurfaceError: Story = { args: { surface: 'map', state: 'error', errorMessage: 'The map could not be loaded.', onRetry: fn(), children: <p>unused</p> }, globals: { theme: 'night' } };
+export const MapSurfaceLoading: Story = { args: { surface: 'map', state: 'loading', children: <p>unused</p> }, globals: { theme: 'tidewater' } };

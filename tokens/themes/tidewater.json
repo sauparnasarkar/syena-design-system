@@ -529,6 +529,148 @@
         "$type": "color",
         "$value": "#071c24"
       }
+    },
+    "map": {
+      "surface-base": {
+        "$type": "color",
+        "$value": "#c9d6dc"
+      },
+      "surface-raised": {
+        "$type": "color",
+        "$value": "#d1dee4"
+      },
+      "surface-sunken": {
+        "$type": "color",
+        "$value": "#cddae0"
+      },
+      "surface-overlay": {
+        "$type": "color",
+        "$value": "#d8e5eb"
+      },
+      "surface-inverse": {
+        "$type": "color",
+        "$value": "#071c24"
+      },
+      "text-primary": {
+        "$type": "color",
+        "$value": "#071c24"
+      },
+      "text-secondary": {
+        "$type": "color",
+        "$value": "#071c24"
+      },
+      "text-muted": {
+        "$type": "color",
+        "$value": "#2f4752"
+      },
+      "text-disabled": {
+        "$type": "color",
+        "$value": "#8c979c"
+      },
+      "text-on-accent": {
+        "$type": "color",
+        "$value": "#c9d6dc"
+      },
+      "text-inverse": {
+        "$type": "color",
+        "$value": "#c9d6dc"
+      },
+      "text-link": {
+        "$type": "color",
+        "$value": "#071c24"
+      },
+      "border-subtle": {
+        "$type": "color",
+        "$value": "#b8c4ca"
+      },
+      "border-default": {
+        "$type": "color",
+        "$value": "#9aa5aa"
+      },
+      "border-emphasis": {
+        "$type": "color",
+        "$value": "#2f4752"
+      },
+      "accent-fill": {
+        "$type": "color",
+        "$value": "#071c24"
+      },
+      "accent-hover": {
+        "$type": "color",
+        "$value": "#2c373c"
+      },
+      "accent-active": {
+        "$type": "color",
+        "$value": "#3e484d"
+      },
+      "accent-text": {
+        "$type": "color",
+        "$value": "#071c24"
+      },
+      "accent-tint": {
+        "$type": "color",
+        "$value": "#c2ced4"
+      },
+      "accent-secondary": {
+        "$type": "color",
+        "$value": "#2f4752"
+      },
+      "signal-positive-fill": {
+        "$type": "color",
+        "$value": "#00894d"
+      },
+      "signal-positive-text": {
+        "$type": "color",
+        "$value": "#006336"
+      },
+      "signal-positive-tint": {
+        "$type": "color",
+        "$value": "#bccdcf"
+      },
+      "signal-negative-fill": {
+        "$type": "color",
+        "$value": "#d0392f"
+      },
+      "signal-negative-text": {
+        "$type": "color",
+        "$value": "#ad090b"
+      },
+      "signal-negative-tint": {
+        "$type": "color",
+        "$value": "#cac9ce"
+      },
+      "signal-caution-fill": {
+        "$type": "color",
+        "$value": "#9f6d00"
+      },
+      "signal-caution-text": {
+        "$type": "color",
+        "$value": "#744e00"
+      },
+      "signal-caution-tint": {
+        "$type": "color",
+        "$value": "#c4cbce"
+      },
+      "signal-info-fill": {
+        "$type": "color",
+        "$value": "#071c24"
+      },
+      "signal-info-text": {
+        "$type": "color",
+        "$value": "#071c24"
+      },
+      "signal-info-tint": {
+        "$type": "color",
+        "$value": "#c2ced4"
+      },
+      "focus-ring": {
+        "$type": "color",
+        "$value": "#071c24"
+      },
+      "shadow": {
+        "$type": "color",
+        "$value": "#071c24"
+      }
     }
   }
 }

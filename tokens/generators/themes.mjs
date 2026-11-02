@@ -317,6 +317,32 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
     ? { panel: '#97a3b8', stroke: '#c3cbd8', noData: '#7b879c', ink: '#0d1628', inkMuted: '#1f2d47' }
     : { panel: '#c9d6dc', stroke: '#eef4f6', noData: '#a3b1b9', ink: '#071c24', inkMuted: '#2f4752' };
 
+  // (The panel's ink only just reaches 7:1 on the Night panel, so no step is darker than the panel: its steps lift.)
+  // The mid-tone map panel as a scope of its own, like the dark data panel's: every colour role as it reads ON the panel, in either theme, so a card whose body is that
+  // panel (the year controls, buttons, the map and its legend) takes its colours from here. Dark ink on the panel; fills are the ink, text on them is the panel's colour;
+  // lines are the ink mixed into the panel; signals are the theme's own hues, darkened until they read on the panel and its steps.
+  const mapPanel = mapColours.panel;
+  const mapL = lch(mapPanel);
+  const mapSurfaces = [mapPanel, ok(Math.min(1, mapL.l + 0.025), mapL.c, mapL.h), ok(Math.min(1, mapL.l + 0.012), mapL.c, mapL.h), ok(Math.min(1, mapL.l + 0.045), mapL.c, mapL.h)];
+  const mix = (color, duty) => asThinLine(color, mapPanel, duty);
+  const darker = (from, backgrounds, target) => solveLightness({ from, direction: -1, backgrounds, target });
+  const mapTint = mix(mapColours.ink, 0.08);
+  const mapScope = {
+    'surface-base': mapSurfaces[0], 'surface-raised': mapSurfaces[1], 'surface-sunken': mapSurfaces[2], 'surface-overlay': mapSurfaces[3], 'surface-inverse': mapColours.ink,
+    'text-primary': mapColours.ink, 'text-secondary': mapColours.ink, 'text-muted': mapColours.inkMuted, 'text-disabled': mix(mapColours.ink, 0.55),
+    'text-on-accent': mapPanel, 'text-inverse': mapPanel, 'text-link': mapColours.ink,
+    'border-subtle': mix(mapColours.ink, 0.18), 'border-default': mix(mapColours.ink, 0.45), 'border-emphasis': mapColours.inkMuted,
+    'accent-fill': mapColours.ink, 'accent-hover': mix(mapColours.ink, 0.96), 'accent-active': mix(mapColours.ink, 0.92), 'accent-text': mapColours.ink, 'accent-tint': mapTint, 'accent-secondary': mapColours.inkMuted,
+    'signal-info-fill': mapColours.ink, 'signal-info-text': mapColours.ink, 'signal-info-tint': mapTint,
+    'focus-ring': mapColours.ink, shadow,
+  };
+  for (const k of ['positive', 'negative', 'caution']) {
+    const f = darker(signals[k].fill, mapSurfaces, 3);
+    const tint = mix(f, 0.14);
+    Object.assign(mapScope, { [`signal-${k}-fill`]: f, [`signal-${k}-tint`]: tint, [`signal-${k}-text`]: darker(signals[k].fill, [...mapSurfaces, tint], 4.5) });
+  }
+  const mapScopeTokens = Object.fromEntries(panelPaths.map((path) => [path.join('-'), GEN(hex(mapScope[path.join('-')]))]));
+
   const t = {
     color: {
       surface: {
@@ -362,6 +388,7 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
       div: Object.fromEntries(Object.entries(diverging).map(([i, c]) => [i < 0 ? `neg-${-i}` : i > 0 ? `pos-${i}` : 'mid', GEN(hex(c))])),
       change: { decrease: GEN(hex(change.decrease)), increase: GEN(hex(change.increase)) },
       panel: panelTokens,
+      map: mapScopeTokens,
     },
   };
 
@@ -414,6 +441,15 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
   check('data-panel-text-link on data-panel-accent-tint', pc['text-link'], pc['accent-tint'], 4.5);
   ['fill', 'hover', 'active'].forEach((part) => check(`data-panel-text-on-accent on data-panel-accent-${part}`, pc['text-on-accent'], pc[`accent-${part}`], 4.5));
   for (const id of ['border-emphasis', 'focus-ring', 'accent-fill', 'signal-positive-fill', 'signal-negative-fill', 'signal-caution-fill']) panelSurfaces.forEach((surface, i) => check(`data-panel-${id} on ${panelSurfaceNames[i]}`, pc[id], surface, 3));
+
+  // The map panel scope: the same roles and targets as the dark data panel's, against the panel and the surfaces a card can raise from it.
+  const mapSurfaceNames = ['data-map-panel', 'data-map-surface-raised', 'data-map-surface-sunken', 'data-map-surface-overlay'];
+  const mapTexts = { 'text-primary': 7, 'text-secondary': 4.5, 'text-muted': 4.5, 'text-link': 4.5, 'accent-text': 4.5, 'signal-positive-text': 4.5, 'signal-negative-text': 4.5, 'signal-caution-text': 4.5, 'signal-info-text': 4.5 };
+  for (const [id, target] of Object.entries(mapTexts)) mapSurfaces.forEach((surface, i) => check(`data-map-${id} on ${mapSurfaceNames[i]}`, mapScope[id], surface, target));
+  for (const k of ['positive', 'negative', 'caution', 'info']) check(`data-map-signal-${k}-text on data-map-signal-${k}-tint`, mapScope[`signal-${k}-text`], mapScope[`signal-${k}-tint`], 4.5);
+  check('data-map-text-link on data-map-accent-tint', mapScope['text-link'], mapScope['accent-tint'], 4.5);
+  ['fill', 'hover', 'active'].forEach((part) => check(`data-map-text-on-accent on data-map-accent-${part}`, mapScope['text-on-accent'], mapScope[`accent-${part}`], 4.5));
+  for (const id of ['border-emphasis', 'focus-ring', 'accent-fill', 'signal-positive-fill', 'signal-negative-fill', 'signal-caution-fill']) mapSurfaces.forEach((surface, i) => check(`data-map-${id} on ${mapSurfaceNames[i]}`, mapScope[id], surface, 3));
 
   // Hue-zone checks
   const hueChecks = [
