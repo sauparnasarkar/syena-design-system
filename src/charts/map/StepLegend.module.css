@@ -63,12 +63,13 @@
 }
 
 .count {
+  white-space: nowrap;
   color: var(--syn-data-text-muted);
   font: var(--syn-type-caption-weight) var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-type-caption-family);
 }
 
-/* Narrow: two rows of four bands, the no-data swatch after them. */
-@container (max-width: 34rem) {
+/* Not wide enough for eight columns with a count each: two rows of four bands, the no-data swatch after them. */
+@container (max-width: 48rem) {
   .row {
     flex-direction: column;
   }
