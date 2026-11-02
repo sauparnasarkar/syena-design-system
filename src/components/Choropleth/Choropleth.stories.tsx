@@ -399,5 +399,14 @@ export const OverlayControlsLeaveTheTapReadoutItsRoom: Story = {
     const chip = canvasElement.querySelector('[class*="_readoutTap"]') as HTMLElement;
     const group = within(canvasElement).getByRole('group', { name: 'map view' });
     await expect(chip.getBoundingClientRect().right).toBeLessThanOrEqual(group.getBoundingClientRect().left);
+    // and no word runs past the chip's edge: a long name (Turkmenistan) breaks instead
+    await expect(chip.scrollWidth).toBeLessThanOrEqual(chip.clientWidth + 1);
+    press(picture, picture.getBoundingClientRect().left + 2, picture.getBoundingClientRect().top + 2);
+    const turkmenistan = place(picture, [59, 39]);
+    press(picture, turkmenistan.x, turkmenistan.y);
+    await waitFor(() => expect(tapReadout(canvasElement)).toMatch(/^Turkmenistan: /));
+    const long = canvasElement.querySelector('[class*="_readoutTap"]') as HTMLElement;
+    await expect(long.getBoundingClientRect().right).toBeLessThanOrEqual(group.getBoundingClientRect().left);
+    await expect(long.scrollWidth).toBeLessThanOrEqual(long.clientWidth + 1);
   },
 };
