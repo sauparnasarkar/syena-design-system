@@ -262,3 +262,9 @@ const onTheMapPanel: Story['play'] = async ({ canvasElement }) => {
 };
 export const MapSurface: Story = { args: { surface: 'map', title: 'Where emissions come from, 2024', supportText: 'Annual MtCO₂', children: mapCard }, globals: { theme: 'tidewater' }, play: onTheMapPanel };
 export const MapSurfaceNight: Story = { args: { surface: 'map', title: 'Where emissions come from, 2024', supportText: 'Annual MtCO₂', children: mapCard }, globals: { theme: 'night' }, play: onTheMapPanel };
+
+// The other states on the map panel read there too (axe checks the text in each).
+export const MapSurfaceEmpty: Story = { args: { surface: 'map', state: 'empty', emptyMessage: 'No countries have data for this year.', children: <p>unused</p> }, globals: { theme: 'tidewater' } };
+export const MapSurfaceEmptyNight: Story = { args: { surface: 'map', state: 'empty', emptyMessage: 'No countries have data for this year.', children: <p>unused</p> }, globals: { theme: 'night' } };
+export const MapSurfaceError: Story = { args: { surface: 'map', state: 'error', errorMessage: 'The map could not be loaded.', onRetry: fn(), children: <p>unused</p> }, globals: { theme: 'night' } };
+export const MapSurfaceLoading: Story = { args: { surface: 'map', state: 'loading', children: <p>unused</p> }, globals: { theme: 'tidewater' } };
