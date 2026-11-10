@@ -46,6 +46,7 @@ export { KpiStat, type KpiStatProps, type DeltaTone } from './components/KpiStat
 export { Table, type TableProps, type TableColumn, type TableColumnGroup } from './components/Table/Table';
 export { DataTable, type DataTableProps, type DataTableColumn } from './components/DataTable/DataTable';
 export { Chart, chartTable, type ChartProps, type ChartSeries, type SeriesKind } from './components/Chart/Chart';
+export { useSeriesColour } from './charts/useSeriesColour';
 export { ChartCard, type ChartCardProps, type ChartCardState } from './components/ChartCard/ChartCard';
 export { Progress, type ProgressProps } from './components/Progress/Progress';
 export { Globe, type GlobeProps } from './components/Globe/Globe';
