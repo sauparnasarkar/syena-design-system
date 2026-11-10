@@ -717,7 +717,10 @@ every theme; each theme chooses its lightness and chroma.
    the ground *as a line* (the colour mixed into the ground by that coverage, in linear
    light), and the distance between slots is the smaller of the fill distance and the line
    distance. Slots 5 to 8 are fills, bars and areas, or solid lines with markers and direct
-   labels, never dashed lines.
+   labels, never dashed lines. Slot 5 may also be a plain solid line, without markers or a
+   direct label: a solid line shows its full colour, so it needs only the fill's 3:1 against
+   the ground, which the generator checks for slot 5 by name in every theme and fails the
+   build without.
 
 Series are used in order. Beyond eight series, group the rest into `data-other`. The first
 four slots differ in hue by at least <!-- generated:cat-hue-separation -->
@@ -1624,6 +1627,11 @@ with named values; there are no colour-named variants.
   leaves a gap (the line breaks and is never joined across it); a value with a gap on both sides gets a mark of its own, since a line cannot carry it. A series has a `kind` (`line`, `bar`, `area` or `marker`), and optionally `projected`,
   `band`, `axis`, `slot`, `signed` and `signLabels`, and `colorValues`, `colorDomain`, `colorLabel`
   and `formatColorValue`.
+- **Colour outside the chart.** A key, swatch or card accent that stands for a series takes its
+  colour from `useSeriesColour(slot)`, the colour the chart draws in that slot for the theme in
+  force (it reads the same tokens from the theme provider's scope; the data panel does not
+  redefine the categorical slots). Pin the series' `slot` so the two cannot drift; a series
+  without one takes its list position, even when another series has pinned that slot.
 - **Series kinds.** `marker` draws points that are not joined, for a relationship between two
   measures. `barmode: 'percent'` stacks bars to the full height so each shows shares of its total
   (the axis title says so). Bars can be coloured by a second value (`colorValues`) on the

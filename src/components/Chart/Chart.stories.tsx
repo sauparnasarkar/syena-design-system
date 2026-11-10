@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { anomaly, composition, countryObserved, compositionNames, emitters, observed, scenarios } from '../../specimens/data';
 import { Chart, chartTable, signedText, type ChartSeries } from './Chart';
+import { useSeriesColour } from '../../charts/useSeriesColour';
 
 const panel = (width = 'min(100%, 56rem)') => (Story: () => ReactElement) => (
   <div style={{ padding: 'var(--syn-space-4)', width }}>
@@ -350,3 +351,48 @@ export const LegendAboveThePlotByDefault: Story = {
     await expect(figure.getBoundingClientRect().height).toBeGreaterThan(300 + 20);
   },
 };
+
+// A key outside the chart (a table swatch, a card accent) takes its colour from `useSeriesColour(slot)`, so it matches the series the chart draws in
+// that slot. Five pinned slots: the three dashed pathways in 2-4 (the slots validated as thin dashed lines) and a plain solid line in slot 5.
+const keyedSeries: ChartSeries[] = [
+  { name: 'Observed', x: years, y: observed.map((p) => p.value), slot: 1 },
+  { name: 'Business as usual', dashed: true, x: years, y: observed.map((p) => p.value * 1.1), slot: 2 },
+  { name: 'Moderate', dashed: true, x: years, y: observed.map((p) => p.value * 0.95), slot: 3 },
+  { name: 'Aggressive', dashed: true, x: years, y: observed.map((p) => p.value * 0.85), slot: 4 },
+  { name: '5-year mean', x: years, y: observed.map((p) => p.value * 1.02), slot: 5 },
+];
+
+function KeySwatch({ name, slot }: { name: string; slot: number }) {
+  const colour = useSeriesColour(slot);
+  return (
+    <li style={{ display: 'flex', alignItems: 'center', gap: 'var(--syn-space-2)' }}>
+      <span data-syn-key-swatch={name} data-syn-colour={colour ?? ''} aria-hidden="true" style={{ width: 10, height: 10, borderRadius: 2, background: colour ?? 'transparent' }} />
+      {name}
+    </li>
+  );
+}
+
+function ChartWithKey(args: { series: ChartSeries[] }) {
+  return (
+    <div>
+      <Chart {...args} yTitle="GtCO₂ a year" ariaLabel="Observed emissions, three pathways and a smoothed line, with a key outside the chart." />
+      <ul style={{ listStyle: 'none', padding: 0, margin: 'var(--syn-space-3) 0 0', color: 'var(--syn-data-text)' }}>
+        {args.series.map((s) => <KeySwatch key={s.name} name={s.name} slot={s.slot!} />)}
+      </ul>
+    </div>
+  );
+}
+
+const keyMatchesLines = async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+  await drawn(canvasElement);
+  const plot = canvasElement.querySelector('.js-plotly-plot') as HTMLElement & { data?: Array<{ name?: string; line?: { color?: string } }> };
+  await waitFor(() => expect(plot.data?.length).toBeGreaterThanOrEqual(keyedSeries.length));
+  const drawnColour = (name: string) => plot.data!.find((d) => d.name === name)?.line?.color?.toLowerCase();
+  const keyed = keyedSeries.map((s) => (canvasElement.querySelector(`[data-syn-key-swatch="${s.name}"]`) as HTMLElement).dataset.synColour?.toLowerCase());
+  for (const [i, s] of keyedSeries.entries()) await expect(keyed[i]).toBe(drawnColour(s.name));
+  // Every pinned slot is a different colour.
+  await expect(new Set(keyed).size).toBe(keyedSeries.length);
+};
+
+export const KeyOutsideTheChartMatchesItsLines: Story = { render: (args) => <ChartWithKey series={args.series ?? keyedSeries} />, args: { series: keyedSeries }, play: keyMatchesLines };
+export const KeyOutsideTheChartMatchesItsLinesTidewater: Story = { ...KeyOutsideTheChartMatchesItsLines, globals: { theme: 'tidewater' } };

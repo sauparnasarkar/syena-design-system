@@ -6,7 +6,7 @@ import { computeScales, measureFonts } from './scales.mjs';
 import { scalesToDtcg } from './emit.mjs';
 import { fillBlocks, scaleBlocks, colourBlocks } from './docs.mjs';
 import { buildTheme, planCategoricalHues } from './themes.mjs';
-import { lch } from './colour.mjs';
+import { contrast, lch } from './colour.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..', '..');
@@ -73,6 +73,7 @@ for (const rel of ['tokens/semantic/scales.json', ...themes.map((t) => `tokens/t
 
 // Validation: every required contrast pair, palette distance and hue-zone rule must hold.
 const failures = [...vocabularyFailures];
+const solidLineSlot5 = [];
 for (const t of themes) {
   for (const c of t.checks) if (c.kind === 'required' && !c.pass) failures.push(`${t.meta.name}: ${c.id} ${c.ratio} < ${c.target}`);
   for (const h of t.hueChecks) if (!h.pass) failures.push(`${t.meta.name}: ${h.id}`);
@@ -82,6 +83,13 @@ for (const t of themes) {
   for (const [v, min] of Object.entries(t.palette.lineMinByView)) {
     if (min < t.palette.thresholds[v]) failures.push(`${t.meta.name}: categorical palette as thin dashed lines, ${v} distance ${min.toFixed(3)} < ${t.palette.thresholds[v]}`);
   }
+  // Slot 5 may be a plain solid line (no markers, no direct label; FOUNDATIONS.md, Categorical, item 3). A solid line shows its full colour, so it
+  // needs the fill's own 3:1 against the data surface, checked here by name so the allowance cannot outlive the palette that earns it.
+  const cat5 = t.tokens.data?.cat?.['5']?.$value;
+  const ground = t.tokens.data?.surface?.$value;
+  if (!cat5 || !ground) failures.push(`${t.meta.name}: data-cat-5 or data-surface not found for the slot-5 solid-line check`);
+  else if (contrast(cat5, ground) < 3) failures.push(`${t.meta.name}: data-cat-5 as a solid line ${contrast(cat5, ground).toFixed(2)} < 3 on data-surface`);
+  else solidLineSlot5.push(`${t.meta.name} ${contrast(cat5, ground).toFixed(2)}:1`);
   const J = t.palette.jnd;
   if (Math.min(...t.palette.seqSteps) < 2 * J) failures.push(`${t.meta.name}: sequential ramp has neighbours closer than 2 JND`);
   if (Math.min(...t.palette.heatSteps) < 2 * J) failures.push(`${t.meta.name}: heat ramp has neighbours closer than 2 JND`);
@@ -120,6 +128,7 @@ mkdirSync(join(root, 'src', 'generated', 'reports'), { recursive: true });
 writeFileSync(join(root, 'src', 'generated', 'reports', 'contrast-matrix.json'), `${JSON.stringify(matrix, null, 2)}\n`);
 const lowest = themes.map((t) => { const req = matrix.filter((m) => m.theme === t.meta.name && m.required); const low = req.reduce((a, b) => (b.ratio / b.target < a.ratio / a.target ? b : a)); return `${t.meta.name}: ${req.length} required pairs, tightest ${low.pair} ${low.ratio}:1 (needs ${low.target}:1)`; });
 console.log(lowest.join('\n'));
+if (solidLineSlot5.length) console.log(`slot 5 as a solid line on data-surface: ${solidLineSlot5.join(', ')} (needs 3:1)`);
 
 if (failures.length) {
   console.error(`validation failed:\n${failures.join('\n')}`);
