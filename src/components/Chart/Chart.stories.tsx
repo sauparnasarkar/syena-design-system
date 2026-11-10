@@ -366,7 +366,7 @@ function KeySwatch({ name, slot }: { name: string; slot: number }) {
   const colour = useSeriesColour(slot);
   return (
     <li style={{ display: 'flex', alignItems: 'center', gap: 'var(--syn-space-2)' }}>
-      <span data-key-swatch={name} data-colour={colour ?? ''} aria-hidden="true" style={{ width: 10, height: 10, borderRadius: 2, background: colour ?? 'transparent' }} />
+      <span data-syn-key-swatch={name} data-syn-colour={colour ?? ''} aria-hidden="true" style={{ width: 10, height: 10, borderRadius: 2, background: colour ?? 'transparent' }} />
       {name}
     </li>
   );
@@ -388,7 +388,7 @@ const keyMatchesLines = async ({ canvasElement }: { canvasElement: HTMLElement }
   const plot = canvasElement.querySelector('.js-plotly-plot') as HTMLElement & { data?: Array<{ name?: string; line?: { color?: string } }> };
   await waitFor(() => expect(plot.data?.length).toBeGreaterThanOrEqual(keyedSeries.length));
   const drawnColour = (name: string) => plot.data!.find((d) => d.name === name)?.line?.color?.toLowerCase();
-  const keyed = keyedSeries.map((s) => (canvasElement.querySelector(`[data-key-swatch="${s.name}"]`) as HTMLElement).dataset.colour?.toLowerCase());
+  const keyed = keyedSeries.map((s) => (canvasElement.querySelector(`[data-syn-key-swatch="${s.name}"]`) as HTMLElement).dataset.synColour?.toLowerCase());
   for (const [i, s] of keyedSeries.entries()) await expect(keyed[i]).toBe(drawnColour(s.name));
   // Every pinned slot is a different colour.
   await expect(new Set(keyed).size).toBe(keyedSeries.length);
