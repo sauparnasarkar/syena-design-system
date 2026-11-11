@@ -320,6 +320,23 @@ export const SeveralReferenceLines: Story = {
   },
 };
 
+export const ReferenceAtTheLastYear: Story = {
+  // Narrow, so there are no end labels to widen the right margin: the case where a reference at the edge clipped its label.
+  args: { series: lineSeries, referenceX: [{ x: 2024, label: '2024 start' }, { x: 2050, label: '0.10 °C apart' }] },
+  decorators: [panel('30rem')],
+  play: async ({ canvasElement }) => {
+    await drawn(canvasElement);
+    // A label at the right edge sits left of its line, so it is drawn whole inside the chart instead of clipped.
+    const label = await waitFor(() => {
+      const el = [...canvasElement.querySelectorAll('.main-svg .annotation')].find((a) => a.textContent === '0.10 °C apart');
+      expect(el).toBeDefined();
+      return el!;
+    });
+    const svg = canvasElement.querySelector('.main-svg')!.getBoundingClientRect();
+    await expect(label.getBoundingClientRect().right).toBeLessThanOrEqual(svg.right + 0.5);
+  },
+};
+
 export const TableOfTheValues: Story = {
   args: { series: lineSeries.slice(0, 2) },
   play: async ({ canvasElement }) => {

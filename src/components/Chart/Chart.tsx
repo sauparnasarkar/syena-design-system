@@ -182,14 +182,19 @@ export function Chart(props: ChartProps) {
     const plotWidth = Math.max(1, width - t.space.s5 - t.space.s4 - labelWidth);
     const px = (x: number) => ((x - x0) / Math.max(1, x1 - x0)) * plotWidth;
 
-    // Labels above the plot: a label that would overlap an earlier one moves down a row.
+    // Labels above the plot: a label that would overlap an earlier one moves down a row. A label sits right of its line,
+    // unless it would run past the right margin (a reference at the last year): then it sits left of the line, so it is not clipped.
     const notes: Array<{ x: number; text: string }> = [];
     if (projectionFrom !== undefined) notes.push({ x: projectionFrom, text: 'Projection' });
     const references = referenceX === undefined ? [] : Array.isArray(referenceX) ? referenceX : [referenceX];
     references.forEach((r) => notes.push({ x: r.x, text: r.label }));
+    const textWidth = (text: string) => text.length * 0.6 * t.captionSize;
+    const flipped = notes.map((n) => px(n.x) + t.space.s2 + textWidth(n.text) > plotWidth + t.space.s4 + labelWidth);
     const placed: Array<{ a: number; b: number; row: number }> = [];
-    const rows = notes.map((n) => {
-      const box = { a: px(n.x) - t.space.s2, b: px(n.x) + n.text.length * 0.6 * t.captionSize + t.space.s2, row: 0 };
+    const rows = notes.map((n, i) => {
+      const box = flipped[i]
+        ? { a: px(n.x) - textWidth(n.text) - t.space.s2, b: px(n.x) + t.space.s2, row: 0 }
+        : { a: px(n.x) - t.space.s2, b: px(n.x) + textWidth(n.text) + t.space.s2, row: 0 };
       while (placed.some((p) => p.row === box.row && p.a < box.b && box.a < p.b)) box.row += 1;
       placed.push(box);
       return box.row;
@@ -200,7 +205,7 @@ export function Chart(props: ChartProps) {
     const notations: Partial<Annotations>[] = [];
     if (projectionFrom !== undefined) shapes.push({ type: 'rect', xref: 'x', yref: 'paper', x0: projectionFrom, x1, y0: 0, y1: 1, fillcolor: t.uncertainty, opacity: t.projectionOpacity, line: { width: 0 }, layer: 'below' });
     references.forEach((r) => shapes.push({ type: 'line', xref: 'x', yref: 'paper', x0: r.x, x1: r.x, y0: 0, y1: 1 }));
-    notes.forEach((n, i) => notations.push({ x: n.x, xref: 'x', y: 1, yref: 'paper', text: n.text, xanchor: 'left', yanchor: 'bottom', xshift: t.space.s2, yshift: rows[i] * LABEL_ROW, showarrow: false }));
+    notes.forEach((n, i) => notations.push({ x: n.x, xref: 'x', y: 1, yref: 'paper', text: n.text, xanchor: flipped[i] ? 'right' : 'left', yanchor: 'bottom', xshift: flipped[i] ? -t.space.s2 : t.space.s2, yshift: rows[i] * LABEL_ROW, showarrow: false }));
     (annotations ?? []).forEach((a) => notations.push({ x: a.x, y: a.y, text: a.text, showarrow: true, ax: 0, ay: -t.space.s5, arrowwidth: t.strokeWidth }));
     if (direct) {
       // Each line is named at its last value, skipping any gap at the end.
