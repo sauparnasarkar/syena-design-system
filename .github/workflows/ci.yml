@@ -11,7 +11,9 @@ permissions:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    # Pinned: on ubuntu-latest (now Ubuntu 26.04) Playwright's --with-deps apt step failed twice on 2026-11-11, unable to resolve
+    # security.ubuntu.com, so the tests never ran. 24.04 is the release Playwright supports.
+    runs-on: ubuntu-24.04
     steps:
       # Actions are pinned to a commit (the one the v4 tag pointed at on 2026-10-23), so a moved tag cannot change what runs.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
