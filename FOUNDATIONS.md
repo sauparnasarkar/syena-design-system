@@ -1623,7 +1623,7 @@ with named values; there are no colour-named variants.
 - **Purpose and props.** A themed chart on the plotting library. Props: `series`, `xTitle`,
   `yTitle`, `y2Title`, `y2TickFormat`, `ariaLabel`, `showLegend`, `height`, `legendWithinHeight` (the height is the legend's and the plot's together),
   `stackedAreaMode`, `barmode`, `orientation`, `projectionFrom`, `referenceX`, `annotations`,
-  `yRange`; `referenceX` is one reference line or a list. A series may be `dashed` (a dashed line that is not a projection, so two lines of one colour can be told apart; it is not marked as a projection). A series' values may be `null`, which
+  `yRange`; `referenceX` is one reference line or a list; each label sits right of its line, or left of it when it would run past the right margin (a reference at the last year), so it is never clipped. A series may be `dashed` (a dashed line that is not a projection, so two lines of one colour can be told apart; it is not marked as a projection). A series' values may be `null`, which
   leaves a gap (the line breaks and is never joined across it); a value with a gap on both sides gets a mark of its own, since a line cannot carry it. A series has a `kind` (`line`, `bar`, `area` or `marker`), and optionally `projected`,
   `band`, `axis`, `slot`, `signed` and `signLabels`, and `colorValues`, `colorDomain`, `colorLabel`
   and `formatColorValue`.
