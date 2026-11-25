@@ -21,7 +21,9 @@ const preview: Preview = {
   decorators: [
     (Story, context) => {
       const theme = (context.globals.theme ?? 'night') as ThemeName;
-      return createElement(SynThemeProvider, { theme, storageKey: null }, createElement(Story));
+      // The theme in force must be one of the pair on offer: ledger pairs with night, the others with each other.
+      const pair = theme === 'ledger' ? (['night', 'ledger'] as const) : (['night', 'tidewater'] as const);
+      return createElement(SynThemeProvider, { themes: pair, theme, storageKey: null }, createElement(Story));
     },
   ],
   parameters: {

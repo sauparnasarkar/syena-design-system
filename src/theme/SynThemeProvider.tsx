@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import type { ThemeName } from '../generated/tokens';
 import { resolveToken } from './resolveToken';
-import { checkThemePair, defaultThemePair, isOffered, systemThemeFor, type ThemePair } from './themePair';
+import { checkThemePair, defaultThemePair, isPairChoice, resolveChoice, resolveTheme, type ThemePair } from './themePair';
 
 export type ThemeChoice = ThemeName | 'system';
 /** The themes offered when a product does not say. */
@@ -26,14 +26,11 @@ export interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-/** A choice is `system` or one of the offered themes; anything else is not a choice at all. */
-const isChoice = (pair: ThemePair, value: unknown): value is ThemeChoice => value === 'system' || isOffered(pair, value);
-
 function readStored(key: string | null, pair: ThemePair): ThemeChoice | null {
   if (!key || typeof window === 'undefined') return null;
   try {
     const stored = window.localStorage.getItem(key);
-    return isChoice(pair, stored) ? stored : null;
+    return isPairChoice(pair, stored) ? stored : null;
   } catch {
     return null;
   }
@@ -70,7 +67,7 @@ export function SynThemeProvider({ themes: offered = defaultThemePair, theme: fo
   const pairKey = offered.join(',');
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const pair = useMemo(() => checkThemePair(offered), [pairKey]);
-  const [chosen, setChosen] = useState<ThemeChoice>(() => readStored(storageKey, pair) ?? (isChoice(pair, defaultChoice) ? defaultChoice : 'system'));
+  const [chosen, setChosen] = useState<ThemeChoice>(() => readStored(storageKey, pair) ?? resolveChoice(pair, defaultChoice, 'system'));
   const [dark, setDark] = useState<boolean>(prefersDark);
   const [scope, setScope] = useState<HTMLElement | null>(null);
   const listeners = useRef(new Set<() => void>());
@@ -83,9 +80,9 @@ export function SynThemeProvider({ themes: offered = defaultThemePair, theme: fo
     return () => media.removeEventListener('change', update);
   }, []);
 
-  // A choice that is not on offer (the offered pair changed) counts as `system`.
-  const choice: ThemeChoice = isChoice(pair, chosen) ? chosen : 'system';
-  const theme: ThemeName = forced ?? (choice === 'system' ? systemThemeFor(pair, dark) : choice);
+  // A choice that is no longer on offer (the pair changed) gives way to a valid default, else to `system`.
+  const choice: ThemeChoice = resolveChoice(pair, chosen, defaultChoice);
+  const theme: ThemeName = resolveTheme(pair, forced, choice, dark);
 
   useLayoutEffect(() => {
     if (!syncDocument) return undefined;
@@ -110,7 +107,7 @@ export function SynThemeProvider({ themes: offered = defaultThemePair, theme: fo
   }, []);
 
   const setChoice = useCallback((next: ThemeChoice) => {
-    if (!isChoice(pair, next)) return;
+    if (!isPairChoice(pair, next)) return;
     setChosen(next);
     writeStored(storageKey, next);
   }, [storageKey, pair]);

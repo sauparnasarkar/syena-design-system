@@ -22,3 +22,25 @@ export function systemThemeFor(pair: ThemePair, prefersDark: boolean): ThemeName
 
 /** Whether `value` is one of the themes in the pair. */
 export const isOffered = (pair: ThemePair, value: unknown): value is ThemeName => pair.includes(value as ThemeName);
+
+/** A choice is `system` or one of the offered themes. */
+export type PairChoice = ThemeName | 'system';
+export const isPairChoice = (pair: ThemePair, value: unknown): value is PairChoice => value === 'system' || isOffered(pair, value);
+
+/**
+ * The choice in force. A choice that is not on offer (the pair changed, or the stored value was never on offer)
+ * gives way to the default when that is on offer, and to `system` otherwise.
+ */
+export function resolveChoice(pair: ThemePair, chosen: unknown, defaultChoice: unknown): PairChoice {
+  if (isPairChoice(pair, chosen)) return chosen;
+  return isPairChoice(pair, defaultChoice) ? defaultChoice : 'system';
+}
+
+/** The theme in force: the forced theme, which must be one of the pair, or what the choice and the colour preference give. */
+export function resolveTheme(pair: ThemePair, forced: ThemeName | undefined, choice: PairChoice, prefersDark: boolean): ThemeName {
+  if (forced !== undefined) {
+    if (!isOffered(pair, forced)) throw new Error(`SynThemeProvider: theme "${forced}" is not one of themes [${pair.join(', ')}]`);
+    return forced;
+  }
+  return choice === 'system' ? systemThemeFor(pair, prefersDark) : choice;
+}

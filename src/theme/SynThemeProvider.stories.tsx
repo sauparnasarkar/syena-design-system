@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { themes } from '../generated/tokens';
 import { Text } from '../components/Text/Text';
@@ -141,5 +142,32 @@ export const SystemFollowsThePreferenceWithinThePair: Story = {
     const region = within(canvasElement).getByRole('region', { name: 'Theme readout' });
     const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     await expect(text(region, 'theme')).toBe(dark ? 'night' : 'ledger');
+  },
+};
+
+function ChangingPair() {
+  const [ledger, setLedger] = useState(false);
+  return (
+    <SynThemeProvider themes={ledger ? ['night', 'ledger'] : ['night', 'tidewater']} defaultChoice="night" storageKey="syn-story-change" syncDocument={false}>
+      <button type="button" onClick={() => setLedger(true)}>Offer ledger</button>
+      <Readout />
+    </SynThemeProvider>
+  );
+}
+
+export const ChangingThePairAppliesAValidDefault: Story = {
+  render: () => <ChangingPair />,
+  beforeEach: () => {
+    window.localStorage.setItem('syn-story-change', 'tidewater');
+    return () => window.localStorage.removeItem('syn-story-change');
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const region = canvas.getByRole('region', { name: 'Theme readout' });
+    await expect(text(region, 'choice')).toBe('tidewater');
+    await userEvent.click(canvas.getByRole('button', { name: 'Offer ledger' }));
+    // Tidewater is no longer offered: the default (night) is in force, not system.
+    await waitFor(() => expect(text(region, 'choice')).toBe('night'));
+    await expect(text(region, 'theme')).toBe('night');
   },
 };
