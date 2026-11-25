@@ -466,12 +466,15 @@ and 1.6 (accessible by construction).
 |---|---|---|
 | `night` | dark | The default analytical theme: deep blue-grey surfaces, bright marks. |
 | `tidewater` | light | Daylight reading: cool light-grey canvas and white raised surfaces. Chart panels stay dark (see 3.6), so marks are validated on one kind of ground in every theme. |
+| `ledger` | light | Paper-toned reading theme for tabular financial work: warm off-white canvas, white raised surfaces, a dark panel for charts (see 3.6). |
 
 Polarity decides the direction of two operations used throughout: *toward emphasis* (lighter
 in a dark theme, darker in a light theme) and *elevation* (raised surfaces are lighter than
 the canvas in a dark theme; in a light theme they are the lightest surface and rely on
 shadow). A third theme is added by supplying seeds and a polarity; nothing else is chosen
 by hand.
+
+A product offers two themes, one dark and one light: `night` with `tidewater`, or `night` with `ledger`.
 
 ### 3.2 Seeds
 
@@ -480,8 +483,28 @@ text, the brand accent, the three status signals, and, where a theme has one, th
 ground, the raised surface and the highest-emphasis text. A role with no seed in a theme is
 derived. Seed values are in `tokens/primitives/seeds.json`.
 
-Brand direction: the accent of both themes is a blue-cyan (hue about 222° to 226°). Neither
-theme has a green or red brand colour (principle 1.5, rule in 3.5).
+Brand direction: the accent of `night` and `tidewater` is a blue-cyan (hue about 222° to 226°); the
+`ledger` accent is a blue-violet (below). No theme has a green or red brand colour (principle 1.5, rule in 3.5).
+
+The `ledger` seeds are listed below. Every other `ledger` colour is derived by the rules in this section. The accent is derived with the rule given here; it is not chosen by eye.
+
+| Seed role | Value |
+|---|---|
+| `surface-base` | `#f4f2ed` |
+| `border-default` | `#d9d4c8` |
+| `text-primary` | `#16150f` |
+| `text-secondary` | `#3a3733` |
+| `text-muted` | `#6e6a62` |
+| `data-surface` | `#171614` |
+| `signal-positive-fill` | `#1e7a4c` |
+| `signal-negative-fill` | `#c0392b` |
+| `signal-caution-fill` | `#e8b317` |
+| `accent-fill` | `#3b6ac5` |
+
+On `surface-base` the text seeds measure 16.35:1 for `text-primary` (target 7:1), 10.58:1 for `text-secondary` (target 4.5:1) and 4.81:1 for `text-muted` (target 4.5:1).
+
+The accent is the colour at OKLCH chroma 0.15 (clamped to the gamut) and a stated hue, at the lightest lightness where white text on the fill and the fill as text on the canvas both reach at least 4.6:1. Its hue is about 262°, which is 106° from the positive signal, 128° from the negative signal and about 36° from the `tidewater` accent hue. As text on the canvas it reaches 4.63:1, the smallest margin of any `ledger` pair family, so the generator's check on this pair is required and is never relaxed.
+
 
 ### 3.3 Ramps
 
@@ -652,6 +675,8 @@ lands in one.
 
 The secondary accent is the accent hue plus 60°, which lies outside both zones in each
 theme. A hue inside a zone is available only through signal and change tokens.
+
+In `ledger` the positive signal hue is 156.4° and the negative signal hue is 29.7°, so the reserved zones cover 111° to 201° and 345° to 75°. Accent and secondary accent hues must lie in 75° to 111° or 201° to 345°; the accent hue (about 262°) and the secondary accent (accent plus 60°, about 322°) are both inside that range. The generator reports both distances.
 
 ### 3.6 Data colour
 
@@ -1029,6 +1054,9 @@ distance between the two outer colours:
 At build time the same checks run on the emitted tokens, and the build fails if any required
 pair falls below its target.
 
+Every pair family listed here passes in `ledger` at the same targets as in the other themes: 4.5:1 for text, 3:1 for boundaries, icons and chart marks, and 7:1 for primary and chart text. Chart marks are validated on the dark `data-surface` panel, as in every theme. The theme is not accepted while any required pair fails.
+
+
 ---
 
 ## 4. Application shell
@@ -1346,6 +1374,14 @@ with named values; there are no colour-named variants.
 - **Tokens.** `text-muted`, `text-link`, `border-subtle`.
 - **Accessibility.** `footer` landmark; links are real links with visible underlines.
 
+#### ProductSwitcher
+
+- **Purpose and props.** Move between the products of one family. It fills the rail's product-switcher slot (§4.1). Props: `products` (each `{ id, name, href, mark }`, where `mark` is required: `src` or `node`, with an accessible name), `currentId` and `message`. There are no default marks (§5.1); `ProductMark` draws them. The component shows exactly the products it is given: deciding which products a reader may see belongs to the consuming product.
+- **Anatomy.** A button in the rail opens a panel with a grid of tiles, each a mark above a name; the current product shows a check and carries `aria-current`. In a collapsed rail the button shows the mark only, with its accessible name.
+- **States.** Closed, open, hover, focus, current.
+- **Tokens.** The panel takes the popover's surface, border and elevation, so the two stay the same; `layer-overlay`, `radius-card`, the tile states of `Tile`.
+- **Accessibility.** A disclosure, not a menu: a button with `aria-expanded` and `aria-controls` shows and hides a region of ordinary links. It has no `aria-haspopup`, and no `menu` or `menuitem` roles; the links are reached in normal tab order. Escape closes the panel and returns focus to the button; moving focus outside, or a click outside, closes it.
+
 ---
 
 ### 5.3 Controls
@@ -1471,6 +1507,46 @@ with named values; there are no colour-named variants.
 - **Accessibility.** A labelled textarea; `Enter` submits and `Shift+Enter` inserts a newline;
   the hint is associated with `aria-describedby`; loading is announced.
 
+#### Tabs
+
+- **Purpose and props.** Switch between views of one subject on one page. Props: `items` (each `{ id, label, disabled? }`), `activeId`, `onChange(id)`, `variant` (`underline` by default, or `segmented` for a boxed set), `size` (`default`, `small`), `label` (the accessible name of the tab list) and `idPrefix`. Controlled only. Tabs change a panel on the same page; destinations that change the view are links in `JumpLinks` or `SidebarNav`.
+- **Anatomy.** A `tablist` of `tab` buttons. The selected tab has an `accent-fill` bar (`underline`) or an `accent-tint` fill with `accent-text` (`segmented`), and a change of weight, so selection is not carried by colour alone. The consumer renders each panel with `role="tabpanel"` and `aria-labelledby` the tab; `Tabs` exports `tabId(prefix, id)` and `panelId(prefix, id)` so the ids match.
+- **States.** Default, hover (a `surface-sunken` wash), focus (`focus-ring`), selected, disabled.
+- **Tokens.** `text-secondary`, `accent-fill`, `accent-tint`, `accent-text`, `border-subtle` (the rule under the list), control height tokens.
+- **Accessibility.** Arrow keys move focus (Left and Right, Home and End); Enter or Space selects; roving `tabindex`; `aria-selected` and `aria-controls`. A list wider than its container scrolls horizontally and keeps the selected tab in view. Each tab is `control-height-touch` on touch devices.
+
+#### Chip
+
+- **Purpose and props.** A removable or toggleable filter token. Props: `selected`, `onClick`, `onRemove` (adds a remove button), `disabled` and content.
+- **Anatomy.** A pill in `text-sm` with `radius-control`; a selected chip uses `accent-tint` and a check mark; the remove button is its own focus stop named "Remove" followed by the chip's label.
+- **States.** Default, hover, focus, selected, disabled.
+- **Tokens.** `surface-sunken`, `border-emphasis`, `accent-tint`, `accent-text`.
+- **Accessibility.** A toggling chip is a button with `aria-pressed`; the remove control is a separate button. A chip is interactive; `Tag` (§5.4) is a static label.
+
+#### SearchInput
+
+- **Purpose and props.** A text field that filters a list on the page. Props: `value`, `onChange(value)`, `onClear`, `placeholder`, `size` and `label`. `label` is required, so omitting it is a type error: a placeholder is not a name.
+- **Anatomy.** The control anatomy of §5.1 with a leading search icon and a clear button once there is text. On touch devices the field is in the `text-lg` step, which is not under sixteen pixels.
+- **States.** Default, hover, focus, filled, disabled.
+- **Tokens.** As the other fields.
+- **Accessibility.** `type="search"`; Escape clears; the clear button is named "Clear search". The number of results belongs to the consumer's live region (`role="status"`).
+
+#### Toggle
+
+- **Purpose and props.** An on and off setting that takes effect at once. Props: `checked`, `onChange(checked)`, `label`, `description`, `size` (`default`, `small`) and `disabled`.
+- **Anatomy.** A track and a thumb, with the label at the end. On is an `accent-fill` track with a check mark in the thumb; off is a `border-emphasis` outline, so state is not carried by colour alone.
+- **States.** Off, on, hover, focus, disabled.
+- **Tokens.** `accent-fill`, `border-emphasis`, `text-primary`, `text-muted`, `focus-ring`.
+- **Accessibility.** A native checkbox with `role="switch"`; Space toggles; the label is required.
+
+#### Pagination
+
+- **Purpose and props.** Page through a long table. Props: `page` (1-based), `pageCount`, `onChange(page)`, `siblingCount`, `compact` and `label`.
+- **Anatomy.** Previous and next buttons with "Page X of Y" (`compact`), or numbered buttons with ellipses. The current page carries `aria-current="page"`. The icons are `previous` and `next` (§5.4).
+- **States.** Default, hover, focus, current, disabled (at either end).
+- **Tokens.** As `Button`, plus `accent-tint` for the current page.
+- **Accessibility.** A `nav` named by `label` (*Pagination* by default). A disabled end uses `aria-disabled="true"` and is not removed or given the `disabled` attribute, so it stays focusable; activating it does nothing. Page changes are announced by the consumer's live region.
+
 ---
 
 ### 5.4 Surfaces and feedback
@@ -1540,6 +1616,11 @@ with named values; there are no colour-named variants.
 - **Accessibility.** `role="status"` for default and warning, `role="alert"` for errors;
   icon and text carry the meaning, not colour.
 
+#### InlineAlert (additions)
+
+- **Placement.** New prop `placement`: `inline` (the default, a message within a card or section) or `page` (a notice across the full width of the content that stays until dismissed or resolved, such as a caveat or a stale-data warning). A `page` alert drops the radius, spans its container and keeps the same bar, icon, tint and text tokens. New prop `actions`: a slot for one or two buttons after the message.
+- **Accessibility.** Unchanged: `role="status"` for default and warning, `role="alert"` for errors.
+
 #### Spinner
 
 - **Purpose and props.** Indeterminate loading. Props: `label`, `showLabel`.
@@ -1559,6 +1640,22 @@ with named values; there are no colour-named variants.
 - **Accessibility.** `role="progressbar"` with `aria-valuenow`, `aria-valuemin`,
   `aria-valuemax` and a name.
 
+#### EmptyState
+
+- **Purpose and props.** Say that a region has nothing to show, and why. Props: `title`, `message`, `icon` (optional), `actions` (optional slot), `tone` (`neutral` by default, `caution`, `negative`) and `headingLevel` (3 by default).
+- **Anatomy.** A centred block in a `surface-sunken` well or inside its card: the icon, the title in `title-sm`, the message in `text-md` and `text-muted`, then the actions. A `negative` tone (a failed load) carries an icon and words, never colour alone, and always offers a retry action.
+- **States.** Static. Actions are ordinary buttons.
+- **Tokens.** `surface-sunken`, `border-subtle`, `text-primary`, `text-muted`, and the `signal-*` tint and text for tones.
+- **Accessibility.** The title is a real heading at `headingLevel`. A `negative` empty state that appears after a reader's action is `role="alert"`; otherwise `role="status"`.
+
+#### Gauge
+
+- **Purpose and props.** One value on a bounded scale, such as a coverage percentage. Props: `value`, `min` (0), `max` (100), `unit` (the suffix), `unitLabel` (the unit spelled for screen readers), `label` and `tone` (`accent` by default, or `positive`, `caution`, `negative` where the metric defines it). Colour is chosen by tone, never by a raw value.
+- **Anatomy.** A horizontal track of `space(2)` thickness with a fill, and the value written as a `Figure`. It is not a chart: no ticks, and no animation under reduced motion.
+- **States.** Static.
+- **Tokens.** `border-default` (track), `accent-fill` or the matching signal fill, `type-figure-sm`.
+- **Accessibility.** `role="meter"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, a name, and `aria-valuetext` carrying the value with its unit spelled out. `Progress` is determinate task progress; `Gauge` is a measurement.
+
 #### Icon
 
 - **Purpose and props.** A glyph. Props: `name`, `size`, `style`. Sizes `small`, `medium` and
@@ -1570,6 +1667,24 @@ with named values; there are no colour-named variants.
   through a set.
 - **Accessibility.** Decorative by default (`aria-hidden`); an icon that carries meaning
   takes a `title`, which becomes its accessible name.
+
+#### Modal
+
+- **Purpose and props.** A dialog that interrupts the page. Props: `open`, `onClose`, `title`, `size` (`default`, `small`), `actions` (a footer slot at the trailing edge) and content.
+- **Anatomy.** Built on the dialog pattern the system already uses for the chart card's expanded view and the shell's drawer: a scrim at `layer-modal` and a `surface-raised` panel with `radius-card` and `elevation-3`, a title in `title-sm`, a close button, a scrolling body and a footer. Below `bp-compact` it is a full-height sheet.
+- **Safe areas.** The scrim covers the whole viewport, including the areas under device insets. The panel and the sheet add `env(safe-area-inset-top)`, `-right`, `-bottom` and `-left` to their padding, so the title, close button and footer actions never sit under a notch, a rounded corner or a home indicator, in portrait and in landscape. The footer rests above the bottom inset. Heights use the dynamic viewport unit (`dvh`), so the sheet is not cut off by a browser toolbar that shows or hides.
+- **Mechanics.** `useScrollLock` locks the page while open; `useFocusTrap` keeps focus inside and returns it to the control that opened the dialog on close. Escape and a click on the scrim close it unless `onClose` is absent. Under reduced motion there is no transition.
+- **States.** Closed, open, scrolling body, focus within.
+- **Tokens.** `layer-modal`, `surface-raised`, `radius-card`, `elevation-3`, `border-subtle`, `title-sm`.
+- **Accessibility.** `role="dialog"` and `aria-modal="true"`, named by its title with `aria-labelledby`; first focus goes to the title or the first control.
+
+#### Tooltip
+
+- **Purpose and props.** A short explanation of a term or figure, shown on hover and keyboard focus. Props: `label`, `placement` (`top` by default), `delay` and `children` (one focusable element). It positions with `Popover` (§5.7).
+- **Anatomy.** A small bubble in `surface-inverse` with `text-inverse` in `text-sm`, with an arrow and a maximum width. It never holds interactive content.
+- **States.** Opens on hover after `motion-base` and at once on focus; closes on Escape, on blur and when the pointer leaves; the pointer can move onto the bubble without closing it. Under reduced motion it appears without a transition.
+- **Tokens.** `surface-inverse`, `text-inverse`, `radius-control`, `elevation-2`, `layer-overlay`.
+- **Accessibility.** The trigger carries `aria-describedby` pointing to the bubble (`role="tooltip"`). On touch devices it opens on tap and closes on the next tap. A tooltip is never the only place important information appears.
 
 ---
 
@@ -1811,6 +1926,12 @@ with named values; there are no colour-named variants.
 - **Accessibility.** `ThemeSwitch` is the labelled control for the choice (System, Night,
   Tidewater); it is a native select with a visible label.
 
+The provider also takes `themes`: the two themes the product offers, one dark and one light. It defaults to `night` and `tidewater`. A product that uses `ledger` passes `night` and `ledger`. The `theme` and `defaultChoice` props accept the name of either offered theme in place of the fixed `night` or `tidewater`.
+
+- **Choice.** `system` follows the system colour preference live: dark gives the offered dark theme and light gives the offered light theme. `ThemeSwitch` lists the offered themes by name.
+- **Remembering.** Each product passes its own `storageKey`. A stored value that is not one of the offered themes is ignored, as if nothing had been stored, and is neither read as a choice nor rewritten until the reader chooses.
+- **Theme in force.** `useSynTheme()` returns the theme in force from the offered pair; `useResolvedToken` and `resolveToken` are unchanged.
+
 ---
 
 ## 6. Chart and table specifications
@@ -1992,6 +2113,8 @@ Values are read from the resolved token values (§5.7), so that charts follow th
 without a reload.
 
 ### 6.2 Tables
+
+Products that show dense financial tables use the compact table density defined in this section. There is no separate density token set: if a table needs more room or less, §6.2 changes for every product.
 
 #### Density and type
 
