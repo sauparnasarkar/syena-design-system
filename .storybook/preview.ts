@@ -7,7 +7,7 @@ import '@fontsource/poppins/latin-600.css';
 import '../src/styles.css';
 import './story-base.css';
 
-const themes = ['night', 'tidewater'] as const;
+const themes = ['night', 'tidewater', 'ledger'] as const;
 type ThemeName = (typeof themes)[number];
 
 const preview: Preview = {

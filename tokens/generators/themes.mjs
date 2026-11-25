@@ -7,12 +7,12 @@ import {
 const GEN = (value, description) => ({ $type: 'color', $value: value, ...(description ? { $description: description } : {}) });
 
 /** Hues for the categorical slots, shared by all themes: outside every theme's reserved zones,
- *  the first slot at the accent hue, each next slot as far as possible from those chosen. */
-export function planCategoricalHues({ themes, D, count, step = 3 }) {
+ *  the first slot at the mean accent hue of `anchorThemes` (the themes listed first, so adding a theme does not move the palette), each next slot as far as possible from those chosen. */
+export function planCategoricalHues({ themes, D, count, step = 3, anchorThemes = themes }) {
   const zones = themes.flatMap((t) => [t.hp, t.hn]);
   const allowed = [];
   for (let h = 0; h < 360; h += step) if (zones.every((z) => hueDistance(h, z) >= D)) allowed.push(h);
-  const accent = themes.reduce((a, t) => a + t.hb, 0) / themes.length;
+  const accent = anchorThemes.reduce((a, t) => a + t.hb, 0) / anchorThemes.length;
   const chosen = [allowed.reduce((best, h) => (hueDistance(h, accent) < hueDistance(best, accent) ? h : best))];
   while (chosen.length < count) {
     chosen.push(allowed.reduce((best, h) => (Math.min(...chosen.map((c) => hueDistance(h, c))) > Math.min(...chosen.map((c) => hueDistance(best, c))) ? h : best)));

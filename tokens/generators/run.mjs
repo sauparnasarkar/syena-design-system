@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 import { formatHex } from 'culori';
 import { computeScales, measureFonts } from './scales.mjs';
 import { scalesToDtcg } from './emit.mjs';
-import { fillBlocks, scaleBlocks, colourBlocks } from './docs.mjs';
+import { fillBlocks, scaleBlocks, colourBlocks, themeBlocks } from './docs.mjs';
 import { buildTheme, planCategoricalHues } from './themes.mjs';
 import { contrast, lch } from './colour.mjs';
 
@@ -33,12 +33,16 @@ write('tokens/primitives/figure-face.json', {
 });
 
 const seeds = JSON.parse(readFileSync(join(root, 'tokens', 'primitives', 'seeds.json'), 'utf8'));
-const polarity = { night: 'dark', tidewater: 'light' };
+const { $description: _polarityNote, ...polarity } = JSON.parse(readFileSync(join(root, 'tokens', 'primitives', 'polarity.json'), 'utf8'));
 const zoneOf = (name) => {
   const s = seeds[name];
   return { hp: lch(s['signal-positive-fill'].$value).h, hn: lch(s['signal-negative-fill'].$value).h, hb: lch(s['accent-fill'].$value).h };
 };
-const hues = planCategoricalHues({ themes: Object.keys(polarity).map(zoneOf), D: 360 / inputs.colour.zoneDivisions, count: inputs.colour.categories });
+// Slot 1 follows the mean accent hue of the first two themes only, so a theme added later cannot move the shared palette.
+const hues = planCategoricalHues({
+  themes: Object.keys(polarity).map(zoneOf), anchorThemes: Object.keys(polarity).slice(0, 2).map(zoneOf),
+  D: 360 / inputs.colour.zoneDivisions, count: inputs.colour.categories,
+});
 const themes = Object.keys(polarity).map((name) => buildTheme({
   name, polarity: polarity[name], seeds: seeds[name], rho: inputs.colour.stepRatio, top: inputs.colour.topLightness,
   colourInputs: inputs.colour, hues,
@@ -102,6 +106,7 @@ for (const t of themes) {
 fillBlocks(join(root, 'FOUNDATIONS.md'), {
   ...scaleBlocks(scales, inputs),
   ...colourBlocks(themes),
+  ...themeBlocks(themes.find((t) => t.meta.name === 'ledger')),
   'metrics': [
     `| Measure | Poppins | Inter |`,
     `|---|---|---|`,

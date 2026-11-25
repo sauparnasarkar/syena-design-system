@@ -22,5 +22,17 @@
     "signal-positive-fill": { "$type": "color", "$value": "#129455" },
     "signal-caution-fill": { "$type": "color", "$value": "#e8a317" },
     "signal-negative-fill": { "$type": "color", "$value": "#d0392f" }
+  },
+  "ledger": {
+    "surface-base": { "$type": "color", "$value": "#f4f2ed" },
+    "border-default": { "$type": "color", "$value": "#d9d4c8" },
+    "text-primary": { "$type": "color", "$value": "#16150f" },
+    "text-secondary": { "$type": "color", "$value": "#3a3733" },
+    "text-muted": { "$type": "color", "$value": "#6e6a62" },
+    "data-surface": { "$type": "color", "$value": "#171614" },
+    "accent-fill": { "$type": "color", "$value": "#3b6ac5" },
+    "signal-positive-fill": { "$type": "color", "$value": "#1e7a4c" },
+    "signal-caution-fill": { "$type": "color", "$value": "#e8b317" },
+    "signal-negative-fill": { "$type": "color", "$value": "#c0392b" }
   }
 }

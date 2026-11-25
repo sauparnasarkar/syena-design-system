@@ -202,5 +202,107 @@
         "$value": "#080808"
       }
     }
+  },
+  "ledger": {
+    "neutral": {
+      "0": {
+        "$type": "color",
+        "$value": "#fbfbfb"
+      },
+      "1": {
+        "$type": "color",
+        "$value": "#c5c5c3"
+      },
+      "2": {
+        "$type": "color",
+        "$value": "#9b9a97"
+      },
+      "3": {
+        "$type": "color",
+        "$value": "#797874"
+      },
+      "4": {
+        "$type": "color",
+        "$value": "#5e5c58"
+      },
+      "5": {
+        "$type": "color",
+        "$value": "#484743"
+      },
+      "6": {
+        "$type": "color",
+        "$value": "#373532"
+      },
+      "7": {
+        "$type": "color",
+        "$value": "#292824"
+      },
+      "8": {
+        "$type": "color",
+        "$value": "#1e1d1a"
+      },
+      "9": {
+        "$type": "color",
+        "$value": "#151412"
+      },
+      "10": {
+        "$type": "color",
+        "$value": "#0e0d0c"
+      },
+      "11": {
+        "$type": "color",
+        "$value": "#080808"
+      }
+    },
+    "brand": {
+      "0": {
+        "$type": "color",
+        "$value": "#fbfbfb"
+      },
+      "1": {
+        "$type": "color",
+        "$value": "#b4c6e6"
+      },
+      "2": {
+        "$type": "color",
+        "$value": "#7c9ad2"
+      },
+      "3": {
+        "$type": "color",
+        "$value": "#5076be"
+      },
+      "4": {
+        "$type": "color",
+        "$value": "#2e58aa"
+      },
+      "5": {
+        "$type": "color",
+        "$value": "#143f96"
+      },
+      "6": {
+        "$type": "color",
+        "$value": "#022b81"
+      },
+      "7": {
+        "$type": "color",
+        "$value": "#001f65"
+      },
+      "8": {
+        "$type": "color",
+        "$value": "#00164e"
+      },
+      "9": {
+        "$type": "color",
+        "$value": "#000f3b"
+      },
+      "10": {
+        "$type": "color",
+        "$value": "#030c22"
+      },
+      "11": {
+        "$type": "color",
+        "$value": "#080808"
+      }
+    }
   }
 }

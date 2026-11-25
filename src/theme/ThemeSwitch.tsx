@@ -3,7 +3,7 @@ import { Text } from '../components/Text/Text';
 import styles from './ThemeSwitch.module.css';
 import { themeNames, useSynTheme, type ThemeChoice } from './SynThemeProvider';
 
-const labels: Record<ThemeChoice, string> = { system: 'System', night: 'Night', tidewater: 'Tidewater' };
+const labels: Record<ThemeChoice, string> = { system: 'System', night: 'Night', tidewater: 'Tidewater', ledger: 'Ledger' };
 
 /** A labelled control for the reader's theme choice. */
 export function ThemeSwitch({ label = 'Theme' }: { label?: string }) {

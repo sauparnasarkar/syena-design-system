@@ -7,7 +7,8 @@ import StyleDictionary from 'style-dictionary';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel) => JSON.parse(readFileSync(join(root, rel), 'utf8'));
-const themeNames = ['night', 'tidewater'];
+const { $description: _polarityNote, ...polarity } = read('tokens/primitives/polarity.json');
+const themeNames = Object.keys(polarity);
 const range = { min: 150, max: 300 };
 
 StyleDictionary.registerTransform({ name: 'name/syn', type: 'name', transform: (token) => `--syn-${token.path.join('-')}` });
@@ -83,7 +84,7 @@ export async function buildTokens() {
   const base = await instance(['tokens/semantic/scales.json', 'tokens/primitives/figure-face.json'].map((p) => join(root, p)), [join(root, 'tokens/themes/night.json')], ':root');
   const themes = {};
   for (const name of themeNames) {
-    const scheme = name === 'night' ? 'dark' : 'light';
+    const scheme = polarity[name];
     themes[name] = await instance([join(root, `tokens/themes/${name}.json`)], [], `[data-syn-theme="${name}"]`, scheme);
   }
 
@@ -105,6 +106,7 @@ export async function buildTokens() {
     `export const scale = ${JSON.stringify(scale, null, 2)} as const;`,
     `export const themes = ${JSON.stringify(Object.fromEntries(themeNames.map((n) => [n, nest(themes[n].tokens, plain)])), null, 2)} as const;`,
     'export type ThemeName = keyof typeof themes;',
+    `export const themePolarity = ${JSON.stringify(polarity)} as const satisfies Record<ThemeName, 'dark' | 'light'>;`,
     `export const breakpointPx = ${JSON.stringify(px(scale.breakpoint))} as const;`,
     `export const iconPx = ${JSON.stringify(px(scale.icon))} as const;`,
     '',
