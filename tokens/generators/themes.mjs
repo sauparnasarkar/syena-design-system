@@ -20,7 +20,7 @@ export function planCategoricalHues({ themes, D, count, step = 3, anchorThemes =
   return chosen;
 }
 
-export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues }) {
+export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues, seedRules = [] }) {
   const seed = (role) => (seeds[role] ? seeds[role].$value : undefined);
   const L0 = top;
   const dir = polarity === 'dark' ? 'lighter' : 'darker';
@@ -31,6 +31,12 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
     const ratio = contrast(foreground, background);
     checks.push({ theme: name, id, foreground: hex(foreground), background: hex(background), target, ratio: Number(ratio.toFixed(2)), pass: ratio >= target, kind });
   };
+
+  // Pairs between seeds that the theme must keep, whatever the derived roles do.
+  for (const rule of seedRules) {
+    if (!seed(rule.foreground) || !seed(rule.background)) throw new Error(`${name}: seed rule "${rule.id}" names a seed the theme does not have`);
+    check(rule.id, seed(rule.foreground), seed(rule.background), rule.target);
+  }
 
   // Neutral hue and chroma come from the base surface.
   const base = lch(seed('surface-base'));

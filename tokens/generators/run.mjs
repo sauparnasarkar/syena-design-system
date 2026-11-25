@@ -39,13 +39,14 @@ const zoneOf = (name) => {
   return { hp: lch(s['signal-positive-fill'].$value).h, hn: lch(s['signal-negative-fill'].$value).h, hb: lch(s['accent-fill'].$value).h };
 };
 // Slot 1 follows the mean accent hue of the first two themes only, so a theme added later cannot move the shared palette.
+const { $description: _rulesNote, ...seedRules } = JSON.parse(readFileSync(join(root, 'tokens', 'primitives', 'seed-rules.json'), 'utf8'));
 const hues = planCategoricalHues({
   themes: Object.keys(polarity).map(zoneOf), anchorThemes: Object.keys(polarity).slice(0, 2).map(zoneOf),
   D: 360 / inputs.colour.zoneDivisions, count: inputs.colour.categories,
 });
 const themes = Object.keys(polarity).map((name) => buildTheme({
   name, polarity: polarity[name], seeds: seeds[name], rho: inputs.colour.stepRatio, top: inputs.colour.topLightness,
-  colourInputs: inputs.colour, hues,
+  colourInputs: inputs.colour, hues, seedRules: seedRules[name] ?? [],
 }));
 for (const t of themes) write(`tokens/themes/${t.meta.name}.json`, t.tokens);
 write('tokens/primitives/ramps.json', Object.fromEntries(themes.map((t) => [t.meta.name, Object.fromEntries(

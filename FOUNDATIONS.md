@@ -1067,12 +1067,13 @@ pair falls below its target.
 Every pair family listed here passes in `ledger` at the same targets as in the other themes: 4.5:1 for text, 3:1 for boundaries, icons and chart marks, and 7:1 for primary and chart text. Chart marks are validated on the dark `data-surface` panel, as in every theme. The theme is not accepted while any required pair fails.
 
 <!-- generated:ledger-contrast-count -->
-ledger: 244 required pairs.
+ledger: 245 required pairs.
 <!-- /generated:ledger-contrast-count -->
 
 <!-- generated:ledger-contrast-table -->
 | Pair (worst surface) | Target | ledger | Result |
 |---|---|---|---|
+| accent-fill | 4.6:1 | 4.63 | pass |
 | text-primary | 7:1 | 15.35 | pass |
 | text-secondary | 4.5:1 | 9.94 | pass |
 | text-muted | 4.5:1 | 4.52 | pass |
