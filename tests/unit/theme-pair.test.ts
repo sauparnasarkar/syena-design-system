@@ -24,6 +24,17 @@ describe('a pair of themes', () => {
   it('refuses a theme that does not exist', () => {
     expect(() => checkThemePair(['night', 'dusk'] as never)).toThrow(/unknown theme/);
   });
+
+  it('refuses a pair that is not exactly two names', () => {
+    expect(() => checkThemePair(['night', 'ledger', 'dusk'] as never)).toThrow(/exactly two/);
+    expect(() => checkThemePair(['night'] as never)).toThrow(/exactly two/);
+    expect(() => checkThemePair('night,ledger' as never)).toThrow(/exactly two/);
+  });
+
+  it('refuses a name the system only inherits', () => {
+    expect(() => checkThemePair(['night', 'toString'] as never)).toThrow(/unknown theme/);
+    expect(() => checkThemePair(['constructor', 'ledger'] as never)).toThrow(/unknown theme/);
+  });
 });
 
 describe('the theme `system` gives', () => {
