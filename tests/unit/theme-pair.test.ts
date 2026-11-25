@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkThemePair, defaultThemePair, isOffered, systemThemeFor } from '../../src/theme/themePair';
+import { checkThemePair, defaultThemePair, isOffered, resolveChoice, resolveTheme, systemThemeFor } from '../../src/theme/themePair';
 
 describe('a pair of themes', () => {
   it('defaults to night and tidewater', () => {
@@ -45,5 +45,43 @@ describe('which themes are on offer', () => {
     expect(isOffered(['night', 'ledger'], 'tidewater')).toBe(false);
     expect(isOffered(['night', 'ledger'], 'system')).toBe(false);
     expect(isOffered(['night', 'ledger'], null)).toBe(false);
+  });
+});
+
+describe('the choice in force', () => {
+  const pair = ['night', 'ledger'] as const;
+
+  it('keeps a choice that is on offer, and `system`', () => {
+    expect(resolveChoice(pair, 'ledger', 'night')).toBe('ledger');
+    expect(resolveChoice(pair, 'system', 'night')).toBe('system');
+  });
+
+  it('gives way to a valid default when the choice is not on offer', () => {
+    // The stored choice was tidewater; the pair is now night and ledger.
+    expect(resolveChoice(pair, 'tidewater', 'night')).toBe('night');
+    expect(resolveChoice(pair, null, 'ledger')).toBe('ledger');
+  });
+
+  it('falls back to system when neither the choice nor the default is on offer', () => {
+    expect(resolveChoice(pair, 'tidewater', 'tidewater')).toBe('system');
+    expect(resolveChoice(pair, 'dusk', undefined)).toBe('system');
+  });
+});
+
+describe('the theme in force', () => {
+  const pair = ['night', 'ledger'] as const;
+
+  it('is the forced theme when it is one of the pair', () => {
+    expect(resolveTheme(pair, 'ledger', 'night', true)).toBe('ledger');
+  });
+
+  it('refuses a forced theme outside the pair', () => {
+    expect(() => resolveTheme(pair, 'tidewater', 'system', false)).toThrow(/not one of themes/);
+  });
+
+  it('follows the choice, or the colour preference for system', () => {
+    expect(resolveTheme(pair, undefined, 'ledger', true)).toBe('ledger');
+    expect(resolveTheme(pair, undefined, 'system', true)).toBe('night');
+    expect(resolveTheme(pair, undefined, 'system', false)).toBe('ledger');
   });
 });

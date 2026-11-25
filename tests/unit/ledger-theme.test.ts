@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 // @ts-expect-error culori ships no type declarations
 import { converter } from 'culori';
 import { describe, expect, it } from 'vitest';
+import { contrastRatio } from '../../src/lib/colour';
 import { themePolarity } from '../../src/generated/tokens';
 
 const toOklch = converter('oklch');
@@ -27,9 +28,9 @@ describe('the ledger theme', () => {
     for (const role of roles) expect(known.has(role), role).toBe(true);
   });
 
-  it('passes every required contrast pair, with as many pairs as the other light theme', () => {
+  it('passes every required contrast pair: the other light theme\'s families plus the accent seed pair', () => {
     const required = matrix().filter((m) => m.theme === 'ledger' && m.required);
-    expect(required.length).toBe(matrix().filter((m) => m.theme === 'tidewater' && m.required).length);
+    expect(required.length).toBe(matrix().filter((m) => m.theme === 'tidewater' && m.required).length + 1);
     expect(required.filter((m) => !m.pass)).toEqual([]);
   });
 
@@ -38,6 +39,14 @@ describe('the ledger theme', () => {
     expect(ratio('text-primary on surface-base')).toBeGreaterThanOrEqual(7);
     expect(ratio('text-secondary on surface-base')).toBeGreaterThanOrEqual(4.5);
     expect(ratio('text-muted on surface-base')).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('checks the accent seed against the canvas, so changing the seed cannot lower the pair unnoticed', () => {
+    const pair = matrix().find((m) => m.theme === 'ledger' && m.pair === 'accent-fill on surface-base');
+    expect(pair).toMatchObject({ required: true, target: 4.6, pass: true });
+    expect(contrastRatio(seeds.ledger['accent-fill'].$value, seeds.ledger['surface-base'].$value)).toBeGreaterThanOrEqual(4.6);
+    // Only ledger carries the rule; the other themes' accents are not held to it.
+    expect(matrix().some((m) => m.theme !== 'ledger' && m.pair === 'accent-fill on surface-base')).toBe(false);
   });
 
   it('keeps the accent and the secondary accent at least 45 degrees from both signals', () => {
