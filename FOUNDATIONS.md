@@ -731,7 +731,8 @@ every theme; each theme chooses its lightness and chroma.
 
 1. *Hues, shared by all themes.* Candidates are every hue in 3° steps outside the reserved
    zones of every theme (so a hue is allowed only if it is allowed everywhere). Slot 1 is the
-   candidate nearest the mean accent hue, so the first series is the brand colour. Each next
+   candidate nearest the mean accent hue of the first two themes (`night` and `tidewater`), so the first
+   series is the brand colour and a theme added later does not move the shared palette. Each next
    slot takes the candidate whose smallest hue distance to the slots already chosen is
    largest. The first four slots must differ in hue by at least `D` (45°), the same half-width
    that protects the signals, so the four slots most used are separable by hue and not only by
