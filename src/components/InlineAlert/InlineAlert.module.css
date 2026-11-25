@@ -48,3 +48,18 @@
 .error .title {
   color: var(--syn-color-signal-negative-text);
 }
+
+/* A page-level notice spans its container edge to edge, without the rounded corners of one inside a card. */
+.page {
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 0;
+}
+
+.actions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--syn-space-2);
+}
