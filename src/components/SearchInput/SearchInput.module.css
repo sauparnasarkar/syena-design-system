@@ -1,0 +1,58 @@
+.field {
+  min-width: var(--syn-layout-field-min);
+}
+
+.field:focus-within {
+  outline: var(--syn-layout-focus-ring-width) solid var(--syn-color-focus-ring);
+  outline-offset: var(--syn-layout-focus-ring-width);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  appearance: none;
+}
+
+.input::placeholder {
+  color: var(--syn-color-text-muted);
+}
+
+.input::-webkit-search-cancel-button,
+.input::-webkit-search-decoration {
+  appearance: none;
+}
+
+.clear {
+  display: inline-grid;
+  place-items: center;
+  margin: 0;
+  padding: var(--syn-space-1);
+  border: 0;
+  border-radius: var(--syn-radius-control);
+  background: transparent;
+  color: var(--syn-color-text-muted);
+  cursor: pointer;
+}
+
+.clear:hover {
+  background: var(--syn-color-surface-sunken);
+}
+
+.clear:focus-visible {
+  outline: var(--syn-layout-focus-ring-width) solid var(--syn-color-focus-ring);
+}
+
+/* A touch browser zooms the page when a field under sixteen pixels takes focus: type on touch is the text-lg step. */
+@media (pointer: coarse) {
+  .input {
+    font-size: var(--syn-type-text-lg-size);
+    line-height: var(--syn-type-text-lg-line);
+  }
+}

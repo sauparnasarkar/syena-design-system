@@ -35,6 +35,11 @@ export { Radio, RadioGroup, type RadioProps, type RadioGroupProps, type RadioGro
 export { Slider, type SliderProps } from './components/Slider/Slider';
 export { RangeSlider, type RangeSliderProps } from './components/RangeSlider/RangeSlider';
 export { PromptBar, type PromptBarProps } from './components/PromptBar/PromptBar';
+export { Tabs, tabId, panelId, type TabItem, type TabsProps } from './components/Tabs/Tabs';
+export { Chip, type ChipProps } from './components/Chip/Chip';
+export { SearchInput, type SearchInputProps } from './components/SearchInput/SearchInput';
+export { Toggle, type ToggleProps } from './components/Toggle/Toggle';
+export { Pagination, type PaginationProps } from './components/Pagination/Pagination';
 export { Card, type CardProps } from './components/Card/Card';
 export { CardHeader, type CardHeaderProps } from './components/CardHeader/CardHeader';
 export { Tile, type TileProps } from './components/Tile/Tile';

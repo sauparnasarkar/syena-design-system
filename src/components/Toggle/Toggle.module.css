@@ -1,0 +1,123 @@
+.toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--syn-space-3);
+  color: var(--syn-color-text-secondary);
+  font: var(--syn-type-text-md-weight) var(--syn-type-text-md-size) / var(--syn-type-text-md-line) var(--syn-type-text-md-family);
+  cursor: pointer;
+}
+
+.input {
+  position: absolute;
+  inset-inline-start: 0;
+  width: var(--syn-space-8);
+  height: var(--syn-space-6);
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.track {
+  display: flex;
+  flex: none;
+  align-items: center;
+  box-sizing: border-box;
+  width: var(--syn-space-8);
+  height: var(--syn-space-6);
+  padding: var(--syn-layout-focus-ring-width);
+  border: var(--syn-layout-border-hairline) solid var(--syn-color-border-emphasis);
+  border-radius: var(--syn-radius-pill);
+  background: var(--syn-color-surface-base);
+}
+
+.thumb {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: calc(var(--syn-space-6) - 2 * var(--syn-layout-focus-ring-width) - 2 * var(--syn-layout-border-hairline));
+  height: calc(var(--syn-space-6) - 2 * var(--syn-layout-focus-ring-width) - 2 * var(--syn-layout-border-hairline));
+  border-radius: var(--syn-radius-pill);
+  background: var(--syn-color-border-emphasis);
+}
+
+/* On is a filled track, the thumb at the far end, and a check mark: never colour alone. */
+.input:checked + .track {
+  justify-content: flex-end;
+  border-color: var(--syn-color-accent-fill);
+  background: var(--syn-color-accent-fill);
+}
+
+.input:checked + .track .thumb {
+  background: var(--syn-color-surface-base);
+  color: var(--syn-color-accent-text);
+}
+
+.input:focus-visible + .track {
+  outline: var(--syn-layout-focus-ring-width) solid var(--syn-color-focus-ring);
+  outline-offset: var(--syn-layout-focus-ring-width);
+}
+
+.toggle:hover .input:not(:disabled):not(:checked) + .track {
+  background: var(--syn-color-surface-sunken);
+}
+
+.toggle:hover .input:not(:disabled):checked + .track {
+  border-color: var(--syn-color-accent-hover);
+  background: var(--syn-color-accent-hover);
+}
+
+.text {
+  display: grid;
+  gap: var(--syn-space-1);
+  min-width: 0;
+  padding-block: calc((var(--syn-space-6) - var(--syn-type-text-md-line)) / 2);
+}
+
+.small .input,
+.small .track {
+  width: var(--syn-space-7);
+  height: var(--syn-space-5);
+}
+
+.small .thumb {
+  width: calc(var(--syn-space-5) - 2 * var(--syn-layout-focus-ring-width) - 2 * var(--syn-layout-border-hairline));
+  height: calc(var(--syn-space-5) - 2 * var(--syn-layout-focus-ring-width) - 2 * var(--syn-layout-border-hairline));
+}
+
+.small .text {
+  padding-block: calc((var(--syn-space-5) - var(--syn-type-text-md-line)) / 2);
+}
+
+.description {
+  color: var(--syn-color-text-muted);
+  font: var(--syn-type-caption-weight) var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-type-caption-family);
+}
+
+.disabled {
+  color: var(--syn-color-text-disabled);
+  cursor: default;
+}
+
+.disabled .track {
+  border-color: var(--syn-color-border-subtle);
+  background: transparent;
+}
+
+.disabled .thumb {
+  background: var(--syn-color-border-subtle);
+}
+
+.disabled .input:checked + .track {
+  border-color: var(--syn-color-border-subtle);
+  background: var(--syn-color-border-subtle);
+}
+
+.disabled .input:checked + .track .thumb {
+  background: transparent;
+  color: var(--syn-color-text-disabled);
+}
+
+.disabled .description {
+  color: var(--syn-color-text-disabled);
+}
