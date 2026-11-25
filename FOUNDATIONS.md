@@ -731,7 +731,8 @@ every theme; each theme chooses its lightness and chroma.
 
 1. *Hues, shared by all themes.* Candidates are every hue in 3° steps outside the reserved
    zones of every theme (so a hue is allowed only if it is allowed everywhere). Slot 1 is the
-   candidate nearest the mean accent hue, so the first series is the brand colour. Each next
+   candidate nearest the mean accent hue of the first two themes (`night` and `tidewater`), so the first
+   series is the brand colour and a theme added later does not move the shared palette. Each next
    slot takes the candidate whose smallest hue distance to the slots already chosen is
    largest. The first four slots must differ in hue by at least `D` (45°), the same half-width
    that protects the signals, so the four slots most used are separable by hue and not only by
@@ -1882,7 +1883,7 @@ with named values; there are no colour-named variants.
 
 #### Tooltip
 
-- **Purpose and props.** A short explanation of a term or figure, shown on hover and keyboard focus. Props: `label`, `placement` (`top` by default), `delay` and `children` (one focusable element). It positions with `Popover` (§5.7).
+- **Purpose and props.** A short explanation of a term or figure, shown on hover and keyboard focus. Props: `label`, `placement` (`top` by default), `delay` and `children` (one focusable element). It uses the placement helper that `Popover` uses, and is not itself a dialog: it never takes focus and has no close button.
 - **Anatomy.** A small bubble in `surface-inverse` with `text-inverse` in `text-sm`, with an arrow and a maximum width. It never holds interactive content.
 - **States.** Opens on hover after `motion-base` and at once on focus; closes on Escape, on blur and when the pointer leaves; the pointer can move onto the bubble without closing it. Under reduced motion it appears without a transition.
 - **Tokens.** `surface-inverse`, `text-inverse`, `radius-control`, `elevation-2`, `layer-overlay`.
@@ -2131,7 +2132,7 @@ with named values; there are no colour-named variants.
 The provider also takes `themes`: the two themes the product offers, one dark and one light. It defaults to `night` and `tidewater`. A product that uses `ledger` passes `night` and `ledger`. The `theme` and `defaultChoice` props accept the name of either offered theme in place of the fixed `night` or `tidewater`.
 
 - **Choice.** `system` follows the system colour preference live: dark gives the offered dark theme and light gives the offered light theme. `ThemeSwitch` lists the offered themes by name.
-- **Remembering.** Each product passes its own `storageKey`. A stored value that is not one of the offered themes is ignored, as if nothing had been stored, and is neither read as a choice nor rewritten until the reader chooses.
+- **Remembering.** Each product passes its own `storageKey`. A stored value that is neither `system` nor one of the offered themes is ignored, as if nothing had been stored, and is neither read as a choice nor rewritten until the reader chooses.
 - **Theme in force.** `useSynTheme()` returns the theme in force from the offered pair; `useResolvedToken` and `resolveToken` are unchanged.
 
 ---
