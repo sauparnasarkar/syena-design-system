@@ -503,7 +503,7 @@ The `ledger` seeds are listed below. Every other `ledger` colour is derived by t
 
 On `surface-base` the text seeds measure 16.35:1 for `text-primary` (target 7:1), 10.58:1 for `text-secondary` (target 4.5:1) and 4.81:1 for `text-muted` (target 4.5:1).
 
-The accent is the colour at OKLCH chroma 0.15 (clamped to the gamut) and a stated hue, at the lightest lightness where white text on the fill and the fill as text on the canvas both reach at least 4.6:1. Its hue is about 262°, which is 106° from the positive signal, 128° from the negative signal and about 36° from the `tidewater` accent hue. As text on the canvas it reaches 4.63:1, the smallest margin of any `ledger` pair family, so the generator's check on this pair is required and is never relaxed.
+The accent is the colour at OKLCH chroma 0.15 (clamped to the gamut) and a stated hue, at the lightest lightness where white text on the fill and the fill as text on the canvas both reach at least 4.6:1. Its hue is about 262°, which is 106° from the positive signal, 128° from the negative signal and about 36° from the `tidewater` accent hue. As text on the canvas it reaches 4.63:1. The generator checks this pair (`accent-fill` on `surface-base`, at least 4.6:1) for `ledger`, so a change to the seed cannot lower it unnoticed.
 
 
 ### 3.3 Ramps
@@ -1680,7 +1680,7 @@ with named values; there are no colour-named variants.
 
 #### Tooltip
 
-- **Purpose and props.** A short explanation of a term or figure, shown on hover and keyboard focus. Props: `label`, `placement` (`top` by default), `delay` and `children` (one focusable element). It uses the placement helper that `Popover` uses, and is not itself a dialog: it never takes focus and has no close button.
+- **Purpose and props.** A short explanation of a term or figure, shown on hover and keyboard focus. Props: `label`, `placement` (`top` by default), `delay` and `children` (one focusable element that exists to carry the explanation, such as an info icon or a focusable term, and not a control that acts or navigates). It uses the placement helper that `Popover` uses, and is not itself a dialog: it never takes focus and has no close button.
 - **Anatomy.** A small bubble in `surface-inverse` with `text-inverse` in `text-sm`, with an arrow and a maximum width. It never holds interactive content.
 - **States.** Opens on hover after `motion-base` and at once on focus; closes on Escape, on blur and when the pointer leaves; the pointer can move onto the bubble without closing it. Under reduced motion it appears without a transition.
 - **Tokens.** `surface-inverse`, `text-inverse`, `radius-control`, `elevation-2`, `layer-overlay`.
