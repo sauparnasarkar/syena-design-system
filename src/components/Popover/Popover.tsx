@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type 
 import { createPortal } from 'react-dom';
 import { useOptionalSynTheme } from '../../theme/SynThemeProvider';
 import { Button } from '../Button/Button';
+import { useDialogOwner } from '../Modal/dialogOwner';
 import { Text } from '../Text/Text';
 import { placePopover, type PopoverAlign, type PopoverPlacement, type PopoverSide } from './position';
 import styles from './Popover.module.css';
@@ -54,6 +55,7 @@ export function Popover({ trigger, title, children, side = 'bottom', align = 'en
   const panelId = useId();
   const titleId = useId();
   const theme = useOptionalSynTheme();
+  const owner = useDialogOwner();
 
   const setOpen = useCallback((next: boolean) => {
     if (controlled === undefined) setOwn(next);
@@ -149,7 +151,8 @@ export function Popover({ trigger, title, children, side = 'bottom', align = 'en
   }, [open, close, triggerEl]);
 
   const panel = open ? (
-    <div data-syn-theme={theme?.theme} style={{ display: 'contents' }}>
+    // data-syn-owner: a popover opened from inside a dialog belongs to it, so it stays usable while the page behind the dialog is inert.
+    <div data-syn-theme={theme?.theme} data-syn-owner={owner ?? undefined} style={{ display: 'contents' }}>
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
       <div
         ref={panelRef}

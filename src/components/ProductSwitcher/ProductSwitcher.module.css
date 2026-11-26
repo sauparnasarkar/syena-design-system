@@ -1,0 +1,119 @@
+.switcher {
+  display: flex;
+  min-width: 0;
+}
+
+.trigger {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--syn-space-2);
+  min-width: 0;
+  min-height: var(--syn-layout-control-height);
+  margin: 0;
+  padding: var(--syn-space-1) var(--syn-space-2);
+  border: var(--syn-layout-border-hairline) solid transparent;
+  border-radius: var(--syn-radius-control);
+  background: transparent;
+  color: var(--syn-color-text-secondary);
+  font: var(--syn-type-text-md-weight) var(--syn-type-text-md-size) / var(--syn-type-text-md-line) var(--syn-type-text-md-family);
+  letter-spacing: var(--syn-type-text-md-tracking);
+  text-align: start;
+  cursor: pointer;
+}
+
+.collapsed {
+  justify-content: center;
+}
+
+.trigger:hover {
+  background: var(--syn-color-surface-sunken);
+}
+
+.trigger:focus-visible,
+.tile:focus-visible {
+  outline: var(--syn-layout-focus-ring-width) solid var(--syn-color-focus-ring);
+  outline-offset: calc(-1 * var(--syn-layout-focus-ring-width));
+}
+
+.trigger[aria-expanded='true'] {
+  border-color: var(--syn-color-border-emphasis);
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The popover's class supplies the surface and no top padding, for its pinned header: the content carries its own. */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--syn-space-3);
+  padding-top: var(--syn-space-4);
+}
+
+.panel {
+  /* The scrollbar's room is part of the panel's width whether or not it is showing, so measuring the panel without its height limit gives the width it will have with it. */
+  scrollbar-gutter: stable;
+}
+
+.grid {
+  display: grid;
+  gap: var(--syn-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--syn-space-1);
+  min-height: var(--syn-layout-control-height-touch);
+  padding: var(--syn-space-2);
+  border: var(--syn-layout-border-hairline) solid var(--syn-color-border-subtle);
+  border-radius: var(--syn-radius-control);
+  color: var(--syn-color-text-secondary);
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+  text-align: center;
+  text-decoration: none;
+}
+
+.tile:hover {
+  border-color: var(--syn-color-border-emphasis);
+  background: var(--syn-color-surface-sunken);
+}
+
+/* The current product is marked with a check and a heavier name: never colour alone. */
+.tile[aria-current='true'] {
+  border-color: var(--syn-color-accent-fill);
+  background: var(--syn-color-accent-tint);
+  color: var(--syn-color-accent-text);
+  font-weight: 600;
+}
+
+.check {
+  position: absolute;
+  top: var(--syn-space-1);
+  inset-inline-end: var(--syn-space-1);
+}
+
+.tileMark {
+  display: flex;
+}
+
+.tileName {
+  overflow-wrap: anywhere;
+}
+
+.message {
+  margin: 0;
+  color: var(--syn-color-text-muted);
+  font: var(--syn-type-caption-weight) var(--syn-type-caption-size) / var(--syn-type-caption-line) var(--syn-type-caption-family);
+}

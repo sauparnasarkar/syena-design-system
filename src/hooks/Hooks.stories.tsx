@@ -4,6 +4,7 @@ import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { breakpointPx } from '../generated/tokens';
 import { scrollToJumpTarget } from '../lib/scrollToJumpTarget';
 import { useFocusTrap } from './useFocusTrap';
+import { useScrollLock } from './useScrollLock';
 import { useIsMobile } from './useIsMobile';
 import { useReducedMotion } from './useReducedMotion';
 import { useWidth } from './useWidth';
@@ -163,5 +164,116 @@ export const JumpLandsBelowTheStickyBarAndMovesFocus: Story = {
     // Keyboard and screen-reader users arrive there too.
     await expect(target).toHaveFocus();
     await expect(target).toHaveAttribute('tabindex', '-1');
+  },
+};
+
+function NestedTraps({ log }: { log: string[] }) {
+  const [outer, setOuter] = useState(false);
+  const [inner, setInner] = useState(false);
+  const outerPanel = useRef<HTMLDivElement>(null);
+  const innerPanel = useRef<HTMLDivElement>(null);
+  useFocusTrap(outerPanel, outer, () => { log.push('outer'); setOuter(false); });
+  useFocusTrap(innerPanel, inner, () => { log.push('inner'); setInner(false); });
+  return (
+    <div>
+      <button type="button" onClick={() => setOuter(true)}>Open outer</button>
+      {outer ? (
+        <div ref={outerPanel} role="dialog" aria-label="Outer" tabIndex={-1}>
+          <button type="button" onClick={() => setInner(true)}>Open inner</button>
+          <button type="button">Outer last</button>
+        </div>
+      ) : null}
+      {inner ? (
+        <div ref={innerPanel} role="dialog" aria-label="Inner" tabIndex={-1}>
+          <button type="button">Inner first</button>
+          <button type="button">Inner last</button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export const OnlyTheTopmostTrapAnswersTheKeyboard: Story = {
+  render: () => <NestedTraps log={[]} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Open outer' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Open inner' }));
+    await expect(canvas.getByRole('button', { name: 'Inner first' })).toHaveFocus();
+    // Tab wraps inside the inner trap, not the outer one.
+    await userEvent.tab({ shift: true });
+    await expect(canvas.getByRole('button', { name: 'Inner last' })).toHaveFocus();
+    // One Escape closes the inner trap only; the outer stays, and focus returns to what opened the inner one.
+    await userEvent.keyboard('{Escape}');
+    await expect(canvas.queryByRole('dialog', { name: 'Inner' })).toBeNull();
+    await expect(canvas.getByRole('dialog', { name: 'Outer' })).toBeInTheDocument();
+    await expect(canvas.getByRole('button', { name: 'Open inner' })).toHaveFocus();
+  },
+};
+
+function TwoLockedPanels() {
+  const first = useRef<HTMLDivElement>(null);
+  const second = useRef<HTMLDivElement>(null);
+  useScrollLock(first, true);
+  useScrollLock(second, true);
+  const tall = { height: '6rem', overflowY: 'auto' } as const;
+  return (
+    <div>
+      <div ref={first} aria-label="First panel" role="group" style={tall}><div style={{ height: '30rem' }}>First content</div></div>
+      <div ref={second} aria-label="Second panel" role="group" style={tall}><div style={{ height: '30rem' }}>Second content</div></div>
+      <p>Outside</p>
+    </div>
+  );
+}
+
+export const EveryLockedPanelMayScrollOnTouch: Story = {
+  render: () => <TwoLockedPanels />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const drag = (target: Element) => {
+      const touch = (y: number) => new Touch({ identifier: 1, target, clientX: 10, clientY: y });
+      document.dispatchEvent(new TouchEvent('touchstart', { touches: [touch(100)], bubbles: true }));
+      const move = new TouchEvent('touchmove', { touches: [touch(80)], bubbles: true, cancelable: true });
+      target.dispatchEvent(move);
+      return move.defaultPrevented;
+    };
+    // A finger moving up scrolls the panel down: allowed in each locked panel, not only the first to ask for the lock.
+    await expect(drag(canvas.getByText('First content'))).toBe(false);
+    await expect(drag(canvas.getByText('Second content'))).toBe(false);
+    await expect(drag(canvas.getByText('Outside'))).toBe(true);
+  },
+};
+
+function TrapWithAHiddenLastControl() {
+  const box = useRef<HTMLDivElement>(null);
+  const [on, setOn] = useState(false);
+  useFocusTrap(box, on);
+  return (
+    <div>
+      <button type="button" onClick={() => setOn(true)}>Open</button>
+      {on ? (
+        <div ref={box} role="dialog" aria-label="Trap">
+          <h2 tabIndex={-1}>Title</h2>
+          <button type="button">First</button>
+          <button type="button">Last visible</button>
+          <fieldset disabled><button type="button">In a disabled group</button></fieldset>
+          <div hidden><button type="button">Hidden</button></div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export const AControlInHiddenContentIsNotATabStop: Story = {
+  render: () => <TrapWithAHiddenLastControl />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Open' }));
+    canvas.getByRole('heading', { name: 'Title' }).focus();
+    // Back from the title wraps to the last control that can be reached, not to one that is hidden.
+    await userEvent.tab({ shift: true });
+    await expect(canvas.getByRole('button', { name: 'Last visible' })).toHaveFocus();
+    await userEvent.tab();
+    await expect(canvas.getByRole('button', { name: 'First' })).toHaveFocus();
   },
 };
