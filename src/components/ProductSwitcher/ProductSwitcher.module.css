@@ -56,6 +56,11 @@
   padding-top: var(--syn-space-4);
 }
 
+.panel {
+  /* The scrollbar's room is part of the panel's width whether or not it is showing, so measuring the panel without its height limit gives the width it will have with it. */
+  scrollbar-gutter: stable;
+}
+
 .grid {
   display: grid;
   gap: var(--syn-space-2);

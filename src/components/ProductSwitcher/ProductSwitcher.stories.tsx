@@ -292,6 +292,8 @@ export const AScrollbarDoesNotNarrowTheTiles: Story = {
     await new Promise((resolve) => setTimeout(resolve, 300));
     const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
     const widest = Math.min(...within(panel).getAllByRole('link').map((link) => link.getBoundingClientRect().width));
+    await expect(getComputedStyle(panel).scrollbarGutter).toContain('stable');
+    await expect(panel.getBoundingClientRect().right).toBeLessThanOrEqual(window.innerWidth);
     // Every tile keeps at least the width the stylesheet gives it, whatever the scrollbar takes.
     await expect(widest).toBeGreaterThanOrEqual(5 * rem - 1);
   },
