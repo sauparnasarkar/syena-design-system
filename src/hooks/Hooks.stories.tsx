@@ -77,11 +77,11 @@ function Trap({ onEscape }: { onEscape: () => void }) {
 }
 
 /** A trap whose owner re-renders while it is open (a counter inside the dialog), passing a NEW onEscape each render, as a shell does when the page it hosts changes. */
-function TrapThatReRenders({ onEscape }: { onEscape: () => void }) {
+function TrapThatReRenders({ onEscape }: { onEscape: (count: number) => void }) {
   const [open, setOpen] = useState(false);
   const [count, setCount] = useState(0);
   const panel = useRef<HTMLDivElement>(null);
-  useFocusTrap(panel, open, () => { onEscape(); setOpen(false); });
+  useFocusTrap(panel, open, () => { onEscape(count); setOpen(false); }); // closes over this render's count, so a stale handler reports an old one
   return (
     <div>
       <button type="button" onClick={() => setOpen(true)}>Open</button>
@@ -96,7 +96,7 @@ function TrapThatReRenders({ onEscape }: { onEscape: () => void }) {
   );
 }
 
-export const FocusTrapLeavesFocusAloneWhenItsOwnerReRenders: StoryObj<{ onEscape: () => void }> = {
+export const FocusTrapLeavesFocusAloneWhenItsOwnerReRenders: StoryObj<{ onEscape: (count: number) => void }> = {
   args: { onEscape: fn() },
   render: (args) => <TrapThatReRenders onEscape={args.onEscape} />,
   play: async ({ canvasElement, args }) => {
@@ -112,6 +112,7 @@ export const FocusTrapLeavesFocusAloneWhenItsOwnerReRenders: StoryObj<{ onEscape
     await expect(canvas.getByRole('button', { name: 'Count 2' })).toHaveFocus();
     await userEvent.keyboard('{Escape}'); // Escape still reaches the latest handler, and closing still gives focus back
     await expect(args.onEscape).toHaveBeenCalledTimes(1);
+    await expect(args.onEscape).toHaveBeenCalledWith(2); // the handler of the latest render (count 2), not the one from when the trap opened (0)
     await waitFor(() => expect(open).toHaveFocus());
   },
 };
