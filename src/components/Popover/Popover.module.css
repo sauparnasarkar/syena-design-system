@@ -13,7 +13,7 @@
   padding: 0 var(--syn-space-5) calc(var(--syn-space-4) + env(safe-area-inset-bottom, 0px));
   border: var(--syn-layout-border-hairline) solid var(--syn-color-border-default);
   border-radius: var(--syn-radius-card);
-  background: var(--syn-color-surface-raised);
+  background: var(--syn-color-surface-overlay);
   color: var(--syn-color-text-secondary);
   box-shadow: var(--syn-elevation-3);
 }
@@ -28,7 +28,7 @@
   top: 0;
   z-index: 1;
   padding-block: var(--syn-space-4) var(--syn-space-2);
-  background: var(--syn-color-surface-raised);
+  background: var(--syn-color-surface-overlay);
   display: flex;
   align-items: center;
   justify-content: space-between;

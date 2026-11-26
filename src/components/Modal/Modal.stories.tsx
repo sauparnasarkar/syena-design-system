@@ -343,3 +343,17 @@ export const APopoverOpenedInsideADialogIsLiveAndAboveTheScrim: Story = {
     await expect(panel.contains(document.elementFromPoint(box.left + box.width / 2, box.top + 8))).toBe(true);
   },
 };
+
+export const TheDialogTakesTheOverlaySurfaceInNight: Story = {
+  globals: { theme: 'night' },
+  render: () => <Demo />,
+  play: async ({ canvasElement }) => {
+    const dialog = await open(canvasElement);
+    const probe = document.createElement('div');
+    probe.style.background = 'var(--syn-color-surface-overlay)';
+    document.body.appendChild(probe);
+    const overlay = getComputedStyle(probe).backgroundColor;
+    probe.remove();
+    await expect(getComputedStyle(dialog).backgroundColor).toBe(overlay);
+  },
+};
