@@ -167,3 +167,17 @@ export const OnATouchDeviceActionsKeepTheTouchMinimum: Story = {
     await expect(coarseStyle(button)?.getPropertyValue('min-height')).toContain('--syn-layout-control-height-touch');
   },
 };
+
+export const AnUnbrokenLongWordInAnActionStaysInsideItsButton: Story = {
+  render: () => (
+    <div data-syn-frame style={{ width: '14rem' }}>
+      <InlineAlert placement="page" actions={<Button size="small">Donaudampfschifffahrtsgesellschaftskapitaen</Button>}>Notice.</InlineAlert>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button');
+    const frame = canvasElement.querySelector('[data-syn-frame]') as HTMLElement;
+    await expect(button.getBoundingClientRect().right).toBeLessThanOrEqual(frame.getBoundingClientRect().right + 1);
+    await expect(button.scrollWidth).toBeLessThanOrEqual(button.clientWidth + 1);
+  },
+};

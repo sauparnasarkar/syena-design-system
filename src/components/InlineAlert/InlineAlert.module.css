@@ -82,6 +82,8 @@
   max-width: 100%;
   padding-block: var(--syn-space-1);
   white-space: normal;
+  /* An unbroken long word breaks inside the button rather than spilling out of it. */
+  overflow-wrap: anywhere;
   overflow: visible;
   text-align: start;
 }
