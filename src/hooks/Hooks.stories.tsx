@@ -76,6 +76,46 @@ function Trap({ onEscape }: { onEscape: () => void }) {
   );
 }
 
+/** A trap whose owner re-renders while it is open (a counter inside the dialog), passing a NEW onEscape each render, as a shell does when the page it hosts changes. */
+function TrapThatReRenders({ onEscape }: { onEscape: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [count, setCount] = useState(0);
+  const panel = useRef<HTMLDivElement>(null);
+  useFocusTrap(panel, open, () => { onEscape(); setOpen(false); });
+  return (
+    <div>
+      <button type="button" onClick={() => setOpen(true)}>Open</button>
+      {open ? (
+        <div ref={panel} role="dialog" aria-label="Trap" aria-modal="true" tabIndex={-1}>
+          <button type="button">First</button>
+          <button type="button" onClick={() => setCount((c) => c + 1)}>Count {count}</button>
+          <button type="button">Last</button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export const FocusTrapLeavesFocusAloneWhenItsOwnerReRenders: StoryObj<{ onEscape: () => void }> = {
+  args: { onEscape: fn() },
+  render: (args) => <TrapThatReRenders onEscape={args.onEscape} />,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const open = canvas.getByRole('button', { name: 'Open' });
+    await userEvent.click(open);
+    const first = await canvas.findByRole('button', { name: 'First' });
+    await waitFor(() => expect(first).toHaveFocus()); // opening takes focus: that is the trap's job
+    const count = canvas.getByRole('button', { name: /^Count/ });
+    await userEvent.click(count); // focus is on Count, and the owner re-renders with a new onEscape
+    await expect(canvas.getByRole('button', { name: 'Count 1' })).toHaveFocus(); // a change while it is open must not move focus back to the first control
+    await userEvent.click(canvas.getByRole('button', { name: 'Count 1' }));
+    await expect(canvas.getByRole('button', { name: 'Count 2' })).toHaveFocus();
+    await userEvent.keyboard('{Escape}'); // Escape still reaches the latest handler, and closing still gives focus back
+    await expect(args.onEscape).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(open).toHaveFocus());
+  },
+};
+
 export const FocusTrapKeepsTabInsideAndGivesFocusBack: StoryObj<{ onEscape: () => void }> = {
   args: { onEscape: fn() },
   render: (args) => <Trap onEscape={args.onEscape} />,
