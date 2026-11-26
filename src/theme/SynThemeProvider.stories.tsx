@@ -171,3 +171,32 @@ export const ChangingThePairAppliesAValidDefault: Story = {
     await expect(text(region, 'theme')).toBe('night');
   },
 };
+
+function PairAndStorage() {
+  const [pair, setPair] = useState<['night', 'ledger'] | ['night', 'tidewater']>(['night', 'ledger']);
+  return (
+    <>
+      <button type="button" onClick={() => setPair(['night', 'tidewater'])}>Offer tidewater</button>
+      <SynThemeProvider themes={pair} defaultChoice="night" storageKey="syn-story-restore" syncDocument={false}>
+        <Readout />
+      </SynThemeProvider>
+    </>
+  );
+}
+
+export const AStoredChoiceThatBecomesOfferedIsUsed: Story = {
+  render: () => <PairAndStorage />,
+  beforeEach: () => {
+    window.localStorage.setItem('syn-story-restore', 'tidewater');
+    return () => window.localStorage.removeItem('syn-story-restore');
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const region = canvas.getByRole('region', { name: 'Theme readout' });
+    // Not on offer at first: ignored, and the default applies.
+    await expect(text(region, 'choice')).toBe('night');
+    await userEvent.click(canvas.getByRole('button', { name: 'Offer tidewater' }));
+    // Now on offer: the stored choice applies.
+    await waitFor(() => expect(text(region, 'choice')).toBe('tidewater'));
+  },
+};

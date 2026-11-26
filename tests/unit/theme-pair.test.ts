@@ -96,3 +96,10 @@ describe('the theme in force', () => {
     expect(resolveTheme(pair, undefined, 'system', false)).toBe('ledger');
   });
 });
+
+describe('a pair that changes shape', () => {
+  it('is checked whatever its text form: two names that join the same are still two names', () => {
+    expect(() => checkThemePair(['night,ledger'] as never)).toThrow(/exactly two/);
+    expect(JSON.stringify(['night', 'ledger'])).not.toBe(JSON.stringify(['night,ledger']));
+  });
+});
