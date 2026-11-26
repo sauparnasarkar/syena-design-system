@@ -282,3 +282,17 @@ export const NeverMoreThanThreeAcross: Story = {
     await expect(tops[3]).toBeGreaterThan(tops[0]);
   },
 };
+
+export const AScrollbarDoesNotNarrowTheTiles: Story = {
+  args: { products: many, currentId: 'p0' },
+  decorators: [(Story) => <div style={{ position: 'fixed', left: 0, bottom: 0, width: '14rem', padding: 'var(--syn-space-5)' }}><Story /></div>],
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Product 1, switch product' }));
+    const panel = await within(canvasElement).findByRole('region', { name: 'Products' });
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const widest = Math.min(...within(panel).getAllByRole('link').map((link) => link.getBoundingClientRect().width));
+    // Every tile keeps at least the width the stylesheet gives it, whatever the scrollbar takes.
+    await expect(widest).toBeGreaterThanOrEqual(5 * rem - 1);
+  },
+};

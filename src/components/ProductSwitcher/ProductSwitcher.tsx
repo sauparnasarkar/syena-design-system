@@ -26,10 +26,10 @@ export interface ProductSwitcherProps {
   label?: string;
 }
 
-// In rem, the sizes the panel's stylesheet gives a tile, the gap between tiles and the panel's own side padding and border.
+// In rem, the sizes the panel's stylesheet gives a tile, the gap between tiles and the panel's own side padding and border, with room kept for a scrollbar that takes space.
 const TILE = 5;
 const TILE_GAP = 0.5;
-const PANEL_CHROME = 2 * 1.25 + 2 * 0.0625;
+const PANEL_CHROME = 2 * 1.25 + 2 * 0.0625 + 0.875;
 
 function tileColumns(count: number, room?: number) {
   const wanted = Math.max(1, Math.min(count, 3));
@@ -92,7 +92,7 @@ export function ProductSwitcher({ products, currentId, message, collapsed = fals
       </button>
       {open ? (
         // The panel takes the popover's surface, border and elevation by wearing its class, so the two stay the same.
-        <div ref={panel} id={panelId} role="region" aria-label={label} className={[popover.panel, styles.panel].join(' ')} style={{ width: `calc(${columns} * var(--syn-space-9) + ${columns - 1} * var(--syn-space-2) + 2 * var(--syn-space-5) + 2 * var(--syn-layout-border-hairline))`, maxWidth: placed ? `${placed.maxWidth}px` : undefined, top: placed?.top ?? 0, left: placed?.left ?? 0, maxHeight: placed ? placed.maxHeight : undefined, visibility: placed ? 'visible' : 'hidden' }}>
+        <div ref={panel} id={panelId} role="region" aria-label={label} className={[popover.panel, styles.panel].join(' ')} style={{ width: `calc(${columns} * var(--syn-space-9) + ${columns - 1} * var(--syn-space-2) + 2 * var(--syn-space-5) + 2 * var(--syn-layout-border-hairline) + var(--syn-space-4))`, maxWidth: placed ? `${placed.maxWidth}px` : undefined, top: placed?.top ?? 0, left: placed?.left ?? 0, maxHeight: placed ? placed.maxHeight : undefined, visibility: placed ? 'visible' : 'hidden' }}>
           <div className={styles.content}>
             <ul className={styles.grid} style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
               {products.map((product) => (
