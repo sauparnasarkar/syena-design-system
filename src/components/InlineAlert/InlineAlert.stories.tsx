@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
+import { Button } from '../Button/Button';
+import { coarseStyle } from '../storyHover';
 import { InlineAlert } from './InlineAlert';
 
 const meta: Meta<typeof InlineAlert> = { title: 'Feedback/InlineAlert', component: InlineAlert, decorators: [(Story) => <div style={{ padding: 'var(--syn-space-5)', width: 'min(100%, 48rem)' }}><Story /></div>] };
@@ -43,4 +45,139 @@ export const AllInTidewater: Story = {
 export const AllInNight: Story = {
   globals: { theme: 'night' },
   render: () => (<div style={{ display: 'grid', gap: 'var(--syn-space-3)' }}><InlineAlert title="Info">Default alert.</InlineAlert><InlineAlert variant="warning" title="Warning">Warning alert.</InlineAlert><InlineAlert variant="error" title="Error">Error alert.</InlineAlert></div>),
+};
+
+export const AllInLedger: Story = {
+  globals: { theme: 'ledger' },
+  render: () => (<div style={{ display: 'grid', gap: 'var(--syn-space-3)' }}><InlineAlert title="Info">Default alert.</InlineAlert><InlineAlert variant="warning" title="Warning">Warning alert.</InlineAlert><InlineAlert variant="error" title="Error">Error alert.</InlineAlert></div>),
+};
+
+export const PagePlacementRunsEdgeToEdgeWithoutRoundedCorners: Story = {
+  render: () => (
+    <div data-syn-frame style={{ width: '100%' }}>
+      <InlineAlert placement="page" variant="warning" title="Stale data">Figures were last updated three days ago.</InlineAlert>
+      <InlineAlert title="Inline">Inside a card.</InlineAlert>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const page = canvas.getByText(/Stale data/).closest('[role]') as HTMLElement;
+    const inline = canvas.getByText(/Inline/).closest('[role]') as HTMLElement;
+    await expect(getComputedStyle(page).borderTopLeftRadius).toBe('0px');
+    await expect(parseFloat(getComputedStyle(inline).borderTopLeftRadius)).toBeGreaterThan(0);
+    // It spans its container.
+    const frame = canvasElement.querySelector('[data-syn-frame]') as HTMLElement;
+    await expect(Math.round(page.getBoundingClientRect().width)).toBe(Math.round(frame.getBoundingClientRect().width));
+    // The announcement is the same as for an inline alert of that variant.
+    await expect(page).toHaveAttribute('role', 'status');
+  },
+};
+
+export const APageErrorIsStillAnnouncedAtOnce: Story = {
+  args: { placement: 'page', variant: 'error', title: 'Could not load', children: 'Try again in a moment.' },
+  play: async ({ canvasElement }) => { await expect(within(canvasElement).getByRole('alert')).toBeInTheDocument(); },
+};
+
+export const ActionsFollowTheMessage: Story = {
+  args: {
+    placement: 'page',
+    variant: 'warning',
+    children: 'A newer version is available.',
+    actions: (<><Button size="small" variant="secondary">Later</Button><Button size="small" variant="primary">Reload</Button></>),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const buttons = canvas.getAllByRole('button');
+    await expect(buttons.map((b) => b.textContent)).toEqual(['Later', 'Reload']);
+    // After the message in reading order.
+    const message = canvas.getByText('A newer version is available.');
+    await expect(message.compareDocumentPosition(buttons[0]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    await userEvent.tab();
+    await expect(buttons[0]).toHaveFocus();
+  },
+};
+
+const PageGallery = () => (
+  <div style={{ display: 'grid', gap: 'var(--syn-space-3)' }}>
+    <InlineAlert placement="page" title="Info">Page notice.</InlineAlert>
+    <InlineAlert placement="page" variant="warning" title="Warning" actions={<Button size="small">Review</Button>}>Page warning.</InlineAlert>
+    <InlineAlert placement="page" variant="error" title="Error" onDismiss={() => undefined}>Page error.</InlineAlert>
+  </div>
+);
+export const PageInNight: Story = { render: () => <PageGallery />, globals: { theme: 'night' } };
+export const PageInTidewater: Story = { render: () => <PageGallery />, globals: { theme: 'tidewater' } };
+export const PageInLedger: Story = { render: () => <PageGallery />, globals: { theme: 'ledger' } };
+
+export const ActionsWrapInANarrowContainerAndLeaveTheMessageReadable: Story = {
+  render: () => (
+    <div data-syn-frame style={{ width: '16rem' }}>
+      <InlineAlert placement="page" variant="warning" title="Update available" onDismiss={() => undefined} actions={<><Button size="small">Later</Button><Button size="small" variant="primary">Reload now</Button></>}>A newer version of this page is ready to load.</InlineAlert>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const alert = canvas.getByRole('status');
+    const message = canvas.getByText(/A newer version/);
+    await expect(message.getBoundingClientRect().width).toBeGreaterThan(120);
+    // Nothing spills out of the container.
+    await expect(alert.scrollWidth).toBeLessThanOrEqual(alert.clientWidth);
+    const frame = canvasElement.querySelector('[data-syn-frame]') as HTMLElement;
+    for (const button of canvas.getAllByRole('button')) await expect(button.getBoundingClientRect().right).toBeLessThanOrEqual(frame.getBoundingClientRect().right + 1);
+    // The actions sit below the message, not beside a message squeezed to nothing.
+    await expect(canvas.getByRole('button', { name: 'Reload now' }).getBoundingClientRect().top).toBeGreaterThanOrEqual(message.getBoundingClientRect().bottom - 1);
+  },
+};
+
+export const LongActionLabelsWrapRatherThanOverflow: Story = {
+  render: () => (
+    <div data-syn-frame style={{ width: '16rem' }}>
+      <InlineAlert placement="page" variant="warning" title="Changes pending" actions={<><Button size="small">Review changes</Button><Button size="small" variant="primary">Reload data</Button></>}>Some figures changed since you opened this page.</InlineAlert>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const frame = canvasElement.querySelector('[data-syn-frame]') as HTMLElement;
+    const edge = frame.getBoundingClientRect().right;
+    for (const button of canvas.getAllByRole('button')) await expect(button.getBoundingClientRect().right).toBeLessThanOrEqual(edge + 1);
+    const alert = canvas.getByRole('status');
+    await expect(alert.scrollWidth).toBeLessThanOrEqual(alert.clientWidth);
+  },
+};
+
+export const OneLongActionLabelIsShownInFullNotClipped: Story = {
+  render: () => (
+    <div data-syn-frame style={{ width: '16rem' }}>
+      <InlineAlert placement="page" variant="warning" title="Report ready" actions={<Button size="small">Download a complete copy of the report</Button>}>Your report has finished.</InlineAlert>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Download a complete copy of the report' });
+    // The whole label is inside the button: nothing is cut off horizontally or vertically.
+    await expect(button.scrollWidth).toBeLessThanOrEqual(button.clientWidth + 1);
+    await expect(button.scrollHeight).toBeLessThanOrEqual(button.clientHeight + 1);
+    const label = button.querySelector('span') as HTMLElement;
+    await expect(label.getBoundingClientRect().right).toBeLessThanOrEqual(button.getBoundingClientRect().right + 1);
+  },
+};
+
+export const OnATouchDeviceActionsKeepTheTouchMinimum: Story = {
+  render: () => <InlineAlert placement="page" actions={<Button size="small">Review</Button>}>Notice.</InlineAlert>,
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Review' });
+    await expect(coarseStyle(button)?.getPropertyValue('min-height')).toContain('--syn-layout-control-height-touch');
+  },
+};
+
+export const AnUnbrokenLongWordInAnActionStaysInsideItsButton: Story = {
+  render: () => (
+    <div data-syn-frame style={{ width: '14rem' }}>
+      <InlineAlert placement="page" actions={<Button size="small">Donaudampfschifffahrtsgesellschaftskapitaen</Button>}>Notice.</InlineAlert>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button');
+    const frame = canvasElement.querySelector('[data-syn-frame]') as HTMLElement;
+    await expect(button.getBoundingClientRect().right).toBeLessThanOrEqual(frame.getBoundingClientRect().right + 1);
+    await expect(button.scrollWidth).toBeLessThanOrEqual(button.clientWidth + 1);
+  },
 };

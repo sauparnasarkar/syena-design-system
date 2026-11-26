@@ -48,3 +48,49 @@
 .error .title {
   color: var(--syn-color-signal-negative-text);
 }
+
+/* A page-level notice spans its container edge to edge, without the rounded corners of one inside a card. */
+.page {
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 0;
+}
+
+.actions {
+  display: flex;
+  /* It may shrink to the width the alert has, so long labels wrap onto a second row instead of overflowing. */
+  flex: 0 1 auto;
+  max-width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--syn-space-2);
+}
+
+/* With actions the row may wrap: the message keeps a readable width and the actions drop below it instead of squeezing it. */
+.hasActions {
+  flex-wrap: wrap;
+}
+
+.hasActions .message {
+  flex: 1 1 var(--syn-layout-field-min);
+}
+
+/* A long action label wraps inside its button instead of being clipped: the button grows in height and keeps its full text. */
+.actions button {
+  height: auto;
+  min-height: var(--syn-layout-control-height-sm);
+  max-width: 100%;
+  padding-block: var(--syn-space-1);
+  white-space: normal;
+  /* An unbroken long word breaks inside the button rather than spilling out of it. */
+  overflow-wrap: anywhere;
+  overflow: visible;
+  text-align: start;
+}
+
+/* The shared touch minimum is kept: this more specific rule must not lower it. */
+@media (pointer: coarse) {
+  .actions button {
+    min-height: var(--syn-layout-control-height-touch);
+  }
+}

@@ -46,6 +46,8 @@ export { Tile, type TileProps } from './components/Tile/Tile';
 export { Accordion, type AccordionItem, type AccordionProps } from './components/Accordion/Accordion';
 export { Tag, type TagColor, type TagProps } from './components/Tag/Tag';
 export { InlineAlert, type AlertVariant, type InlineAlertProps } from './components/InlineAlert/InlineAlert';
+export { EmptyState, type EmptyStateProps, type EmptyTone } from './components/EmptyState/EmptyState';
+export { Gauge, type GaugeProps } from './components/Gauge/Gauge';
 export { Spinner, type SpinnerProps } from './components/Spinner/Spinner';
 export { KpiStat, type KpiStatProps, type DeltaTone } from './components/KpiStat/KpiStat';
 export { Table, type TableProps, type TableColumn, type TableColumnGroup } from './components/Table/Table';
