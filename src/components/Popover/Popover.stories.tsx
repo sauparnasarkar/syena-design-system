@@ -228,30 +228,3 @@ export const OpenTidewater: Story = {
     await waitFor(() => expect(panel()).not.toBeNull());
   },
 };
-
-function TallContent() {
-  return (
-    <div style={{ position: 'fixed', left: 0, bottom: 0, padding: 'var(--syn-space-4)' }}>
-      <Popover title="Settings" side="right" align="end" trigger={(props) => <Button variant="ghost" icon="settings" aria-label="Settings" {...props} />}>
-        <div style={{ height: '200vh' }}>Content</div>
-      </Popover>
-    </div>
-  );
-}
-
-// Scrolling inside a panel that is held short keeps the place it was scrolled to: measuring it again does not send it back to the top.
-export const KeepsItsScrollPositionWhenScrolledInside: Story = {
-  render: () => <TallContent />,
-  play: async ({ canvasElement }) => {
-    await userEvent.click(trigger(canvasElement));
-    const dialog = await waitFor(() => { const d = panel(); if (!d) throw new Error('closed'); return d; });
-    await waitFor(() => expect(dialog.style.visibility).toBe('visible'));
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    await waitFor(() => expect(dialog.scrollHeight).toBeGreaterThan(dialog.clientHeight + 200));
-    dialog.scrollTop = 120;
-    // The scroll event arrives on the next frame; give it, and anything it sets off, time to run.
-    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    await expect(dialog.scrollTop).toBe(120);
-  },
-};

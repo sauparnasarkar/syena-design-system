@@ -243,3 +243,36 @@ export const EveryLockedPanelMayScrollOnTouch: Story = {
     await expect(drag(canvas.getByText('Outside'))).toBe(true);
   },
 };
+
+function TrapWithAHiddenLastControl() {
+  const box = useRef<HTMLDivElement>(null);
+  const [on, setOn] = useState(false);
+  useFocusTrap(box, on);
+  return (
+    <div>
+      <button type="button" onClick={() => setOn(true)}>Open</button>
+      {on ? (
+        <div ref={box} role="dialog" aria-label="Trap">
+          <h2 tabIndex={-1}>Title</h2>
+          <button type="button">First</button>
+          <button type="button">Last visible</button>
+          <div hidden><button type="button">Hidden</button></div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export const AControlInHiddenContentIsNotATabStop: Story = {
+  render: () => <TrapWithAHiddenLastControl />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Open' }));
+    canvas.getByRole('heading', { name: 'Title' }).focus();
+    // Back from the title wraps to the last control that can be reached, not to one that is hidden.
+    await userEvent.tab({ shift: true });
+    await expect(canvas.getByRole('button', { name: 'Last visible' })).toHaveFocus();
+    await userEvent.tab();
+    await expect(canvas.getByRole('button', { name: 'First' })).toHaveFocus();
+  },
+};

@@ -26,7 +26,8 @@ export function useFocusTrap(container: RefObject<HTMLElement | null>, active: b
     const id = Symbol('focus trap');
     openTraps.push(id);
     const previous = document.activeElement as HTMLElement | null;
-    const items = () => [...root.querySelectorAll<HTMLElement>(focusable)];
+    // Only controls that are rendered: one inside hidden content cannot take focus, and a wrap onto it would leave focus where it was.
+    const items = () => [...root.querySelectorAll<HTMLElement>(focusable)].filter((el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden');
     (items()[0] ?? root).focus();
     const onKey = (event: KeyboardEvent) => {
       if (openTraps[openTraps.length - 1] !== id) return;

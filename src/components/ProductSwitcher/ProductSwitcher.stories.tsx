@@ -218,3 +218,22 @@ export const EscapeClosesItWhateverHasFocusAsInABrowserThatDoesNotFocusAClickedB
     await expect(calls).toEqual([]);
   },
 };
+
+const many: ProductSwitcherProduct[] = Array.from({ length: 40 }, (_, n) => ({ id: `p${n}`, name: `Product ${n + 1}`, href: `#p${n}`, mark: mark(`Product ${n + 1}`, 'accent') }));
+
+// A list longer than the room it was placed in scrolls inside; scrolling it keeps its place instead of going back to the top.
+export const AHeldShortListKeepsItsScrollPosition: Story = {
+  args: { products: many, currentId: 'p0' },
+  decorators: [(Story) => <div style={{ position: 'fixed', left: 0, bottom: 0, width: '14rem', padding: 'var(--syn-space-5)' }}><Story /></div>],
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Product 1, switch product' }));
+    const panel = await within(canvasElement).findByRole('region', { name: 'Products' });
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    await waitFor(() => expect(panel.scrollHeight).toBeGreaterThan(panel.clientHeight + 200));
+    panel.scrollTop = 150;
+    // The scroll event arrives on the next frame; give it, and anything it sets off, time to run.
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    await expect(panel.scrollTop).toBe(150);
+  },
+};
