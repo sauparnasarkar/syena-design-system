@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 
 import { Icon } from '../Icon/Icon';
 import popover from '../Popover/Popover.module.css';
 import { useAnchoredPlacement } from '../Popover/useAnchoredPlacement';
+import { rootPx } from '../../generated/tokens';
 import { ProductMark, type ProductMarkSource } from '../ProductMark/ProductMark';
 import styles from './ProductSwitcher.module.css';
 
@@ -25,6 +26,19 @@ export interface ProductSwitcherProps {
   label?: string;
 }
 
+// In rem, the sizes the panel's stylesheet gives a tile, the gap between tiles and the panel's own side padding and border.
+const TILE = 5;
+const TILE_GAP = 0.5;
+const PANEL_CHROME = 2 * 1.25 + 2 * 0.0625;
+
+function tileColumns(count: number, room?: number) {
+  const wanted = Math.max(1, Math.min(count, 3));
+  if (room === undefined || typeof document === 'undefined') return wanted;
+  const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || rootPx;
+  const fit = Math.floor((room / rem - PANEL_CHROME + TILE_GAP) / (TILE + TILE_GAP));
+  return Math.max(1, Math.min(wanted, fit));
+}
+
 /** Moves between the products of one family. A disclosure: a button shows and hides a region of ordinary links. */
 export function ProductSwitcher({ products, currentId, message, collapsed = false, label = 'Products' }: ProductSwitcherProps) {
   const [open, setOpen] = useState(false);
@@ -32,9 +46,9 @@ export function ProductSwitcher({ products, currentId, message, collapsed = fals
   const panel = useRef<HTMLDivElement>(null);
   const panelId = useId();
   const current = products.find((product) => product.id === currentId) ?? products[0];
-  // Up to three tiles across; the panel is as wide as that many tiles need, and less where there is not the room, so the grid wraps instead.
-  const columns = Math.max(1, Math.min(products.length, 3));
   const placed = useAnchoredPlacement(trigger, panel, open, 'bottom', 'start');
+  // Up to three tiles across, fewer where the room is short: each tile keeps its full width, and the panel is exactly as wide as the columns need.
+  const columns = tileColumns(products.length, placed?.maxWidth);
 
   const close = useCallback((returnFocus = true) => {
     setOpen(false);
@@ -80,7 +94,7 @@ export function ProductSwitcher({ products, currentId, message, collapsed = fals
         // The panel takes the popover's surface, border and elevation by wearing its class, so the two stay the same.
         <div ref={panel} id={panelId} role="region" aria-label={label} className={[popover.panel, styles.panel].join(' ')} style={{ width: `calc(${columns} * var(--syn-space-9) + ${columns - 1} * var(--syn-space-2) + 2 * var(--syn-space-5) + 2 * var(--syn-layout-border-hairline))`, maxWidth: placed ? `${placed.maxWidth}px` : undefined, top: placed?.top ?? 0, left: placed?.left ?? 0, maxHeight: placed ? placed.maxHeight : undefined, visibility: placed ? 'visible' : 'hidden' }}>
           <div className={styles.content}>
-            <ul className={styles.grid}>
+            <ul className={styles.grid} style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
               {products.map((product) => (
                 <li key={product.id}>
                   <a href={product.href} className={styles.tile} aria-current={product.id === current.id ? 'true' : undefined}>

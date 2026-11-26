@@ -270,3 +270,15 @@ export const TilesKeepTheirColumnsAtASmallerRootSize: Story = {
     }
   },
 };
+
+export const NeverMoreThanThreeAcross: Story = {
+  args: { products: many.slice(0, 4), currentId: 'p0' },
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Product 1, switch product' }));
+    const region = within(canvasElement).getByRole('region', { name: 'Products' });
+    const tops = within(region).getAllByRole('link').map((link) => Math.round(link.getBoundingClientRect().top));
+    // Three in the first row, the fourth on the next.
+    await expect(tops.filter((top) => top === tops[0])).toHaveLength(3);
+    await expect(tops[3]).toBeGreaterThan(tops[0]);
+  },
+};

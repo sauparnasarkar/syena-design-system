@@ -58,8 +58,6 @@
 
 .grid {
   display: grid;
-  /* Tracks may be narrower than the room the panel is sized to give each tile, so a scrollbar or a rounded border cannot take a column away. */
-  grid-template-columns: repeat(auto-fit, minmax(var(--syn-space-8), 1fr));
   gap: var(--syn-space-2);
   margin: 0;
   padding: 0;
