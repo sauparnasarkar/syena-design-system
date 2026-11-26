@@ -266,3 +266,32 @@ export const AChoiceSurvivesAnAToBToARoundTripWithoutStorage: Story = {
     }
   },
 };
+
+function NullAndNamedKey() {
+  const [key, setKey] = useState<string | null>(null);
+  return (
+    <>
+      <button type="button" onClick={() => setKey('null')}>Use the key named null</button>
+      <SynThemeProvider themes={['night', 'tidewater']} defaultChoice="night" storageKey={key} syncDocument={false}>
+        <Readout />
+      </SynThemeProvider>
+    </>
+  );
+}
+
+export const NoStorageAndAKeyNamedNullAreDifferentKeys: Story = {
+  render: () => <NullAndNamedKey />,
+  beforeEach: () => {
+    window.localStorage.setItem('null', 'tidewater');
+    return () => window.localStorage.removeItem('null');
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const region = canvas.getByRole('region', { name: 'Theme readout' });
+    // A choice made with remembering turned off ...
+    await userEvent.selectOptions(canvas.getByLabelText('Theme'), 'night');
+    await userEvent.click(canvas.getByRole('button', { name: 'Use the key named null' }));
+    // ... is not carried into a product whose key is the string "null": that product shows what it stored.
+    await waitFor(() => expect(text(region, 'choice')).toBe('tidewater'));
+  },
+};

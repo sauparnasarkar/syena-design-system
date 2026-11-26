@@ -71,8 +71,8 @@ export function SynThemeProvider({ themes: offered = defaultThemePair, theme: fo
   // The reader's choice in this session, if they made one; what is stored is read again when the pair changes, since a value that was not on offer may now be.
   // It belongs to the storage key it was made under: a provider reused for another product does not carry it across.
   // Kept for each key, so with storage blocked a choice lasts for the session even after another product is shown and this one comes back.
-  const [session, setSession] = useState<Record<string, ThemeChoice>>({});
-  const chosen = session[String(storageKey)] ?? null;
+  const [session, setSession] = useState<Map<string | null, ThemeChoice>>(() => new Map());
+  const chosen = session.get(storageKey) ?? null;
   const stored = useMemo(() => readStored(storageKey, pair), [storageKey, pair]);
   const [dark, setDark] = useState<boolean>(prefersDark);
   const [scope, setScope] = useState<HTMLElement | null>(null);
@@ -114,7 +114,7 @@ export function SynThemeProvider({ themes: offered = defaultThemePair, theme: fo
 
   const setChoice = useCallback((next: ThemeChoice) => {
     if (!isPairChoice(pair, next)) return;
-    setSession((was) => ({ ...was, [String(storageKey)]: next }));
+    setSession((was) => new Map(was).set(storageKey, next));
     writeStored(storageKey, next);
   }, [storageKey, pair]);
 
