@@ -1855,7 +1855,7 @@ with named values; there are no colour-named variants.
 #### Gauge
 
 - **Purpose and props.** One value on a bounded scale, such as a coverage percentage. Props: `value`, `min` (0), `max` (100), `unit` (the suffix), `unitLabel` (the unit spelled for screen readers), `label` and `tone` (`accent` by default, or `positive`, `caution`, `negative` where the metric defines it). Colour is chosen by tone, never by a raw value.
-- **Anatomy.** A horizontal track of `space(2)` thickness with a fill, and the value written as a `Figure` with every decimal place the value has, so what is read and what is heard agree. The track has its own boundary and the fill ends in a line in `border-emphasis`, so the filled proportion can be seen against the track whatever the tone. It is not a chart: no ticks, and no animation under reduced motion.
+- **Anatomy.** A horizontal track of `space(2)` thickness with a fill, and the value written as a `Figure` with every decimal place the value has, so what is read and what is heard agree. The track has its own boundary and the fill ends in a line in `border-emphasis`, which helps the eye find the end of the fill; the value is always written beside the bar, so the bar supplements the number and is never the only place the measurement can be read. It is not a chart: no ticks, and no animation under reduced motion.
 - **States.** Static.
 - **Tokens.** `border-default` (track), `accent-fill` or the matching signal fill, `type-figure-sm`.
 - **Accessibility.** `role="meter"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, a name, and `aria-valuetext` carrying the value with its unit spelled out. `Progress` is determinate task progress; `Gauge` is a measurement.

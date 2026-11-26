@@ -52,8 +52,10 @@ export function Tabs({ items, activeId, onChange, variant = 'underline', size = 
       else if (b.right > a.right) frame.scrollLeft += b.right - a.right;
     };
     reveal();
+    // The list and each tab: a longer label, or a font that arrives late, moves the selected tab without resizing the list.
     const resized = new ResizeObserver(reveal);
     resized.observe(frame);
+    refs.current.forEach((tab) => resized.observe(tab));
     return () => resized.disconnect();
   }, [activeId, itemKey]);
 
