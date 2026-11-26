@@ -37,16 +37,25 @@ export function Tabs({ items, activeId, onChange, variant = 'underline', size = 
   // One tab stop: the tab with focus, else the selected tab, else the first available one.
   const stop = enabled.some((item) => item.id === focused) ? focused : enabled.some((item) => item.id === activeId) ? activeId : enabled[0]?.id;
 
-  // A list wider than its container scrolls; the selected tab stays in view. Only the list moves: the page does not.
+  // A list wider than its container scrolls; the selected tab stays in view: when the selection changes, when the items arrive or change,
+  // and when the list is resized. Only the list moves: the page does not.
+  const itemKey = items.map((item) => item.id).join('\u0000');
   useEffect(() => {
     const frame = list.current;
-    const tab = refs.current.get(activeId);
-    if (!frame || !tab) return;
-    const a = frame.getBoundingClientRect();
-    const b = tab.getBoundingClientRect();
-    if (b.left < a.left) frame.scrollLeft -= a.left - b.left;
-    else if (b.right > a.right) frame.scrollLeft += b.right - a.right;
-  }, [activeId]);
+    if (!frame) return undefined;
+    const reveal = () => {
+      const tab = refs.current.get(activeId);
+      if (!tab) return;
+      const a = frame.getBoundingClientRect();
+      const b = tab.getBoundingClientRect();
+      if (b.left < a.left) frame.scrollLeft -= a.left - b.left;
+      else if (b.right > a.right) frame.scrollLeft += b.right - a.right;
+    };
+    reveal();
+    const resized = new ResizeObserver(reveal);
+    resized.observe(frame);
+    return () => resized.disconnect();
+  }, [activeId, itemKey]);
 
   const move = (from: string, step: number | 'first' | 'last') => {
     const at = enabled.findIndex((item) => item.id === from);

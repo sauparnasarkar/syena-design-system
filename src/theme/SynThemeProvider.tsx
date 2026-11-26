@@ -63,11 +63,14 @@ export interface SynThemeProviderProps {
 }
 
 export function SynThemeProvider({ themes: offered = defaultThemePair, theme: forced, defaultChoice = 'system', storageKey = 'syn-theme', syncDocument = true, onThemeChange, children }: SynThemeProviderProps) {
-  // The pair is compared by value, so a new array with the same two names changes nothing.
-  const pairKey = offered.join(',');
+  // Checked on every render, so a changed or mutated array cannot slip past a cached key; the provider then keeps its own copy, compared by value.
+  const checked = checkThemePair(offered);
+  const pairKey = JSON.stringify(checked);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const pair = useMemo(() => checkThemePair(offered), [pairKey]);
-  const [chosen, setChosen] = useState<ThemeChoice>(() => readStored(storageKey, pair) ?? resolveChoice(pair, defaultChoice, 'system'));
+  const pair = useMemo(() => Object.freeze([...checked]) as unknown as ThemePair, [pairKey]);
+  // The reader's choice in this session, if they made one; what is stored is read again when the pair changes, since a value that was not on offer may now be.
+  const [chosen, setChosen] = useState<ThemeChoice | null>(null);
+  const stored = useMemo(() => readStored(storageKey, pair), [storageKey, pair]);
   const [dark, setDark] = useState<boolean>(prefersDark);
   const [scope, setScope] = useState<HTMLElement | null>(null);
   const listeners = useRef(new Set<() => void>());
@@ -80,8 +83,8 @@ export function SynThemeProvider({ themes: offered = defaultThemePair, theme: fo
     return () => media.removeEventListener('change', update);
   }, []);
 
-  // A choice that is no longer on offer (the pair changed) gives way to a valid default, else to `system`.
-  const choice: ThemeChoice = resolveChoice(pair, chosen, defaultChoice);
+  // A choice that is no longer on offer (the pair changed) gives way to what is stored, then to a valid default, else to `system`.
+  const choice: ThemeChoice = isPairChoice(pair, chosen) ? chosen : resolveChoice(pair, stored, defaultChoice);
   const theme: ThemeName = resolveTheme(pair, forced, choice, dark);
 
   useLayoutEffect(() => {
