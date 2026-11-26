@@ -94,7 +94,7 @@ export function ProductSwitcher({ products, currentId, message, collapsed = fals
         // The panel takes the popover's surface, border and elevation by wearing its class, so the two stay the same.
         <div ref={panel} id={panelId} role="region" aria-label={label} className={[popover.panel, styles.panel].join(' ')} style={{ width: 'max-content', maxWidth: placed ? `${placed.maxWidth}px` : undefined, top: placed?.top ?? 0, left: placed?.left ?? 0, maxHeight: placed ? placed.maxHeight : undefined, visibility: placed ? 'visible' : 'hidden' }}>
           <div className={styles.content}>
-            <ul className={styles.grid} style={{ gridTemplateColumns: `repeat(${columns}, minmax(var(--syn-space-9), 1fr))` }}>
+            <ul className={styles.grid} style={{ gridTemplateColumns: `repeat(${columns}, minmax(var(--syn-space-9), var(--syn-space-10)))` }}>
               {products.map((product) => (
                 <li key={product.id}>
                   <a href={product.href} className={styles.tile} aria-current={product.id === current.id ? 'true' : undefined}>

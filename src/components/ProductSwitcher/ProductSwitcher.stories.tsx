@@ -298,3 +298,14 @@ export const AScrollbarDoesNotNarrowTheTiles: Story = {
     await expect(widest).toBeGreaterThanOrEqual(5 * rem - 1);
   },
 };
+
+export const LongNamesDoNotStretchThePanel: Story = {
+  args: { products: [1, 2, 3].map((n) => ({ id: `l${n}`, name: `A product with a very long name, number ${n}, that goes on and on`, href: `#l${n}`, mark: mark('Long', 'accent') })), currentId: 'l1' },
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: /switch product/ }));
+    const panel = within(canvasElement).getByRole('region', { name: 'Products' });
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    // Three tiles of at most 7.125rem, with the panel's padding, border and scrollbar room.
+    await expect(panel.getBoundingClientRect().width).toBeLessThan(3 * 7.125 * rem + 8 * rem);
+  },
+};
