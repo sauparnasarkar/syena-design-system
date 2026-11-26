@@ -678,6 +678,15 @@ theme. A hue inside a zone is available only through signal and change tokens.
 
 In `ledger` the positive signal hue is 156.4° and the negative signal hue is 29.7°, so the reserved zones cover 111° to 201° and 345° to 75°. Accent and secondary accent hues must lie in 75° to 111° or 201° to 345°; the accent hue (about 262°) and the secondary accent (accent plus 60°, about 322°) are both inside that range. The generator reports both distances.
 
+<!-- generated:ledger-zone-table -->
+| Hue | ledger | Distance to positive | Distance to negative |
+|---|---|---|---|
+| positive signal | 156.4° | 0° | 126.7° |
+| negative signal | 29.7° | 126.7° | 0° |
+| accent | 262.1° | 105.7° | 127.6° |
+| secondary accent | 322.1° | 165.7° | 67.6° |
+<!-- /generated:ledger-zone-table -->
+
 ### 3.6 Data colour
 
 Data marks are drawn on `data-surface`, the chart ground. It is a dark surface in both
@@ -722,7 +731,8 @@ every theme; each theme chooses its lightness and chroma.
 
 1. *Hues, shared by all themes.* Candidates are every hue in 3° steps outside the reserved
    zones of every theme (so a hue is allowed only if it is allowed everywhere). Slot 1 is the
-   candidate nearest the mean accent hue, so the first series is the brand colour. Each next
+   candidate nearest the mean accent hue of the first two themes (`night` and `tidewater`), so the first
+   series is the brand colour and a theme added later does not move the shared palette. Each next
    slot takes the candidate whose smallest hue distance to the slots already chosen is
    largest. The first four slots must differ in hue by at least `D` (45°), the same half-width
    that protects the signals, so the four slots most used are separable by hue and not only by
@@ -1055,6 +1065,200 @@ At build time the same checks run on the emitted tokens, and the build fails if 
 pair falls below its target.
 
 Every pair family listed here passes in `ledger` at the same targets as in the other themes: 4.5:1 for text, 3:1 for boundaries, icons and chart marks, and 7:1 for primary and chart text. Chart marks are validated on the dark `data-surface` panel, as in every theme. The theme is not accepted while any required pair fails.
+
+<!-- generated:ledger-contrast-count -->
+ledger: 245 required pairs.
+<!-- /generated:ledger-contrast-count -->
+
+<!-- generated:ledger-contrast-table -->
+| Pair (worst surface) | Target | ledger | Result |
+|---|---|---|---|
+| accent-fill | 4.6:1 | 4.63 | pass |
+| text-primary | 7:1 | 15.35 | pass |
+| text-secondary | 4.5:1 | 9.94 | pass |
+| text-muted | 4.5:1 | 4.52 | pass |
+| text-link | 4.5:1 | 4.53 | pass |
+| text-on-accent | 4.5:1 | 5.00 | pass |
+| text-inverse | 4.5:1 | 17.66 | pass |
+| signal-positive-text | 4.5:1 | 4.53 | pass |
+| signal-negative-text | 4.5:1 | 4.56 | pass |
+| signal-caution-text | 4.5:1 | 4.50 | pass |
+| signal-info-text | 4.5:1 | 4.53 | pass |
+| border-emphasis | 3:1 | 3.00 | pass |
+| focus-ring | 3:1 | 4.35 | pass |
+| data-text | 7:1 | 7.02 | pass |
+| data-text-muted | 4.5:1 | 4.52 | pass |
+| data-annotation | 4.5:1 | 12.20 | pass |
+| data-no-data | 2.2795070569547775:1 | 2.28 | pass |
+| text on data-no-data (data-ink-light) | 4.5:1 | 7.66 | pass |
+| text on data-seq-1 (data-ink-light or data-ink-dark) | 4.5:1 | 5.81 | pass |
+| text on data-seq-2 (data-ink-light or data-ink-dark) | 4.5:1 | 4.53 | pass |
+| text on data-seq-3 (data-ink-light or data-ink-dark) | 4.5:1 | 5.64 | pass |
+| text on data-seq-4 (data-ink-light or data-ink-dark) | 4.5:1 | 7.27 | pass |
+| text on data-seq-5 (data-ink-light or data-ink-dark) | 4.5:1 | 9.20 | pass |
+| text on data-seq-6 (data-ink-light or data-ink-dark) | 4.5:1 | 11.57 | pass |
+| text on data-seq-7 (data-ink-light or data-ink-dark) | 4.5:1 | 14.51 | pass |
+| text on data-div-0 (data-ink-light or data-ink-dark) | 4.5:1 | 5.01 | pass |
+| text on data-div-1 (data-ink-light or data-ink-dark) | 4.5:1 | 7.41 | pass |
+| text on data-div-2 (data-ink-light or data-ink-dark) | 4.5:1 | 10.63 | pass |
+| text on data-div-3 (data-ink-light or data-ink-dark) | 4.5:1 | 14.79 | pass |
+| text on data-div--3 (data-ink-light or data-ink-dark) | 4.5:1 | 14.91 | pass |
+| text on data-div--2 (data-ink-light or data-ink-dark) | 4.5:1 | 10.68 | pass |
+| text on data-div--1 (data-ink-light or data-ink-dark) | 4.5:1 | 7.42 | pass |
+| data-other | 3:1 | 4.51 | pass |
+| data-cat-* | 3:1 | 3.32 | pass |
+| data-seq-* | 3:1 | 3.01 | pass |
+| data-heat-1 on data-surface (and the borders drawn in it) | 3:1 | 13.62 | pass |
+| data-heat-2 on data-surface (and the borders drawn in it) | 3:1 | 11.43 | pass |
+| data-heat-3 on data-surface (and the borders drawn in it) | 3:1 | 9.50 | pass |
+| data-heat-4 on data-surface (and the borders drawn in it) | 3:1 | 7.80 | pass |
+| data-heat-5 on data-surface (and the borders drawn in it) | 3:1 | 6.39 | pass |
+| data-heat-6 on data-surface (and the borders drawn in it) | 3:1 | 5.14 | pass |
+| data-heat-7 on data-surface (and the borders drawn in it) | 3:1 | 4.11 | pass |
+| the deepest heat step | 3.6742346141747673:1 | 4.11 | pass |
+| data-band-8 on data-map-panel | 5:1 | 8.94 | pass |
+| data-map-ink on data-map-panel | 4.5:1 | 11.77 | pass |
+| data-map-ink-muted on data-map-panel | 4.5:1 | 6.59 | pass |
+| data-div-* | 3:1 | 4.52 | pass |
+| data-change-decrease | 3:1 | 11.22 | pass |
+| data-change-increase | 3:1 | 3.76 | pass |
+| data-panel-text-primary | 7:1 | 13.31 | pass |
+| data-panel-text-primary on data-panel-surface-raised | 7:1 | 12.80 | pass |
+| data-panel-text-primary on data-panel-surface-sunken | 7:1 | 13.55 | pass |
+| data-panel-text-primary on data-panel-surface-overlay | 7:1 | 12.12 | pass |
+| data-panel-text-secondary | 4.5:1 | 7.69 | pass |
+| data-panel-text-secondary on data-panel-surface-raised | 4.5:1 | 7.40 | pass |
+| data-panel-text-secondary on data-panel-surface-sunken | 4.5:1 | 7.83 | pass |
+| data-panel-text-secondary on data-panel-surface-overlay | 4.5:1 | 7.01 | pass |
+| data-panel-text-muted | 4.5:1 | 4.97 | pass |
+| data-panel-text-muted on data-panel-surface-raised | 4.5:1 | 4.78 | pass |
+| data-panel-text-muted on data-panel-surface-sunken | 4.5:1 | 5.06 | pass |
+| data-panel-text-muted on data-panel-surface-overlay | 4.5:1 | 4.52 | pass |
+| data-panel-text-link | 4.5:1 | 4.96 | pass |
+| data-panel-text-link on data-panel-surface-raised | 4.5:1 | 4.77 | pass |
+| data-panel-text-link on data-panel-surface-sunken | 4.5:1 | 5.05 | pass |
+| data-panel-text-link on data-panel-surface-overlay | 4.5:1 | 4.51 | pass |
+| data-panel-accent-text | 4.5:1 | 4.96 | pass |
+| data-panel-accent-text on data-panel-surface-raised | 4.5:1 | 4.77 | pass |
+| data-panel-accent-text on data-panel-surface-sunken | 4.5:1 | 5.05 | pass |
+| data-panel-accent-text on data-panel-surface-overlay | 4.5:1 | 4.51 | pass |
+| data-panel-signal-positive-text | 4.5:1 | 4.97 | pass |
+| data-panel-signal-positive-text on data-panel-surface-raised | 4.5:1 | 4.78 | pass |
+| data-panel-signal-positive-text on data-panel-surface-sunken | 4.5:1 | 5.06 | pass |
+| data-panel-signal-positive-text on data-panel-surface-overlay | 4.5:1 | 4.53 | pass |
+| data-panel-signal-negative-text | 4.5:1 | 4.96 | pass |
+| data-panel-signal-negative-text on data-panel-surface-raised | 4.5:1 | 4.77 | pass |
+| data-panel-signal-negative-text on data-panel-surface-sunken | 4.5:1 | 5.05 | pass |
+| data-panel-signal-negative-text on data-panel-surface-overlay | 4.5:1 | 4.51 | pass |
+| data-panel-signal-caution-text | 4.5:1 | 9.38 | pass |
+| data-panel-signal-caution-text on data-panel-surface-raised | 4.5:1 | 9.02 | pass |
+| data-panel-signal-caution-text on data-panel-surface-sunken | 4.5:1 | 9.55 | pass |
+| data-panel-signal-caution-text on data-panel-surface-overlay | 4.5:1 | 8.54 | pass |
+| data-panel-signal-info-text | 4.5:1 | 4.96 | pass |
+| data-panel-signal-info-text on data-panel-surface-raised | 4.5:1 | 4.77 | pass |
+| data-panel-signal-info-text on data-panel-surface-sunken | 4.5:1 | 5.05 | pass |
+| data-panel-signal-info-text on data-panel-surface-overlay | 4.5:1 | 4.51 | pass |
+| data-panel-signal-positive-text on data-panel-signal-positive-tint | 4.5:1 | 4.80 | pass |
+| data-panel-signal-negative-text on data-panel-signal-negative-tint | 4.5:1 | 4.96 | pass |
+| data-panel-signal-caution-text on data-panel-signal-caution-tint | 4.5:1 | 9.23 | pass |
+| data-panel-signal-info-text on data-panel-signal-info-tint | 4.5:1 | 4.91 | pass |
+| data-panel-text-link on data-panel-accent-tint | 4.5:1 | 4.91 | pass |
+| data-panel-text-on-accent on data-panel-accent-fill | 4.5:1 | 4.56 | pass |
+| data-panel-text-on-accent on data-panel-accent-hover | 4.5:1 | 5.08 | pass |
+| data-panel-text-on-accent on data-panel-accent-active | 4.5:1 | 5.72 | pass |
+| data-panel-border-emphasis | 3:1 | 3.34 | pass |
+| data-panel-border-emphasis on data-panel-surface-raised | 3:1 | 3.22 | pass |
+| data-panel-border-emphasis on data-panel-surface-sunken | 3:1 | 3.40 | pass |
+| data-panel-border-emphasis on data-panel-surface-overlay | 3:1 | 3.04 | pass |
+| data-panel-focus-ring | 3:1 | 3.49 | pass |
+| data-panel-focus-ring on data-panel-surface-raised | 3:1 | 3.36 | pass |
+| data-panel-focus-ring on data-panel-surface-sunken | 3:1 | 3.55 | pass |
+| data-panel-focus-ring on data-panel-surface-overlay | 3:1 | 3.18 | pass |
+| data-panel-accent-fill | 3:1 | 4.12 | pass |
+| data-panel-accent-fill on data-panel-surface-raised | 3:1 | 3.96 | pass |
+| data-panel-accent-fill on data-panel-surface-sunken | 3:1 | 4.19 | pass |
+| data-panel-accent-fill on data-panel-surface-overlay | 3:1 | 3.75 | pass |
+| data-panel-signal-positive-fill | 3:1 | 3.40 | pass |
+| data-panel-signal-positive-fill on data-panel-surface-raised | 3:1 | 3.27 | pass |
+| data-panel-signal-positive-fill on data-panel-surface-sunken | 3:1 | 3.46 | pass |
+| data-panel-signal-positive-fill on data-panel-surface-overlay | 3:1 | 3.09 | pass |
+| data-panel-signal-negative-fill | 3:1 | 3.33 | pass |
+| data-panel-signal-negative-fill on data-panel-surface-raised | 3:1 | 3.20 | pass |
+| data-panel-signal-negative-fill on data-panel-surface-sunken | 3:1 | 3.39 | pass |
+| data-panel-signal-negative-fill on data-panel-surface-overlay | 3:1 | 3.03 | pass |
+| data-panel-signal-caution-fill | 3:1 | 9.38 | pass |
+| data-panel-signal-caution-fill on data-panel-surface-raised | 3:1 | 9.02 | pass |
+| data-panel-signal-caution-fill on data-panel-surface-sunken | 3:1 | 9.55 | pass |
+| data-panel-signal-caution-fill on data-panel-surface-overlay | 3:1 | 8.54 | pass |
+| data-map-text-primary on data-map-panel | 7:1 | 11.77 | pass |
+| data-map-text-primary on data-map-surface-raised | 7:1 | 12.73 | pass |
+| data-map-text-primary on data-map-surface-sunken | 7:1 | 12.24 | pass |
+| data-map-text-primary on data-map-surface-overlay | 7:1 | 13.60 | pass |
+| data-map-text-secondary on data-map-panel | 4.5:1 | 11.77 | pass |
+| data-map-text-secondary on data-map-surface-raised | 4.5:1 | 12.73 | pass |
+| data-map-text-secondary on data-map-surface-sunken | 4.5:1 | 12.24 | pass |
+| data-map-text-secondary on data-map-surface-overlay | 4.5:1 | 13.60 | pass |
+| data-map-text-muted on data-map-panel | 4.5:1 | 6.59 | pass |
+| data-map-text-muted on data-map-surface-raised | 4.5:1 | 7.13 | pass |
+| data-map-text-muted on data-map-surface-sunken | 4.5:1 | 6.86 | pass |
+| data-map-text-muted on data-map-surface-overlay | 4.5:1 | 7.62 | pass |
+| data-map-text-link on data-map-panel | 4.5:1 | 11.77 | pass |
+| data-map-text-link on data-map-surface-raised | 4.5:1 | 12.73 | pass |
+| data-map-text-link on data-map-surface-sunken | 4.5:1 | 12.24 | pass |
+| data-map-text-link on data-map-surface-overlay | 4.5:1 | 13.60 | pass |
+| data-map-accent-text on data-map-panel | 4.5:1 | 11.77 | pass |
+| data-map-accent-text on data-map-surface-raised | 4.5:1 | 12.73 | pass |
+| data-map-accent-text on data-map-surface-sunken | 4.5:1 | 12.24 | pass |
+| data-map-accent-text on data-map-surface-overlay | 4.5:1 | 13.60 | pass |
+| data-map-signal-positive-text on data-map-panel | 4.5:1 | 5.04 | pass |
+| data-map-signal-positive-text on data-map-surface-raised | 4.5:1 | 5.45 | pass |
+| data-map-signal-positive-text on data-map-surface-sunken | 4.5:1 | 5.24 | pass |
+| data-map-signal-positive-text on data-map-surface-overlay | 4.5:1 | 5.82 | pass |
+| data-map-signal-negative-text on data-map-panel | 4.5:1 | 5.06 | pass |
+| data-map-signal-negative-text on data-map-surface-raised | 4.5:1 | 5.46 | pass |
+| data-map-signal-negative-text on data-map-surface-sunken | 4.5:1 | 5.26 | pass |
+| data-map-signal-negative-text on data-map-surface-overlay | 4.5:1 | 5.84 | pass |
+| data-map-signal-caution-text on data-map-panel | 4.5:1 | 5.02 | pass |
+| data-map-signal-caution-text on data-map-surface-raised | 4.5:1 | 5.43 | pass |
+| data-map-signal-caution-text on data-map-surface-sunken | 4.5:1 | 5.22 | pass |
+| data-map-signal-caution-text on data-map-surface-overlay | 4.5:1 | 5.80 | pass |
+| data-map-signal-info-text on data-map-panel | 4.5:1 | 11.77 | pass |
+| data-map-signal-info-text on data-map-surface-raised | 4.5:1 | 12.73 | pass |
+| data-map-signal-info-text on data-map-surface-sunken | 4.5:1 | 12.24 | pass |
+| data-map-signal-info-text on data-map-surface-overlay | 4.5:1 | 13.60 | pass |
+| data-map-signal-positive-text on data-map-signal-positive-tint | 4.5:1 | 4.52 | pass |
+| data-map-signal-negative-text on data-map-signal-negative-tint | 4.5:1 | 4.54 | pass |
+| data-map-signal-caution-text on data-map-signal-caution-tint | 4.5:1 | 4.57 | pass |
+| data-map-signal-info-text on data-map-signal-info-tint | 4.5:1 | 10.89 | pass |
+| data-map-text-link on data-map-accent-tint | 4.5:1 | 10.89 | pass |
+| data-map-text-on-accent on data-map-accent-fill | 4.5:1 | 11.77 | pass |
+| data-map-text-on-accent on data-map-accent-hover | 4.5:1 | 8.22 | pass |
+| data-map-text-on-accent on data-map-accent-active | 4.5:1 | 6.31 | pass |
+| data-map-border-emphasis on data-map-panel | 3:1 | 6.59 | pass |
+| data-map-border-emphasis on data-map-surface-raised | 3:1 | 7.13 | pass |
+| data-map-border-emphasis on data-map-surface-sunken | 3:1 | 6.86 | pass |
+| data-map-border-emphasis on data-map-surface-overlay | 3:1 | 7.62 | pass |
+| data-map-focus-ring on data-map-panel | 3:1 | 11.77 | pass |
+| data-map-focus-ring on data-map-surface-raised | 3:1 | 12.73 | pass |
+| data-map-focus-ring on data-map-surface-sunken | 3:1 | 12.24 | pass |
+| data-map-focus-ring on data-map-surface-overlay | 3:1 | 13.60 | pass |
+| data-map-accent-fill on data-map-panel | 3:1 | 11.77 | pass |
+| data-map-accent-fill on data-map-surface-raised | 3:1 | 12.73 | pass |
+| data-map-accent-fill on data-map-surface-sunken | 3:1 | 12.24 | pass |
+| data-map-accent-fill on data-map-surface-overlay | 3:1 | 13.60 | pass |
+| data-map-signal-positive-fill on data-map-panel | 3:1 | 3.58 | pass |
+| data-map-signal-positive-fill on data-map-surface-raised | 3:1 | 3.87 | pass |
+| data-map-signal-positive-fill on data-map-surface-sunken | 3:1 | 3.73 | pass |
+| data-map-signal-positive-fill on data-map-surface-overlay | 3:1 | 4.14 | pass |
+| data-map-signal-negative-fill on data-map-panel | 3:1 | 3.66 | pass |
+| data-map-signal-negative-fill on data-map-surface-raised | 3:1 | 3.96 | pass |
+| data-map-signal-negative-fill on data-map-surface-sunken | 3:1 | 3.81 | pass |
+| data-map-signal-negative-fill on data-map-surface-overlay | 3:1 | 4.23 | pass |
+| data-map-signal-caution-fill on data-map-panel | 3:1 | 3.01 | pass |
+| data-map-signal-caution-fill on data-map-surface-raised | 3:1 | 3.25 | pass |
+| data-map-signal-caution-fill on data-map-surface-sunken | 3:1 | 3.13 | pass |
+| data-map-signal-caution-fill on data-map-surface-overlay | 3:1 | 3.47 | pass |
+<!-- /generated:ledger-contrast-table -->
 
 
 ---

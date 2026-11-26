@@ -1,9 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
-import { themes, type ThemeName } from '../generated/tokens';
+import { themePolarity, type ThemeName } from '../generated/tokens';
 import { resolveToken } from './resolveToken';
 
-export type ThemeChoice = ThemeName | 'system';
-export const themeNames = Object.keys(themes) as ThemeName[];
+/** The themes a reader can choose between until a product names its own pair. */
+type OfferedThemeName = 'night' | 'tidewater';
+export type ThemeChoice = OfferedThemeName | 'system';
+/** The themes a product offers its readers. `ledger` exists as a theme but is not offered yet. */
+export const themeNames: OfferedThemeName[] = ['night', 'tidewater'];
+export { themePolarity };
 
 /** The theme used for each system colour preference. */
 const systemTheme: Record<'dark' | 'light', ThemeName> = { dark: 'night', light: 'tidewater' };
@@ -23,7 +27,7 @@ export interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-const isChoice = (value: unknown): value is ThemeChoice => value === 'system' || themeNames.includes(value as ThemeName);
+const isChoice = (value: unknown): value is ThemeChoice => value === 'system' || themeNames.includes(value as OfferedThemeName);
 
 function readStored(key: string | null): ThemeChoice | null {
   if (!key || typeof window === 'undefined') return null;

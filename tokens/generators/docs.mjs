@@ -165,3 +165,21 @@ export function colourBlocks(themes) {
 import { formatHex, converter } from 'culori';
 const hexOf = (c) => formatHex(c);
 const lchL = (t, i) => converter('oklch')(t.ramps.neutral[i].color).l.toFixed(3);
+
+// Blocks for a theme documented on its own: the contrast families at their worst surface, the count and the hue zones.
+export function themeBlocks(theme) {
+  const name = theme.meta.name;
+  const group = (id) => id.replace(/ on (surface-\w+|signal-\w+-tint|accent-\w+|data-surface|accent-tint|surface-inverse)$/, '').replace(/^(data-(cat|seq|div))-.+$/, '$1-*');
+  const worst = new Map();
+  for (const c of theme.checks.filter((x) => x.kind === 'required')) {
+    const g = group(c.id);
+    const cur = worst.get(g);
+    if (!cur || c.ratio < cur.ratio) worst.set(g, { ratio: c.ratio, target: c.target, pass: c.pass });
+    else if (!c.pass) cur.pass = false;
+  }
+  return {
+    [`${name}-contrast-table`]: table(['Pair (worst surface)', 'Target', name, 'Result'], [...worst.entries()].map(([g, w]) => [g, `${w.target}:1`, w.ratio.toFixed(2), w.pass ? 'pass' : 'FAIL'])),
+    [`${name}-contrast-count`]: `${name}: ${theme.checks.filter((c) => c.kind === 'required').length} required pairs.`,
+    [`${name}-zone-table`]: table(['Hue', name, 'Distance to positive', 'Distance to negative'], theme.zoneRows.map((r) => [r.name, `${r.hue.toFixed(1)}°`, `${r.distancePositive}°`, `${r.distanceNegative}°`])),
+  };
+}

@@ -23,7 +23,9 @@ describe('token build', () => {
   it('gives every theme the same set of colour and data variables', () => {
     const night = names(block('[data-syn-theme="night"]'));
     const tidewater = names(block('[data-syn-theme="tidewater"]'));
+    const ledger = names(block('[data-syn-theme="ledger"]'));
     expect([...night].sort()).toEqual([...tidewater].sort());
+    expect([...night].sort()).toEqual([...ledger].sort());
     expect(night.size).toBeGreaterThan(60);
   });
 
@@ -36,7 +38,7 @@ describe('token build', () => {
     const matrix = JSON.parse(readFileSync('src/generated/reports/contrast-matrix.json', 'utf8')) as Array<{ required: boolean; pass: boolean; theme: string }>;
     expect(matrix.filter((m) => m.required).length).toBeGreaterThan(150);
     expect(matrix.filter((m) => m.required && !m.pass)).toEqual([]);
-    expect(new Set(matrix.map((m) => m.theme))).toEqual(new Set(['night', 'tidewater']));
+    expect(new Set(matrix.map((m) => m.theme))).toEqual(new Set(['night', 'tidewater', 'ledger']));
   });
 
   it('writes typed constants for the chart and grid themes', () => {
@@ -45,9 +47,9 @@ describe('token build', () => {
     expect(ts).toContain('export const breakpointPx');
   });
 
-  it('validates the heat scale in both themes: borders visible, the deepest step apart from the ground, steps ordered', () => {
+  it('validates the heat scale in every theme: borders visible, the deepest step apart from the ground, steps ordered', () => {
     const matrix = JSON.parse(readFileSync('src/generated/reports/contrast-matrix.json', 'utf8')) as Array<{ pair: string; pass: boolean; theme: string; ratio: number; target: number }>;
-    for (const theme of ['night', 'tidewater']) {
+    for (const theme of ['night', 'tidewater', 'ledger']) {
       const heat = matrix.filter((m) => m.theme === theme && m.pair.startsWith('data-heat-'));
       expect(heat).toHaveLength(7);
       for (const m of heat) expect(m.ratio).toBeGreaterThanOrEqual(3);
@@ -61,7 +63,7 @@ describe('token build', () => {
 
   it('names the no-data colour as quieter than the 3:1 floor but never a hue', () => {
     const matrix = JSON.parse(readFileSync('src/generated/reports/contrast-matrix.json', 'utf8')) as Array<{ pair: string; pass: boolean; theme: string; ratio: number }>;
-    for (const theme of ['night', 'tidewater']) {
+    for (const theme of ['night', 'tidewater', 'ledger']) {
       const noData = matrix.find((m) => m.theme === theme && m.pair === 'data-no-data on data-surface')!;
       expect(noData.ratio).toBeGreaterThan(1.8);
       expect(noData.ratio).toBeLessThan(3);
@@ -98,9 +100,9 @@ describe('the data panel scope', () => {
     for (const m of night.matchAll(/--syn-data-panel-([a-z-]+): ([^;]+);/g)) expect(m[2]).toBe(`var(--syn-color-${m[1]})`);
   });
 
-  it('gives a light theme panel values of its own, light text on the dark ground', () => {
-    const tidewater = block('[data-syn-theme="tidewater"]');
-    const value = (name: string) => tidewater.match(new RegExp(`--syn-${name}: (#[0-9a-f]{6});`))![1];
+  it.each(['tidewater', 'ledger'])('gives the light theme %s panel values of its own, light text on the dark ground', (theme) => {
+    const light = block(`[data-syn-theme="${theme}"]`);
+    const value = (name: string) => light.match(new RegExp(`--syn-${name}: (#[0-9a-f]{6});`))![1];
     expect(value('data-panel-text-primary')).not.toBe(value('color-text-primary'));
     expect(contrastRatio(value('data-panel-text-primary'), value('data-surface'))).toBeGreaterThanOrEqual(7);
     expect(contrastRatio(value('data-panel-signal-negative-text'), value('data-surface'))).toBeGreaterThanOrEqual(4.5);

@@ -28,3 +28,4 @@ export const UnitsAgree: Story = {
   },
 };
 export const Tidewater: Story = { globals: { theme: 'tidewater' } };
+export const Ledger: Story = { globals: { theme: 'ledger' } };

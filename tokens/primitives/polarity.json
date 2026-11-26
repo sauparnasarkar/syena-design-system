@@ -1,0 +1,6 @@
+{
+  "$description": "Polarity of each theme: dark themes raise surfaces by lightness, light themes by shadow.",
+  "night": "dark",
+  "tidewater": "light",
+  "ledger": "light"
+}

@@ -1,0 +1,11 @@
+{
+  "$description": "Contrast pairs between seeds that a theme must keep, checked as required pairs. The derived roles are checked by the generator whatever the seeds are; these guard a seed that a derived role would otherwise hide.",
+  "ledger": [
+    {
+      "id": "accent-fill on surface-base",
+      "foreground": "accent-fill",
+      "background": "surface-base",
+      "target": 4.6
+    }
+  ]
+}
