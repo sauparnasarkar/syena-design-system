@@ -139,6 +139,52 @@ export const MountingTheTabsDoesNotScrollThePage: Story = {
   },
 };
 
+const many = Array.from({ length: 12 }, (_, i) => ({ id: `t${i}`, label: `Section ${i + 1}` }));
+
+function Narrowing() {
+  const [wide, setWide] = useState(true);
+  return (
+    <div style={{ padding: 'var(--syn-space-3)' }}>
+      <button type="button" onClick={() => setWide(false)}>Narrow</button>
+      <div style={{ width: wide ? '80rem' : '14rem' }}>
+        <Tabs label="Sections" idPrefix="narrow" items={many} activeId="t11" onChange={() => undefined} />
+        <div role="tabpanel" id={panelId('narrow', 't11')} aria-labelledby={tabId('narrow', 't11')} tabIndex={0}>Panel</div>
+      </div>
+    </div>
+  );
+}
+
+export const TheSelectedTabIsRevealedWhenTheListIsNarrowed: Story = {
+  render: () => <Narrowing />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Narrow' }));
+    const list = canvas.getByRole('tablist');
+    await waitFor(() => expect(canvas.getByRole('tab', { name: 'Section 12' }).getBoundingClientRect().right).toBeLessThanOrEqual(list.getBoundingClientRect().right + 1));
+  },
+};
+
+function LateItems() {
+  const [items, setItems] = useState<TabItem[]>([]);
+  return (
+    <div style={{ width: '14rem', padding: 'var(--syn-space-3)' }}>
+      <button type="button" onClick={() => setItems(many)}>Load</button>
+      <Tabs label="Sections" idPrefix="late" items={items} activeId="t11" onChange={() => undefined} />
+      {items.length ? <div role="tabpanel" id={panelId('late', 't11')} aria-labelledby={tabId('late', 't11')} tabIndex={0}>Panel</div> : null}
+    </div>
+  );
+}
+
+export const TheSelectedTabIsRevealedWhenItsItemsArriveLate: Story = {
+  render: () => <LateItems />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Load' }));
+    const list = canvas.getByRole('tablist');
+    await waitFor(() => expect(canvas.getByRole('tab', { name: 'Section 12' }).getBoundingClientRect().right).toBeLessThanOrEqual(list.getBoundingClientRect().right + 1));
+  },
+};
+
 export const Segmented: Story = { render: () => <Demo variant="segmented" /> };
 export const Small: Story = { render: () => <Demo size="small" /> };
 
