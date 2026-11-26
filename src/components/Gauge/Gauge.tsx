@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { Figure } from '../Figure/Figure';
+import { Figure, formatFigure } from '../Figure/Figure';
 import styles from './Gauge.module.css';
 
 export interface GaugeProps {
@@ -16,8 +16,11 @@ export interface GaugeProps {
   tone?: 'accent' | 'positive' | 'caution' | 'negative';
 }
 
-/** The decimal places a number is written with (up to six), so the figure shows what the meter announces. */
-const places = (value: number) => Math.min(6, (String(value).split('.')[1] ?? '').replace(/e.*$/, '').length);
+/** The decimal places a number has, whatever its notation (4e-7 has seven), up to twenty: the figure shows what the meter announces. */
+const places = (value: number) => {
+  const [mantissa, exponent = '0'] = String(value).toLowerCase().split('e');
+  return Math.min(20, Math.max(0, (mantissa.split('.')[1] ?? '').length - Number(exponent)));
+};
 
 /** One value on a bounded scale. It is a measurement, not progress toward a goal: that is `Progress`. The bar is held to the scale; the written and spoken value is always the real one, so what is seen and what is heard agree. */
 export function Gauge({ value, min = 0, max = 100, unit, unitLabel, label, tone = 'accent' }: GaugeProps) {
@@ -32,7 +35,7 @@ export function Gauge({ value, min = 0, max = 100, unit, unitLabel, label, tone 
         <span id={id} className={styles.label}>{label}</span>
         <Figure size="sm" value={value} decimals={places(value)} unit={unit} unitLabel={unitLabel} tone="primary" />
       </div>
-      <div role="meter" aria-labelledby={id} aria-valuemin={min} aria-valuemax={max} aria-valuenow={clamped} aria-valuetext={[value, spoken].filter((part) => part !== undefined && part !== '').join(' ')} className={styles.track}>
+      <div role="meter" aria-labelledby={id} aria-valuemin={min} aria-valuemax={max} aria-valuenow={clamped} aria-valuetext={[formatFigure(value, { decimals: places(value) }), spoken].filter((part) => part !== undefined && part !== '').join(' ')} className={styles.track}>
         {percent > 0 ? <div className={[styles.fill, styles[tone]].join(' ')} style={{ width: `${percent}%` }} /> : <div className={styles.none} />}
       </div>
     </div>

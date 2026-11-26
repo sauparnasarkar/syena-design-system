@@ -50,6 +50,22 @@ export const AFractionalValueIsWrittenWithItsDecimals: Story = {
   },
 };
 
+export const VerySmallAndVeryPreciseValuesAreWrittenAsTheyAre: Story = {
+  render: () => (
+    <div style={{ display: 'grid', gap: 'var(--syn-space-3)' }}>
+      <Gauge label="Tiny" value={0.0000004} min={0} max={0.000001} unit="units" />
+      <Gauge label="Precise" value={0.1234567} min={0} max={1} unit="units" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('0.0000004')).toBeInTheDocument();
+    await expect(canvas.getByRole('meter', { name: 'Tiny' })).toHaveAttribute('aria-valuetext', '0.0000004 units');
+    await expect(canvas.getByText('0.1234567')).toBeInTheDocument();
+    await expect(canvas.getByRole('meter', { name: 'Precise' })).toHaveAttribute('aria-valuetext', '0.1234567 units');
+  },
+};
+
 export const TheFillEndsInALineSoItsExtentShowsInAnyTone: Story = {
   args: { label: 'Caution', value: 40, unit: '%', tone: 'caution' },
   play: async ({ canvasElement }) => {
