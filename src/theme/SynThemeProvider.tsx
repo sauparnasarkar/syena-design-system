@@ -69,7 +69,9 @@ export function SynThemeProvider({ themes: offered = defaultThemePair, theme: fo
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const pair = useMemo(() => Object.freeze([...checked]) as unknown as ThemePair, [pairKey]);
   // The reader's choice in this session, if they made one; what is stored is read again when the pair changes, since a value that was not on offer may now be.
-  const [chosen, setChosen] = useState<ThemeChoice | null>(null);
+  // It belongs to the storage key it was made under: a provider reused for another product does not carry it across.
+  const [session, setSession] = useState<{ key: string | null; choice: ThemeChoice } | null>(null);
+  const chosen = session && session.key === storageKey ? session.choice : null;
   const stored = useMemo(() => readStored(storageKey, pair), [storageKey, pair]);
   const [dark, setDark] = useState<boolean>(prefersDark);
   const [scope, setScope] = useState<HTMLElement | null>(null);
@@ -111,7 +113,7 @@ export function SynThemeProvider({ themes: offered = defaultThemePair, theme: fo
 
   const setChoice = useCallback((next: ThemeChoice) => {
     if (!isPairChoice(pair, next)) return;
-    setChosen(next);
+    setSession({ key: storageKey, choice: next });
     writeStored(storageKey, next);
   }, [storageKey, pair]);
 

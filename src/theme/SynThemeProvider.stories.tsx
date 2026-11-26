@@ -200,3 +200,33 @@ export const AStoredChoiceThatBecomesOfferedIsUsed: Story = {
     await waitFor(() => expect(text(region, 'choice')).toBe('tidewater'));
   },
 };
+
+function ReusedForAnotherProduct() {
+  const [key, setKey] = useState('syn-story-product-a');
+  return (
+    <>
+      <button type="button" onClick={() => setKey('syn-story-product-b')}>Switch product</button>
+      <SynThemeProvider themes={['night', 'tidewater']} defaultChoice="night" storageKey={key} syncDocument={false}>
+        <Readout />
+      </SynThemeProvider>
+    </>
+  );
+}
+
+export const AChoiceMadeForOneProductDoesNotOverrideAnotherProductsStoredOne: Story = {
+  render: () => <ReusedForAnotherProduct />,
+  beforeEach: () => {
+    window.localStorage.removeItem('syn-story-product-a');
+    window.localStorage.setItem('syn-story-product-b', 'tidewater');
+    return () => { window.localStorage.removeItem('syn-story-product-a'); window.localStorage.removeItem('syn-story-product-b'); };
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const region = canvas.getByRole('region', { name: 'Theme readout' });
+    await userEvent.selectOptions(canvas.getByLabelText('Theme'), 'night');
+    await expect(text(region, 'choice')).toBe('night');
+    // Product B stored tidewater: that is what it shows, not product A's choice.
+    await userEvent.click(canvas.getByRole('button', { name: 'Switch product' }));
+    await waitFor(() => expect(text(region, 'choice')).toBe('tidewater'));
+  },
+};
