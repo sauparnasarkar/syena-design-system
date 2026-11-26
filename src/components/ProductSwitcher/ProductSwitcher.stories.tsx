@@ -254,3 +254,19 @@ export const ShortNamesStillFormARowOfTiles: Story = {
     await expect(third.right).toBeLessThanOrEqual(panel.right);
   },
 };
+
+export const TilesKeepTheirColumnsAtASmallerRootSize: Story = {
+  play: async ({ canvasElement }) => {
+    const root = document.documentElement;
+    const held = root.style.fontSize;
+    root.style.fontSize = '14px';
+    try {
+      await userEvent.click(trigger(canvasElement));
+      const region = within(canvasElement).getByRole('region', { name: 'Products' });
+      const tops = within(region).getAllByRole('link').map((link) => Math.round(link.getBoundingClientRect().top));
+      await expect(new Set(tops).size).toBe(1);
+    } finally {
+      root.style.fontSize = held;
+    }
+  },
+};
