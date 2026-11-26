@@ -87,17 +87,15 @@ export function Tooltip({ label, placement = 'top', delay, children }: TooltipPr
         <div data-syn-theme={theme?.theme} data-syn-owner={owner ?? undefined} style={{ display: 'contents' }}>
           <div
             ref={bubble}
-            id={id}
-            role="tooltip"
             hidden={!open}
             data-syn-side={placed?.side ?? placement}
             className={styles.bubble}
             // The pointer may move onto the bubble without closing it.
             onPointerEnter={() => setIntent({ on: true, wait: 0 })}
             onPointerLeave={() => setIntent({ on: false, wait: GRACE })}
-            style={{ top: placed?.top ?? 0, left: placed?.left ?? 0, maxWidth: placed ? `${placed.maxWidth}px` : undefined, maxHeight: placed ? `${placed.maxHeight}px` : undefined, overflowY: 'auto', visibility: placed ? 'visible' : 'hidden' }}
+            style={{ top: placed?.top ?? 0, left: placed?.left ?? 0, maxWidth: placed ? `${placed.maxWidth}px` : undefined, maxHeight: placed ? `${placed.maxHeight}px` : undefined, visibility: placed ? 'visible' : 'hidden' }}
           >
-            {label}
+            <div id={id} role="tooltip" className={styles.text}>{label}</div>
             <span className={styles.arrow} style={placed ? (placed.side === 'top' || placed.side === 'bottom' ? { left: placed.anchorOffset } : { top: placed.anchorOffset }) : undefined} />
           </div>
         </div>,

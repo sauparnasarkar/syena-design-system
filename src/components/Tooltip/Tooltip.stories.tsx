@@ -94,7 +94,7 @@ export const ItFlipsToTheOtherSideWhereThereIsNoRoom: Story = {
   play: async ({ canvasElement }) => {
     await userEvent.tab();
     await expect(within(canvasElement).getByRole('button', { name: 'Near the top' })).toHaveFocus();
-    await waitFor(() => expect(bubble()).toHaveAttribute('data-syn-side', 'bottom'));
+    await waitFor(() => expect(bubble().parentElement!).toHaveAttribute('data-syn-side', 'bottom'));
     await expect(bubble().getBoundingClientRect().top).toBeGreaterThanOrEqual(0);
   },
 };
@@ -123,7 +123,7 @@ const Gallery = () => (
 const openFirst: Story['play'] = async ({ canvasElement }) => {
   await userEvent.tab();
   await expect(within(canvasElement).getByRole('button', { name: 'About top' })).toHaveFocus();
-  await waitFor(() => expect(document.body.querySelector<HTMLElement>('[role="tooltip"]:not([hidden])')).not.toBeNull());
+  await waitFor(() => expect(document.body.querySelector<HTMLElement>(':not([hidden]) > [role="tooltip"]')).not.toBeNull());
 };
 export const AllStates: Story = { render: () => <Gallery />, play: openFirst };
 export const AllStatesTidewater: Story = { render: () => <Gallery />, globals: { theme: 'tidewater' }, play: openFirst };
@@ -136,16 +136,16 @@ export const EverySideIsPlacedAgainstItsTrigger: Story = {
     for (const side of ['top', 'bottom', 'left', 'right'] as const) {
       const trigger = canvas.getByRole('button', { name: `About ${side}` });
       await userEvent.hover(trigger);
-      const tip = await waitFor(() => { const el = document.body.querySelector<HTMLElement>('[role="tooltip"]:not([hidden])'); if (!el) throw new Error('not open'); return el; });
+      const tip = await waitFor(() => { const el = document.body.querySelector<HTMLElement>(':not([hidden]) > [role="tooltip"]'); if (!el) throw new Error('not open'); return el; });
       const box = tip.getBoundingClientRect();
       const anchor = trigger.getBoundingClientRect();
-      await expect(tip.getAttribute('data-syn-side')).toBe(side);
+      await expect(tip.parentElement!.getAttribute('data-syn-side')).toBe(side);
       if (side === 'top') await expect(box.bottom).toBeLessThanOrEqual(anchor.top);
       if (side === 'bottom') await expect(box.top).toBeGreaterThanOrEqual(anchor.bottom);
       if (side === 'left') await expect(box.right).toBeLessThanOrEqual(anchor.left);
       if (side === 'right') await expect(box.left).toBeGreaterThanOrEqual(anchor.right);
       await userEvent.unhover(trigger);
-      await waitFor(() => expect(document.body.querySelector('[role="tooltip"]:not([hidden])')).toBeNull());
+      await waitFor(() => expect(document.body.querySelector(':not([hidden]) > [role="tooltip"]')).toBeNull());
     }
   },
 };
@@ -286,6 +286,18 @@ export const ItsHeightIsHeldToTheRoomItWasPlacedIn: Story = {
   play: async ({ canvasElement }) => {
     await userEvent.hover(within(canvasElement).getByRole('button', { name: 'About completion' }));
     await waitFor(() => expect(bubble()).toBeVisible());
-    await expect(bubble().style.maxHeight).not.toBe('');
+    await expect(bubble().parentElement!.style.maxHeight).not.toBe('');
+  },
+};
+
+export const ItsArrowIsNotClippedAndItsTextScrollsInside: Story = {
+  render: () => <Demo />,
+  play: async ({ canvasElement }) => {
+    await userEvent.hover(within(canvasElement).getByRole('button', { name: 'About completion' }));
+    await waitFor(() => expect(bubble()).toBeVisible());
+    const frame = bubble().parentElement!;
+    await expect(getComputedStyle(frame).overflowX).toBe('visible');
+    await expect(getComputedStyle(frame).overflowY).toBe('visible');
+    await expect(getComputedStyle(bubble()).overflowY).toBe('auto');
   },
 };

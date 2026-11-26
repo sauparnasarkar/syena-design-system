@@ -7,10 +7,13 @@ const MARGIN = 8;
 /** The panel's natural size at the width it will have: measured with its height limit lifted, then put back. */
 function measure(el: HTMLElement, maxWidth: number) {
   const held = el.style.maxHeight;
+  // Lifting the limit makes the panel grow to its full height, which resets how far it was scrolled; put that back.
+  const scrolled = el.scrollTop;
   el.style.maxHeight = '';
   el.style.maxWidth = `${maxWidth}px`;
   const size = { width: el.offsetWidth, height: el.scrollHeight + (el.offsetHeight - el.clientHeight) };
   el.style.maxHeight = held;
+  el.scrollTop = scrolled;
   return size;
 }
 
@@ -61,13 +64,18 @@ export function useAnchoredPlacement(anchor: HTMLElement | null, panel: RefObjec
     const resized = new ResizeObserver(place);
     if (panel.current) resized.observe(panel.current);
     window.addEventListener('resize', place);
-    window.addEventListener('scroll', place, true);
+    // Scrolling inside the panel moves nothing: only the page, or something the anchor sits in, does.
+    const onScroll = (event: Event) => {
+      if (event.target instanceof Node && panel.current?.contains(event.target)) return;
+      place();
+    };
+    window.addEventListener('scroll', onScroll, true);
     window.visualViewport?.addEventListener('resize', place);
     window.visualViewport?.addEventListener('scroll', place);
     return () => {
       resized.disconnect();
       window.removeEventListener('resize', place);
-      window.removeEventListener('scroll', place, true);
+      window.removeEventListener('scroll', onScroll, true);
       window.visualViewport?.removeEventListener('resize', place);
       window.visualViewport?.removeEventListener('scroll', place);
     };

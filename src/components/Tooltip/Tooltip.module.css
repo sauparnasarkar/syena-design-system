@@ -3,8 +3,17 @@
   /* Above a dialog's scrim as well: a tooltip inside a dialog must be seen. */
   z-index: calc(var(--syn-layer-modal) + 1);
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   width: max-content;
   max-width: calc(var(--syn-layout-field-min) * 1.5);
+}
+
+/* The text scrolls inside the frame when the frame is held short; the frame does not clip, so the arrow beside it stays whole. */
+.text {
+  box-sizing: border-box;
+  min-height: 0;
+  overflow-y: auto;
   padding: var(--syn-space-1) var(--syn-space-2);
   border-radius: var(--syn-radius-control);
   background: var(--syn-color-surface-inverse);
@@ -24,7 +33,7 @@
   position: absolute;
   width: var(--syn-space-2);
   height: var(--syn-space-2);
-  background: inherit;
+  background: var(--syn-color-surface-inverse);
   rotate: 45deg;
 }
 
