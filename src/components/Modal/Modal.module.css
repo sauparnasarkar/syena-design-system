@@ -29,7 +29,7 @@
   overflow: hidden;
   border: var(--syn-layout-border-hairline) solid var(--syn-color-border-default);
   border-radius: var(--syn-radius-card);
-  background: var(--syn-color-surface-raised);
+  background: var(--syn-color-surface-overlay);
   color: var(--syn-color-text-secondary);
   box-shadow: var(--syn-elevation-3);
 }

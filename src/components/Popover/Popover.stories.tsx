@@ -228,3 +228,50 @@ export const OpenTidewater: Story = {
     await waitFor(() => expect(panel()).not.toBeNull());
   },
 };
+
+// What the page's overlay surface is: read from an element outside any data panel, in the story's theme.
+function pageOverlay() {
+  const probe = document.createElement('div');
+  probe.style.background = 'var(--syn-color-surface-overlay)';
+  document.body.appendChild(probe);
+  const colour = getComputedStyle(probe).backgroundColor;
+  probe.remove();
+  return colour;
+}
+
+export const TakesTheOverlaySurfaceInNight: Story = {
+  globals: { theme: 'night' },
+  render: () => <Demo />,
+  play: async ({ canvasElement }) => {
+    await userEvent.click(trigger(canvasElement));
+    const dialog = await waitFor(() => { const d = panel(); if (!d) throw new Error('closed'); return d; });
+    await expect(getComputedStyle(dialog).backgroundColor).toBe(pageOverlay());
+  },
+};
+
+function InADataPanel() {
+  return (
+    <div className="syn-data-panel" style={{ padding: 'var(--syn-space-5)' }}>
+      <Demo />
+    </div>
+  );
+}
+
+// A data panel redefines the surface roles for what is drawn inside it. A popover is portaled out of the page and carries only the theme,
+// so opened from inside one it takes the page's overlay surface, not the panel's.
+export const OpenedFromADataPanelItTakesThePagesOverlaySurface: Story = {
+  globals: { theme: 'tidewater' },
+  render: () => <InADataPanel />,
+  play: async ({ canvasElement }) => {
+    const inside = document.createElement('div');
+    inside.style.background = 'var(--syn-color-surface-overlay)';
+    canvasElement.querySelector('.syn-data-panel')!.appendChild(inside);
+    const panelOverlay = getComputedStyle(inside).backgroundColor;
+    inside.remove();
+    await expect(panelOverlay).not.toBe(pageOverlay());
+    await userEvent.click(trigger(canvasElement));
+    const dialog = await waitFor(() => { const d = panel(); if (!d) throw new Error('closed'); return d; });
+    await expect(getComputedStyle(dialog).backgroundColor).toBe(pageOverlay());
+    await expect(getComputedStyle(dialog).backgroundColor).not.toBe(panelOverlay);
+  },
+};

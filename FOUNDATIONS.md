@@ -553,6 +553,9 @@ Semantic tokens are what components consume. Names follow
   text role still meets 4.5:1.
 - `surface-overlay`: menus, popovers, dialogs. Dark themes: raised surface plus half a step.
   Light themes: the raised surface, separated by elevation 2 or 3.
+  A popover, and the product-switcher panel that takes the popover's tokens, uses it with `border-default`,
+  `radius-card` and `elevation-3`. A popover is portaled out of the page and carries only the theme, so
+  opened from inside a data panel it takes the page's overlay surface, not the data panel's.
 - `surface-inverse`: a surface of opposite polarity for toasts and tooltips, with
   `text-inverse` on it.
 
@@ -1583,7 +1586,7 @@ with named values; there are no colour-named variants.
 - **Purpose and props.** Move between the products of one family. It fills the rail's product-switcher slot (§4.1), which, like the actions slot, may be a function of whether the rail is collapsed. Props: `products` (each `{ id, name, href, mark }`, where `mark` is required: `src` or `node`, with an accessible name), `currentId`, `message`, `collapsed` (the mark only: the rail's slot is given a function that is told whether the rail is collapsed) and `label` (the name of the panel of products, *Products* by default). There are no default marks (§5.1); `ProductMark` draws them. The component shows exactly the products it is given: deciding which products a reader may see belongs to the consuming product.
 - **Anatomy.** A button in the rail opens a panel with a grid of tiles, each a mark above a name; the current product shows a check and carries `aria-current`. In a collapsed rail the button shows the mark only, with its accessible name.
 - **States.** Closed, open, hover, focus, current.
-- **Tokens.** The panel takes the popover's surface, border and elevation, so the two stay the same; `layer-overlay`, `radius-card`, the tile states of `Tile`.
+- **Tokens.** The panel takes the popover's surface, border and elevation, so the two stay the same; `layer-modal` plus one (above a dialog's scrim, like the popover), `radius-card`, the tile states of `Tile`.
 - **Accessibility.** A disclosure, not a menu: a button with `aria-expanded` and `aria-controls` shows and hides a region of ordinary links. It has no `aria-haspopup`, and no `menu` or `menuitem` roles; the links are reached in normal tab order. Escape closes the panel and returns focus to the button; moving focus outside, or a click outside, closes it.
 
 ---
@@ -1875,11 +1878,11 @@ with named values; there are no colour-named variants.
 #### Modal
 
 - **Purpose and props.** A dialog that interrupts the page. Props: `open`, `onClose`, `title`, `size` (`default`, `small`), `actions` (a footer slot at the trailing edge) and content.
-- **Anatomy.** Built on the dialog pattern the system already uses for the chart card's expanded view and the shell's drawer: a scrim at `layer-modal` and a `surface-raised` panel with `radius-card` and `elevation-3`, a title in `title-sm`, a close button, a scrolling body and a footer. Below `bp-compact` it is a full-height sheet.
+- **Anatomy.** Built on the dialog pattern the system already uses for the chart card's expanded view and the shell's drawer: a scrim at `layer-modal` and a `surface-overlay` panel with `radius-card` and `elevation-3`, a title in `title-sm`, a close button, a scrolling body and a footer. Below `bp-compact` it is a full-height sheet.
 - **Safe areas.** The scrim covers the whole viewport, including the areas under device insets. The panel and the sheet add `env(safe-area-inset-top)`, `-right`, `-bottom` and `-left` to their padding, so the title, close button and footer actions never sit under a notch, a rounded corner or a home indicator, in portrait and in landscape. The footer rests above the bottom inset. Heights use the dynamic viewport unit (`dvh`), so the sheet is not cut off by a browser toolbar that shows or hides.
 - **Mechanics.** `useScrollLock` locks the page while open; `useFocusTrap` keeps focus inside and returns it to the control that opened the dialog on close. Escape and a click on the scrim close it unless `onClose` is absent. Under reduced motion there is no transition. While it is open the rest of the page is inert (not focusable and hidden from assistive technology), and it is restored on close, including when dialogs are nested. When dialogs or other overlays are nested, Escape and Tab answer to the topmost one only, so Escape closes it alone and focus returns to the control that opened it.
 - **States.** Closed, open, scrolling body, focus within.
-- **Tokens.** `layer-modal`, `surface-raised`, `radius-card`, `elevation-3`, `border-subtle`, `title-sm`.
+- **Tokens.** `layer-modal`, `surface-overlay`, `radius-card`, `elevation-3`, `border-subtle`, `title-sm`.
 - **Accessibility.** `role="dialog"` and `aria-modal="true"`, named by its title with `aria-labelledby`; first focus goes to the title or the first control.
 
 #### Tooltip
@@ -1887,7 +1890,7 @@ with named values; there are no colour-named variants.
 - **Purpose and props.** A short explanation of a term or figure, shown on hover and keyboard focus. Props: `label`, `placement` (`top` by default), `delay` and `children` (one focusable element that exists to carry the explanation, such as an info icon or a focusable term, and not a control that acts or navigates). It uses the placement helper that `Popover` uses, and is not itself a dialog: it never takes focus and has no close button.
 - **Anatomy.** A small bubble in `surface-inverse` with `text-inverse` in `text-sm`, with an arrow and a maximum width. It never holds interactive content.
 - **States.** Opens on hover after `motion-base` and at once on focus. It stays open while the trigger is hovered or focused, and closes when neither remains, so leaving with the pointer does not close it while the trigger has focus, nor does blur while the pointer is over it. Escape closes it whichever opened it, whether or not the trigger has focus; it opens again on the next hover or focus. The pointer can move onto the bubble without closing it. Under reduced motion it appears without a transition.
-- **Tokens.** `surface-inverse`, `text-inverse`, `radius-control`, `elevation-2`, `layer-overlay`.
+- **Tokens.** `surface-inverse`, `text-inverse`, `radius-control`, `elevation-2`, `layer-modal` plus one (above a dialog's scrim, so a tooltip inside a dialog is seen).
 - **Accessibility.** The trigger carries `aria-describedby` pointing to the bubble (`role="tooltip"`). On touch devices it opens on tap and closes on the next tap. A tooltip is never the only place important information appears.
 
 ---
