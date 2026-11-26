@@ -22,8 +22,11 @@ const places = (value: number) => {
   return Math.min(20, Math.max(0, (mantissa.split('.')[1] ?? '').length - Number(exponent)));
 };
 
-/** A number in plain decimal notation, as ARIA requires (4e-7 is written 0.0000004). */
-const decimal = (value: number) => value.toFixed(places(value));
+/**
+ * A number in plain decimal notation, as ARIA requires (4e-7 is written 0.0000004). React types these attributes as numbers and
+ * would write 4e-7, so the string is handed over as the number it stands for.
+ */
+const decimal = (value: number) => value.toFixed(places(value)) as unknown as number;
 
 /** One value on a bounded scale. It is a measurement, not progress toward a goal: that is `Progress`. The bar is held to the scale; the written and spoken value is always the real one, so what is seen and what is heard agree. */
 export function Gauge({ value, min = 0, max = 100, unit, unitLabel, label, tone = 'accent' }: GaugeProps) {
