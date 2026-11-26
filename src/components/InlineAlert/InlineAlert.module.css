@@ -74,3 +74,14 @@
 .hasActions .message {
   flex: 1 1 var(--syn-layout-field-min);
 }
+
+/* A long action label wraps inside its button instead of being clipped: the button grows in height and keeps its full text. */
+.actions button {
+  height: auto;
+  min-height: var(--syn-layout-control-height-sm);
+  max-width: 100%;
+  padding-block: var(--syn-space-1);
+  white-space: normal;
+  overflow: visible;
+  text-align: start;
+}

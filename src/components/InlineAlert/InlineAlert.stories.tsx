@@ -142,3 +142,19 @@ export const LongActionLabelsWrapRatherThanOverflow: Story = {
     await expect(alert.scrollWidth).toBeLessThanOrEqual(alert.clientWidth);
   },
 };
+
+export const OneLongActionLabelIsShownInFullNotClipped: Story = {
+  render: () => (
+    <div data-syn-frame style={{ width: '16rem' }}>
+      <InlineAlert placement="page" variant="warning" title="Report ready" actions={<Button size="small">Download a complete copy of the report</Button>}>Your report has finished.</InlineAlert>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Download a complete copy of the report' });
+    // The whole label is inside the button: nothing is cut off horizontally or vertically.
+    await expect(button.scrollWidth).toBeLessThanOrEqual(button.clientWidth + 1);
+    await expect(button.scrollHeight).toBeLessThanOrEqual(button.clientHeight + 1);
+    const label = button.querySelector('span') as HTMLElement;
+    await expect(label.getBoundingClientRect().right).toBeLessThanOrEqual(button.getBoundingClientRect().right + 1);
+  },
+};
