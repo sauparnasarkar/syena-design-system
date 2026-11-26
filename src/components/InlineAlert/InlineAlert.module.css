@@ -58,7 +58,9 @@
 
 .actions {
   display: flex;
-  flex: none;
+  /* It may shrink to the width the alert has, so long labels wrap onto a second row instead of overflowing. */
+  flex: 0 1 auto;
+  max-width: 100%;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--syn-space-2);

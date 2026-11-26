@@ -39,6 +39,33 @@ export const AValueOutsideTheScaleIsClamped: Story = {
   },
 };
 
+export const AFractionalValueIsWrittenWithItsDecimals: Story = {
+  args: { label: 'Rate', value: 0.0004, min: 0, max: 0.001, unit: 'units' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const meter = canvas.getByRole('meter', { name: 'Rate' });
+    await expect(canvas.getByText('0.0004')).toBeInTheDocument();
+    await expect(meter).toHaveAttribute('aria-valuetext', '0.0004 units');
+    await expect(Math.round(parseFloat((meter.firstElementChild as HTMLElement).style.width))).toBe(40);
+  },
+};
+
+export const TheFillEndsInALineSoItsExtentShowsInAnyTone: Story = {
+  args: { label: 'Caution', value: 40, unit: '%', tone: 'caution' },
+  play: async ({ canvasElement }) => {
+    const fill = within(canvasElement).getByRole('meter').firstElementChild as HTMLElement;
+    await expect(parseFloat(getComputedStyle(fill).borderRightWidth)).toBeGreaterThan(0);
+  },
+};
+
+export const AnEmptyGaugeHasNoFillAndNoEdgeLine: Story = {
+  args: { label: 'Empty', value: 0, unit: '%' },
+  play: async ({ canvasElement }) => {
+    const empty = within(canvasElement).getByRole('meter').firstElementChild as HTMLElement;
+    await expect(parseFloat(getComputedStyle(empty).borderRightWidth)).toBe(0);
+  },
+};
+
 export const EachToneIsADifferentFill: Story = {
   render: () => (
     <div style={{ display: 'grid', gap: 'var(--syn-space-3)' }}>

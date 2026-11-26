@@ -16,6 +16,9 @@ export interface GaugeProps {
   tone?: 'accent' | 'positive' | 'caution' | 'negative';
 }
 
+/** The decimal places a number is written with (up to six), so the figure shows what the meter announces. */
+const places = (value: number) => Math.min(6, (String(value).split('.')[1] ?? '').replace(/e.*$/, '').length);
+
 /** One value on a bounded scale. It is a measurement, not progress toward a goal: that is `Progress`. The bar is held to the scale; the written and spoken value is always the real one, so what is seen and what is heard agree. */
 export function Gauge({ value, min = 0, max = 100, unit, unitLabel, label, tone = 'accent' }: GaugeProps) {
   const id = useId();
@@ -27,10 +30,10 @@ export function Gauge({ value, min = 0, max = 100, unit, unitLabel, label, tone 
     <div className={styles.gauge}>
       <div className={styles.head}>
         <span id={id} className={styles.label}>{label}</span>
-        <Figure size="sm" value={value} unit={unit} unitLabel={unitLabel} tone="primary" />
+        <Figure size="sm" value={value} decimals={places(value)} unit={unit} unitLabel={unitLabel} tone="primary" />
       </div>
       <div role="meter" aria-labelledby={id} aria-valuemin={min} aria-valuemax={max} aria-valuenow={clamped} aria-valuetext={[value, spoken].filter((part) => part !== undefined && part !== '').join(' ')} className={styles.track}>
-        <div className={[styles.fill, styles[tone]].join(' ')} style={{ width: `${percent}%` }} />
+        {percent > 0 ? <div className={[styles.fill, styles[tone]].join(' ')} style={{ width: `${percent}%` }} /> : <div className={styles.none} />}
       </div>
     </div>
   );

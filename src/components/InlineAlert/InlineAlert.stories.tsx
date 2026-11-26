@@ -126,3 +126,19 @@ export const ActionsWrapInANarrowContainerAndLeaveTheMessageReadable: Story = {
     await expect(canvas.getByRole('button', { name: 'Reload now' }).getBoundingClientRect().top).toBeGreaterThanOrEqual(message.getBoundingClientRect().bottom - 1);
   },
 };
+
+export const LongActionLabelsWrapRatherThanOverflow: Story = {
+  render: () => (
+    <div data-syn-frame style={{ width: '16rem' }}>
+      <InlineAlert placement="page" variant="warning" title="Changes pending" actions={<><Button size="small">Review changes</Button><Button size="small" variant="primary">Reload data</Button></>}>Some figures changed since you opened this page.</InlineAlert>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const frame = canvasElement.querySelector('[data-syn-frame]') as HTMLElement;
+    const edge = frame.getBoundingClientRect().right;
+    for (const button of canvas.getAllByRole('button')) await expect(button.getBoundingClientRect().right).toBeLessThanOrEqual(edge + 1);
+    const alert = canvas.getByRole('status');
+    await expect(alert.scrollWidth).toBeLessThanOrEqual(alert.clientWidth);
+  },
+};

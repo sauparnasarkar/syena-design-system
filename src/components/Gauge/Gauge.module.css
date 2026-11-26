@@ -27,7 +27,10 @@
 }
 
 .fill {
+  box-sizing: border-box;
   height: 100%;
+  /* The fill ends in a line, so the filled part can be told from the track whatever the tone. */
+  border-inline-end: var(--syn-layout-border-hairline) solid var(--syn-color-border-emphasis);
   border-radius: var(--syn-radius-pill);
   transition: width var(--syn-motion-base) var(--syn-easing-balanced);
 }
@@ -46,4 +49,9 @@
 
 .negative {
   background: var(--syn-color-signal-negative-fill);
+}
+
+/* An empty gauge has no fill and no edge line. */
+.none {
+  height: 100%;
 }
