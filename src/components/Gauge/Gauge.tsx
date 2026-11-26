@@ -22,6 +22,9 @@ const places = (value: number) => {
   return Math.min(20, Math.max(0, (mantissa.split('.')[1] ?? '').length - Number(exponent)));
 };
 
+/** A number in plain decimal notation, as ARIA requires (4e-7 is written 0.0000004). */
+const decimal = (value: number) => value.toFixed(places(value));
+
 /** One value on a bounded scale. It is a measurement, not progress toward a goal: that is `Progress`. The bar is held to the scale; the written and spoken value is always the real one, so what is seen and what is heard agree. */
 export function Gauge({ value, min = 0, max = 100, unit, unitLabel, label, tone = 'accent' }: GaugeProps) {
   const id = useId();
@@ -35,7 +38,7 @@ export function Gauge({ value, min = 0, max = 100, unit, unitLabel, label, tone 
         <span id={id} className={styles.label}>{label}</span>
         <Figure size="sm" value={value} decimals={places(value)} unit={unit} unitLabel={unitLabel} tone="primary" />
       </div>
-      <div role="meter" aria-labelledby={id} aria-valuemin={min} aria-valuemax={max} aria-valuenow={clamped} aria-valuetext={[formatFigure(value, { decimals: places(value) }), spoken].filter((part) => part !== undefined && part !== '').join(' ')} className={styles.track}>
+      <div role="meter" aria-labelledby={id} aria-valuemin={decimal(min)} aria-valuemax={decimal(max)} aria-valuenow={decimal(clamped)} aria-valuetext={[formatFigure(value, { decimals: places(value) }), spoken].filter((part) => part !== undefined && part !== '').join(' ')} className={styles.track}>
         {percent > 0 ? <div className={[styles.fill, styles[tone]].join(' ')} style={{ width: `${percent}%` }} /> : <div className={styles.none} />}
       </div>
     </div>
