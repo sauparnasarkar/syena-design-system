@@ -237,3 +237,16 @@ export const AHeldShortListKeepsItsScrollPosition: Story = {
     await expect(panel.scrollTop).toBe(150);
   },
 };
+
+export const ShortNamesStillFormARowOfTiles: Story = {
+  play: async ({ canvasElement }) => {
+    await userEvent.click(trigger(canvasElement));
+    const region = within(canvasElement).getByRole('region', { name: 'Products' });
+    const [first, second, third] = within(region).getAllByRole('link').map((link) => link.getBoundingClientRect());
+    // Three products sit side by side: the same top edge, each to the right of the one before.
+    await expect(second.top).toBeCloseTo(first.top, 0);
+    await expect(third.top).toBeCloseTo(first.top, 0);
+    await expect(second.left).toBeGreaterThan(first.left);
+    await expect(third.left).toBeGreaterThan(second.left);
+  },
+};

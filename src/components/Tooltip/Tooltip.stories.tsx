@@ -301,3 +301,14 @@ export const ItsArrowIsNotClippedAndItsTextScrollsInside: Story = {
     await expect(getComputedStyle(bubble()).overflowY).toBe('auto');
   },
 };
+
+const longLabel = 'A long explanation of how the figure is reached: every item in the period is counted once, partial items are not counted until they are done, and items cancelled before the period ends are left out of both the numerator and the denominator.';
+
+export const ALongLabelWrapsAtTheWidthTheBubbleIsAllowed: Story = {
+  render: () => <Demo label={longLabel} />,
+  play: async ({ canvasElement }) => {
+    await userEvent.hover(within(canvasElement).getByRole('button', { name: 'About completion' }));
+    await waitFor(() => expect(bubble()).toBeVisible());
+    await expect(bubble().parentElement!.getBoundingClientRect().width).toBeLessThan(window.innerWidth * 0.5);
+  },
+};

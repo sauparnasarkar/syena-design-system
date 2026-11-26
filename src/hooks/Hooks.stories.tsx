@@ -256,6 +256,7 @@ function TrapWithAHiddenLastControl() {
           <h2 tabIndex={-1}>Title</h2>
           <button type="button">First</button>
           <button type="button">Last visible</button>
+          <fieldset disabled><button type="button">In a disabled group</button></fieldset>
           <div hidden><button type="button">Hidden</button></div>
         </div>
       ) : null}

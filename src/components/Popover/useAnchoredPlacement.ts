@@ -4,6 +4,15 @@ import { placePopover, type PopoverAlign, type PopoverPlacement, type PopoverSid
 const GAP = 8;
 const MARGIN = 8;
 
+/** The widest the panel may be: the room there is, or the width its own stylesheet allows if that is narrower. */
+function widthLimit(el: HTMLElement, room: number) {
+  const held = el.style.maxWidth;
+  el.style.maxWidth = '';
+  const own = parseFloat(getComputedStyle(el).maxWidth);
+  el.style.maxWidth = held;
+  return Number.isFinite(own) ? Math.min(room, own) : room;
+}
+
 /** The panel's natural size at the width it will have: measured with its height limit lifted, then put back. */
 function measure(el: HTMLElement, maxWidth: number) {
   const held = el.style.maxHeight;
@@ -39,7 +48,7 @@ export function useAnchoredPlacement(anchor: HTMLElement | null, panel: RefObjec
       const view = window.visualViewport;
       const viewport = { width: view?.width ?? window.innerWidth, height: view?.height ?? window.innerHeight };
       const origin = { left: view?.offsetLeft ?? 0, top: view?.offsetTop ?? 0 };
-      const maxWidth = Math.max(0, viewport.width - 2 * MARGIN);
+      const maxWidth = widthLimit(el, Math.max(0, viewport.width - 2 * MARGIN));
       const size = measure(el, maxWidth);
       const seen = { left: rect.left - origin.left, right: rect.right - origin.left, top: rect.top - origin.top, bottom: rect.bottom - origin.top };
       const placed = placePopover(seen, size, viewport, side, align === 'center' ? 'start' : align, GAP, MARGIN);

@@ -26,8 +26,12 @@ export function useFocusTrap(container: RefObject<HTMLElement | null>, active: b
     const id = Symbol('focus trap');
     openTraps.push(id);
     const previous = document.activeElement as HTMLElement | null;
-    // Only controls that are rendered: one inside hidden content cannot take focus, and a wrap onto it would leave focus where it was.
-    const items = () => [...root.querySelectorAll<HTMLElement>(focusable)].filter((el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden');
+    // Only controls that can take focus: not one in hidden content, in a disabled group, or in something inert.
+    const reachable = (el: HTMLElement) => {
+      if (el.matches(':disabled') || el.closest('[inert]')) return false;
+      return typeof el.checkVisibility === 'function' ? el.checkVisibility({ visibilityProperty: true, contentVisibilityAuto: true }) : el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
+    };
+    const items = () => [...root.querySelectorAll<HTMLElement>(focusable)].filter(reachable);
     (items()[0] ?? root).focus();
     const onKey = (event: KeyboardEvent) => {
       if (openTraps[openTraps.length - 1] !== id) return;
