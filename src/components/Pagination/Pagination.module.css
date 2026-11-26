@@ -1,0 +1,65 @@
+.nav {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--syn-space-2);
+}
+
+.pages {
+  display: flex;
+  align-items: center;
+  gap: var(--syn-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.page {
+  min-width: var(--syn-layout-control-height);
+  height: var(--syn-layout-control-height);
+  padding: 0 var(--syn-space-2);
+  border: var(--syn-layout-border-hairline) solid transparent;
+  border-radius: var(--syn-radius-control);
+  background: transparent;
+  color: var(--syn-color-text-secondary);
+  font: var(--syn-type-text-md-weight) var(--syn-type-text-md-size) / var(--syn-type-text-md-line) var(--syn-type-text-md-family);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.page:hover:not([aria-current='page']) {
+  background: var(--syn-color-surface-sunken);
+}
+
+.page:focus-visible {
+  outline: var(--syn-layout-focus-ring-width) solid var(--syn-color-focus-ring);
+  outline-offset: var(--syn-layout-focus-ring-width);
+}
+
+/* The current page is filled and heavier: never colour alone. */
+.page[aria-current='page'] {
+  border-color: var(--syn-color-accent-fill);
+  background: var(--syn-color-accent-tint);
+  color: var(--syn-color-accent-text);
+  font-weight: 600;
+  cursor: default;
+}
+
+.gap {
+  padding: 0 var(--syn-space-1);
+  color: var(--syn-color-text-muted);
+}
+
+.status {
+  min-width: var(--syn-space-9);
+  color: var(--syn-color-text-secondary);
+  font: var(--syn-type-text-md-weight) var(--syn-type-text-md-size) / var(--syn-type-text-md-line) var(--syn-type-text-md-family);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+@media (pointer: coarse) {
+  .page {
+    min-width: var(--syn-layout-control-height-touch);
+    height: var(--syn-layout-control-height-touch);
+  }
+}
