@@ -1,21 +1,20 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
-import { themePolarity, type ThemeName } from '../generated/tokens';
+import type { ThemeName } from '../generated/tokens';
 import { resolveToken } from './resolveToken';
+import { checkThemePair, defaultThemePair, isPairChoice, resolveChoice, resolveTheme, type ThemePair } from './themePair';
 
-/** The themes a reader can choose between until a product names its own pair. */
-type OfferedThemeName = 'night' | 'tidewater';
-export type ThemeChoice = OfferedThemeName | 'system';
-/** The themes a product offers its readers. `ledger` exists as a theme but is not offered yet. */
-export const themeNames: OfferedThemeName[] = ['night', 'tidewater'];
-export { themePolarity };
+export type ThemeChoice = ThemeName | 'system';
+/** The themes offered when a product does not say. */
+export const themeNames: ThemeName[] = [...defaultThemePair];
+export type { ThemePair };
 
-/** The theme used for each system colour preference. */
-const systemTheme: Record<'dark' | 'light', ThemeName> = { dark: 'night', light: 'tidewater' };
 const query = '(prefers-color-scheme: dark)';
 
 export interface ThemeContextValue {
   /** The theme in force. */
   theme: ThemeName;
+  /** The two themes on offer: one dark, one light. */
+  themes: ThemePair;
   /** What the reader chose: a theme, or `system`. */
   choice: ThemeChoice;
   setChoice: (choice: ThemeChoice) => void;
@@ -27,13 +26,11 @@ export interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-const isChoice = (value: unknown): value is ThemeChoice => value === 'system' || themeNames.includes(value as OfferedThemeName);
-
-function readStored(key: string | null): ThemeChoice | null {
+function readStored(key: string | null, pair: ThemePair): ThemeChoice | null {
   if (!key || typeof window === 'undefined') return null;
   try {
     const stored = window.localStorage.getItem(key);
-    return isChoice(stored) ? stored : null;
+    return isPairChoice(pair, stored) ? stored : null;
   } catch {
     return null;
   }
@@ -48,15 +45,16 @@ function writeStored(key: string | null, choice: ThemeChoice) {
   }
 }
 
-const systemPreference = (): ThemeName =>
-  typeof window !== 'undefined' && window.matchMedia(query).matches ? systemTheme.dark : systemTheme.light;
+const prefersDark = (): boolean => typeof window !== 'undefined' && window.matchMedia(query).matches;
 
 export interface SynThemeProviderProps {
+  /** The two themes this product offers, one dark and one light. Defaults to `night` and `tidewater`. */
+  themes?: ThemePair;
   /** Forces a theme and ignores the stored choice. */
   theme?: ThemeName;
-  /** The choice used when nothing is stored. */
+  /** The choice used when nothing is stored; a theme that is not on offer is ignored. */
   defaultChoice?: ThemeChoice;
-  /** Where the choice is remembered; `null` turns remembering off. */
+  /** Where the choice is remembered, one key for each product; `null` turns remembering off. A stored value that is not on offer is ignored. */
   storageKey?: string | null;
   /** Also set `data-syn-theme` on the document element, so page background and portals follow the theme. */
   syncDocument?: boolean;
@@ -64,21 +62,33 @@ export interface SynThemeProviderProps {
   children: ReactNode;
 }
 
-export function SynThemeProvider({ theme: forced, defaultChoice = 'system', storageKey = 'syn-theme', syncDocument = true, onThemeChange, children }: SynThemeProviderProps) {
-  const [choice, setChoiceState] = useState<ThemeChoice>(() => readStored(storageKey) ?? defaultChoice);
-  const [system, setSystem] = useState<ThemeName>(systemPreference);
+export function SynThemeProvider({ themes: offered = defaultThemePair, theme: forced, defaultChoice = 'system', storageKey = 'syn-theme', syncDocument = true, onThemeChange, children }: SynThemeProviderProps) {
+  // Checked on every render, so a changed or mutated array cannot slip past a cached key; the provider then keeps its own copy, compared by value.
+  const checked = checkThemePair(offered);
+  const pairKey = JSON.stringify(checked);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const pair = useMemo(() => Object.freeze([...checked]) as unknown as ThemePair, [pairKey]);
+  // The reader's choice in this session, if they made one; what is stored is read again when the pair changes, since a value that was not on offer may now be.
+  // It belongs to the storage key it was made under: a provider reused for another product does not carry it across.
+  // Kept for each key, so with storage blocked a choice lasts for the session even after another product is shown and this one comes back.
+  const [session, setSession] = useState<Map<string | null, ThemeChoice>>(() => new Map());
+  const chosen = session.get(storageKey) ?? null;
+  const stored = useMemo(() => readStored(storageKey, pair), [storageKey, pair]);
+  const [dark, setDark] = useState<boolean>(prefersDark);
   const [scope, setScope] = useState<HTMLElement | null>(null);
   const listeners = useRef(new Set<() => void>());
 
   useEffect(() => {
     const media = window.matchMedia(query);
-    const update = () => setSystem(media.matches ? systemTheme.dark : systemTheme.light);
+    const update = () => setDark(media.matches);
     update();
     media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
   }, []);
 
-  const theme: ThemeName = forced ?? (choice === 'system' ? system : choice);
+  // A choice that is no longer on offer (the pair changed) gives way to what is stored, then to a valid default, else to `system`.
+  const choice: ThemeChoice = isPairChoice(pair, chosen) ? chosen : resolveChoice(pair, stored, defaultChoice);
+  const theme: ThemeName = resolveTheme(pair, forced, choice, dark);
 
   useLayoutEffect(() => {
     if (!syncDocument) return undefined;
@@ -103,11 +113,12 @@ export function SynThemeProvider({ theme: forced, defaultChoice = 'system', stor
   }, []);
 
   const setChoice = useCallback((next: ThemeChoice) => {
-    setChoiceState(next);
+    if (!isPairChoice(pair, next)) return;
+    setSession((was) => new Map(was).set(storageKey, next));
     writeStored(storageKey, next);
-  }, [storageKey]);
+  }, [storageKey, pair]);
 
-  const value = useMemo(() => ({ theme, choice, setChoice, scope, subscribe }), [theme, choice, setChoice, scope, subscribe]);
+  const value = useMemo(() => ({ theme, themes: pair, choice, setChoice, scope, subscribe }), [theme, pair, choice, setChoice, scope, subscribe]);
 
   return (
     <ThemeContext.Provider value={value}>
