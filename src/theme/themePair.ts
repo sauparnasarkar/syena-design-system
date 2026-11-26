@@ -8,8 +8,11 @@ export const defaultThemePair: ThemePair = ['night', 'tidewater'];
 
 /** The pair itself, after checking that it holds one dark and one light theme. */
 export function checkThemePair(pair: ThemePair): ThemePair {
+  // Configuration can arrive as JSON or from untyped code: the pair is exactly two names, and each is a theme the system has.
+  if (!Array.isArray(pair) || pair.length !== 2) throw new Error(`SynThemeProvider: themes must be exactly two theme names, got ${JSON.stringify(pair)}`);
   const [first, second] = pair;
-  if (!(first in themePolarity) || !(second in themePolarity)) throw new Error(`SynThemeProvider: unknown theme in themes [${pair.join(', ')}]`);
+  const known = (name: unknown) => typeof name === 'string' && Object.hasOwn(themePolarity, name);
+  if (!known(first) || !known(second)) throw new Error(`SynThemeProvider: unknown theme in themes [${pair.join(', ')}]`);
   if (themePolarity[first] === themePolarity[second]) throw new Error(`SynThemeProvider: themes must hold one dark and one light theme, got [${pair.join(', ')}]`);
   return pair;
 }

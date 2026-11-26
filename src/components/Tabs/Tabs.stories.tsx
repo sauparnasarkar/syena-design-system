@@ -108,6 +108,37 @@ export const KeyboardFocusShowsTheRing: Story = {
   },
 };
 
+export const AfterArrowingAwayFromTheSelectedTabTabLeavesTheList: Story = {
+  render: () => (<><Demo /><button type="button" style={{ margin: 'var(--syn-space-5)' }}>After the tabs</button></>),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('tab', { name: 'Detail' }));
+    await userEvent.keyboard('{ArrowLeft}');
+    await expect(canvas.getByRole('tab', { name: 'Summary' })).toHaveFocus();
+    // The tab stop followed focus: Tab leaves the list (to the panel, then on), and does not go back to the selected tab.
+    await userEvent.tab();
+    await expect(canvas.getByRole('tabpanel')).toHaveFocus();
+    await userEvent.tab();
+    await expect(canvas.getByRole('button', { name: 'After the tabs' })).toHaveFocus();
+    // Coming back in, the selected tab is the stop again.
+    await userEvent.tab({ shift: true });
+    await userEvent.tab({ shift: true });
+    await expect(canvas.getByRole('tab', { name: 'Detail' })).toHaveFocus();
+  },
+};
+
+export const MountingTheTabsDoesNotScrollThePage: Story = {
+  parameters: { layout: 'fullscreen' },
+  render: () => (
+    <div style={{ paddingTop: '150vh' }}>
+      <Demo items={Array.from({ length: 14 }, (_, i) => ({ id: `t${i}`, label: `Section ${i + 1}` }))} idPrefix="below" />
+    </div>
+  ),
+  play: async () => {
+    await expect(window.scrollY).toBe(0);
+  },
+};
+
 export const Segmented: Story = { render: () => <Demo variant="segmented" /> };
 export const Small: Story = { render: () => <Demo size="small" /> };
 
@@ -136,9 +167,9 @@ export const AListWiderThanItsContainerScrollsAndKeepsTheSelectionInView: Story 
 
 const Gallery = () => (
   <div style={{ display: 'grid', gap: 'var(--syn-space-4)', padding: 'var(--syn-space-5)' }}>
-    <Demo />
-    <Demo variant="segmented" />
-    <Demo size="small" />
+    <Demo idPrefix="gallery-underline" />
+    <Demo idPrefix="gallery-segmented" variant="segmented" />
+    <Demo idPrefix="gallery-small" size="small" />
   </div>
 );
 export const AllStates: Story = { render: () => <Gallery /> };
