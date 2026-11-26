@@ -248,5 +248,9 @@ export const ShortNamesStillFormARowOfTiles: Story = {
     await expect(third.top).toBeCloseTo(first.top, 0);
     await expect(second.left).toBeGreaterThan(first.left);
     await expect(third.left).toBeGreaterThan(second.left);
+    // And the tiles are inside the panel, which is wider than one tile.
+    const panel = region.getBoundingClientRect();
+    await expect(panel.width).toBeGreaterThan(first.width * 2);
+    await expect(third.right).toBeLessThanOrEqual(panel.right);
   },
 };

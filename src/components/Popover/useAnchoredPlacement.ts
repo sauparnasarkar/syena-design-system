@@ -8,9 +8,10 @@ const MARGIN = 8;
 function widthLimit(el: HTMLElement, room: number) {
   const held = el.style.maxWidth;
   el.style.maxWidth = '';
-  const own = parseFloat(getComputedStyle(el).maxWidth);
+  const written = getComputedStyle(el).maxWidth;
   el.style.maxWidth = held;
-  return Number.isFinite(own) ? Math.min(room, own) : room;
+  // Only a length counts: a percentage, or none, leaves the room as the limit.
+  return written.endsWith('px') ? Math.min(room, parseFloat(written)) : room;
 }
 
 /** The panel's natural size at the width it will have: measured with its height limit lifted, then put back. */

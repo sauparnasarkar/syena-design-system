@@ -58,7 +58,7 @@
 
 .grid {
   display: grid;
-  /* The columns come from the number of products (at most three), set where it is rendered: a panel sized to its content has no width to fill. */
+  grid-template-columns: repeat(auto-fill, minmax(var(--syn-space-9), 1fr));
   gap: var(--syn-space-2);
   margin: 0;
   padding: 0;

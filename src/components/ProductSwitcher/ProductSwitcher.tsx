@@ -32,6 +32,8 @@ export function ProductSwitcher({ products, currentId, message, collapsed = fals
   const panel = useRef<HTMLDivElement>(null);
   const panelId = useId();
   const current = products.find((product) => product.id === currentId) ?? products[0];
+  // Up to three tiles across; the panel is as wide as that many tiles need, and less where there is not the room, so the grid wraps instead.
+  const columns = Math.max(1, Math.min(products.length, 3));
   const placed = useAnchoredPlacement(trigger, panel, open, 'bottom', 'start');
 
   const close = useCallback((returnFocus = true) => {
@@ -76,9 +78,9 @@ export function ProductSwitcher({ products, currentId, message, collapsed = fals
       </button>
       {open ? (
         // The panel takes the popover's surface, border and elevation by wearing its class, so the two stay the same.
-        <div ref={panel} id={panelId} role="region" aria-label={label} className={[popover.panel, styles.panel].join(' ')} style={{ width: 'max-content', maxWidth: placed ? `${placed.maxWidth}px` : undefined, top: placed?.top ?? 0, left: placed?.left ?? 0, maxHeight: placed ? placed.maxHeight : undefined, visibility: placed ? 'visible' : 'hidden' }}>
+        <div ref={panel} id={panelId} role="region" aria-label={label} className={[popover.panel, styles.panel].join(' ')} style={{ width: `calc(${columns} * var(--syn-space-9) + ${columns - 1} * var(--syn-space-2) + 2 * var(--syn-space-5) + 2 * var(--syn-layout-border-hairline))`, maxWidth: placed ? `${placed.maxWidth}px` : undefined, top: placed?.top ?? 0, left: placed?.left ?? 0, maxHeight: placed ? placed.maxHeight : undefined, visibility: placed ? 'visible' : 'hidden' }}>
           <div className={styles.content}>
-            <ul className={styles.grid} style={{ gridTemplateColumns: `repeat(${Math.min(products.length, 3)}, minmax(var(--syn-space-9), 1fr))` }}>
+            <ul className={styles.grid}>
               {products.map((product) => (
                 <li key={product.id}>
                   <a href={product.href} className={styles.tile} aria-current={product.id === current.id ? 'true' : undefined}>
