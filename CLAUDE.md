@@ -27,3 +27,4 @@ npm run check:allowlist  # prefix, vocabulary, class, colour-literal and data-at
 ## Conventions
 - One component per folder: Name.tsx, Name.module.css, Name.stories.tsx; export from src/index.ts.
 - PR descriptions name the FOUNDATIONS.md section they implement.
+- PR descriptions and PR comments end with no tool attribution and no session links.
