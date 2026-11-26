@@ -185,6 +185,28 @@ export const TheSelectedTabIsRevealedWhenItsItemsArriveLate: Story = {
   },
 };
 
+function Relabelling() {
+  const [long, setLong] = useState(false);
+  const items = many.map((item, i) => (i === 0 && long ? { ...item, label: 'A much longer first section label than before' } : item));
+  return (
+    <div style={{ width: '14rem', padding: 'var(--syn-space-3)' }}>
+      <button type="button" onClick={() => setLong(true)}>Lengthen</button>
+      <Tabs label="Sections" idPrefix="relabel" items={items} activeId="t11" onChange={() => undefined} />
+      <div role="tabpanel" id={panelId('relabel', 't11')} aria-labelledby={tabId('relabel', 't11')} tabIndex={0}>Panel</div>
+    </div>
+  );
+}
+
+export const TheSelectedTabIsRevealedWhenALabelBeforeItGrows: Story = {
+  render: () => <Relabelling />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Lengthen' }));
+    const list = canvas.getByRole('tablist');
+    await waitFor(() => expect(canvas.getByRole('tab', { name: 'Section 12' }).getBoundingClientRect().right).toBeLessThanOrEqual(list.getBoundingClientRect().right + 1));
+  },
+};
+
 export const Segmented: Story = { render: () => <Demo variant="segmented" /> };
 export const Small: Story = { render: () => <Demo size="small" /> };
 
