@@ -1,0 +1,49 @@
+.bubble {
+  position: fixed;
+  /* Above a dialog's scrim as well: a tooltip inside a dialog must be seen. */
+  z-index: calc(var(--syn-layer-modal) + 1);
+  box-sizing: border-box;
+  width: max-content;
+  max-width: calc(var(--syn-layout-field-min) * 1.5);
+  padding: var(--syn-space-1) var(--syn-space-2);
+  border-radius: var(--syn-radius-control);
+  background: var(--syn-color-surface-inverse);
+  color: var(--syn-color-text-inverse);
+  box-shadow: var(--syn-elevation-2);
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+  letter-spacing: var(--syn-type-text-sm-tracking);
+  overflow-wrap: anywhere;
+}
+
+.bubble[hidden] {
+  display: none;
+}
+
+/* The arrow points at the trigger: a square turned 45 degrees, half of it hidden behind the bubble. */
+.arrow {
+  position: absolute;
+  width: var(--syn-space-2);
+  height: var(--syn-space-2);
+  background: inherit;
+  rotate: 45deg;
+}
+
+.bubble[data-syn-side='top'] .arrow {
+  bottom: calc(var(--syn-space-2) / -2);
+  translate: -50% 0;
+}
+
+.bubble[data-syn-side='bottom'] .arrow {
+  top: calc(var(--syn-space-2) / -2);
+  translate: -50% 0;
+}
+
+.bubble[data-syn-side='left'] .arrow {
+  right: calc(var(--syn-space-2) / -2);
+  translate: 0 -50%;
+}
+
+.bubble[data-syn-side='right'] .arrow {
+  left: calc(var(--syn-space-2) / -2);
+  translate: 0 -50%;
+}

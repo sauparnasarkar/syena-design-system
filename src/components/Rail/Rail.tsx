@@ -17,8 +17,8 @@ export interface RailProps extends Pick<SidebarNavProps, 'groups' | 'footerItems
   brandHref?: string;
   /** Called when the brand link is activated, for an app that navigates without a page load. It also closes the drawer. */
   onBrandClick?: (event: MouseEvent) => void;
-  /** An optional slot above the mark, empty by default, for a switcher between related products. */
-  productSwitcher?: ReactNode;
+  /** An optional slot above the mark, empty by default, for a switcher between related products. A function is told whether the rail is collapsed, so it can show a mark only. */
+  productSwitcher?: RailSlot;
   /** A persistent action below the mark and above the destinations, for example the entry to an assistant. A function is told whether the rail is collapsed, so it can show an icon only. */
   actions?: RailSlot;
   /** Utilities at the foot, above the collapse control, for example a theme switch. They are in the drawer too. */
@@ -88,7 +88,7 @@ export function Rail({ logo, productName, brandHref, onBrandClick, productSwitch
   );
   return (
     <nav ref={nav} aria-label={ariaLabel} className={[styles.rail, isCollapsed ? styles.collapsed : styles.expanded, narrow ? styles.short : '', overlaid ? styles.overlaid : ''].join(' ')}>
-      {productSwitcher ? <div className={styles.switcher}>{productSwitcher}</div> : null}
+      {productSwitcher ? <div className={styles.switcher}>{typeof productSwitcher === 'function' ? productSwitcher(isCollapsed) : productSwitcher}</div> : null}
       <div className={styles.brand}>
         {brandHref ? (
           <a

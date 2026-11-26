@@ -2,6 +2,8 @@ import { useEffect, type RefObject } from 'react';
 
 let holders = 0;
 let unlock: (() => void) | null = null;
+/** The panels that are open and may scroll, whichever asked first: a dialog opened from another must scroll too. */
+const panels = new Set<RefObject<HTMLElement | null>>();
 
 /** Whether a drag of `dy` pixels (positive: finger moving down) can scroll `el` or any scrolling ancestor up to and including `limit`. */
 function canScrollWithin(el: Element | null, limit: HTMLElement, dy: number): boolean {
@@ -17,7 +19,7 @@ function canScrollWithin(el: Element | null, limit: HTMLElement, dy: number): bo
   return false;
 }
 
-function lock(allow: RefObject<HTMLElement | null>) {
+function lock() {
   const root = document.documentElement;
   const body = document.body;
   const saved = { root: root.style.overflow, body: body.style.overflow, pad: body.style.paddingRight };
@@ -33,9 +35,11 @@ function lock(allow: RefObject<HTMLElement | null>) {
   const onStart = (event: TouchEvent) => { startY = event.touches[0]?.clientY ?? 0; };
   const onMove = (event: TouchEvent) => {
     if (event.touches.length !== 1) return; // a pinch is the browser's zoom, not a scroll
-    const panel = allow.current;
     const dy = event.touches[0].clientY - startY;
-    if (panel && event.target instanceof Node && panel.contains(event.target) && canScrollWithin(event.target as Element, panel, dy)) return;
+    for (const ref of panels) {
+      const panel = ref.current;
+      if (panel && event.target instanceof Node && panel.contains(event.target) && canScrollWithin(event.target as Element, panel, dy)) return;
+    }
     event.preventDefault();
   };
   document.addEventListener('touchstart', onStart, { passive: true });
@@ -57,9 +61,11 @@ function lock(allow: RefObject<HTMLElement | null>) {
 export function useScrollLock(allow: RefObject<HTMLElement | null>, active: boolean) {
   useEffect(() => {
     if (!active) return undefined;
-    if (holders === 0) unlock = lock(allow);
+    panels.add(allow);
+    if (holders === 0) unlock = lock();
     holders += 1;
     return () => {
+      panels.delete(allow);
       holders -= 1;
       if (holders === 0) { unlock?.(); unlock = null; }
     };

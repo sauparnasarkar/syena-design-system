@@ -1,0 +1,91 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--syn-layer-modal);
+  display: grid;
+  place-items: center;
+  /* Inside the device's insets (a notch, rounded corners, a home indicator), in portrait and in landscape. */
+  padding: calc(var(--syn-space-4) + env(safe-area-inset-top, 0px)) calc(var(--syn-space-4) + env(safe-area-inset-right, 0px)) calc(var(--syn-space-4) + env(safe-area-inset-bottom, 0px)) calc(var(--syn-space-4) + env(safe-area-inset-left, 0px));
+}
+
+/* The sheet fills the screen, so the insets move into the sheet's own padding and the scrim covers the whole viewport beneath it. */
+.sheetOverlay {
+  padding: 0;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--syn-color-shadow) 55%, transparent);
+}
+
+.dialog {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, calc(var(--syn-layout-field-min) * 3));
+  max-height: 100%;
+  overflow: hidden;
+  border: var(--syn-layout-border-hairline) solid var(--syn-color-border-default);
+  border-radius: var(--syn-radius-card);
+  background: var(--syn-color-surface-raised);
+  color: var(--syn-color-text-secondary);
+  box-shadow: var(--syn-elevation-3);
+}
+
+.small {
+  width: min(100%, calc(var(--syn-layout-field-min) * 2));
+}
+
+.sheet {
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  border: 0;
+  border-radius: 0;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+
+.dialog:focus {
+  outline: none;
+}
+
+.header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--syn-space-3);
+  padding: var(--syn-space-4) var(--syn-space-5) var(--syn-space-2);
+}
+
+.title {
+  margin: 0;
+  color: var(--syn-color-text-primary);
+  font: var(--syn-type-title-sm-weight) var(--syn-type-title-sm-size) / var(--syn-type-title-sm-line) var(--syn-type-title-sm-family);
+  letter-spacing: var(--syn-type-title-sm-tracking);
+}
+
+.title:focus {
+  outline: none;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--syn-space-2) var(--syn-space-5) var(--syn-space-4);
+  font: var(--syn-type-text-md-weight) var(--syn-type-text-md-size) / var(--syn-type-text-md-line) var(--syn-type-text-md-family);
+}
+
+.footer {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--syn-space-2);
+  padding: var(--syn-space-3) var(--syn-space-5) var(--syn-space-4);
+  border-top: var(--syn-layout-border-hairline) solid var(--syn-color-border-subtle);
+}
