@@ -22,7 +22,7 @@ const icon: Record<AlertVariant, IconProps['name']> = { default: 'info', warning
 /** A message inside the flow. Errors are announced at once; the others politely. The icon and the text carry the meaning, not the colour. */
 export function InlineAlert({ variant = 'default', title, children, onDismiss, placement = 'inline', actions }: InlineAlertProps) {
   return (
-    <div role={variant === 'error' ? 'alert' : 'status'} className={[styles.alert, styles[variant], placement === 'page' ? styles.page : ''].filter(Boolean).join(' ')}>
+    <div role={variant === 'error' ? 'alert' : 'status'} className={[styles.alert, styles[variant], placement === 'page' ? styles.page : '', actions ? styles.hasActions : ''].filter(Boolean).join(' ')}>
       <Icon name={icon[variant]} className={styles.icon} />
       <p className={styles.message}>
         {title ? <span className={styles.title}>{title}. </span> : null}

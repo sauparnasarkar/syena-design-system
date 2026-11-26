@@ -106,3 +106,23 @@ const PageGallery = () => (
 export const PageInNight: Story = { render: () => <PageGallery />, globals: { theme: 'night' } };
 export const PageInTidewater: Story = { render: () => <PageGallery />, globals: { theme: 'tidewater' } };
 export const PageInLedger: Story = { render: () => <PageGallery />, globals: { theme: 'ledger' } };
+
+export const ActionsWrapInANarrowContainerAndLeaveTheMessageReadable: Story = {
+  render: () => (
+    <div data-syn-frame style={{ width: '16rem' }}>
+      <InlineAlert placement="page" variant="warning" title="Update available" onDismiss={() => undefined} actions={<><Button size="small">Later</Button><Button size="small" variant="primary">Reload now</Button></>}>A newer version of this page is ready to load.</InlineAlert>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const alert = canvas.getByRole('status');
+    const message = canvas.getByText(/A newer version/);
+    await expect(message.getBoundingClientRect().width).toBeGreaterThan(120);
+    // Nothing spills out of the container.
+    await expect(alert.scrollWidth).toBeLessThanOrEqual(alert.clientWidth);
+    const frame = canvasElement.querySelector('[data-syn-frame]') as HTMLElement;
+    for (const button of canvas.getAllByRole('button')) await expect(button.getBoundingClientRect().right).toBeLessThanOrEqual(frame.getBoundingClientRect().right + 1);
+    // The actions sit below the message, not beside a message squeezed to nothing.
+    await expect(canvas.getByRole('button', { name: 'Reload now' }).getBoundingClientRect().top).toBeGreaterThanOrEqual(message.getBoundingClientRect().bottom - 1);
+  },
+};

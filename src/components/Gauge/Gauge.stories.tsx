@@ -31,8 +31,11 @@ export const AValueOutsideTheScaleIsClamped: Story = {
   args: { label: 'Over', value: 140, unit: '%' },
   play: async ({ canvasElement }) => {
     const meter = within(canvasElement).getByRole('meter');
+    // The bar is held to the scale; the written and spoken value is the real one, so they agree.
     await expect(meter).toHaveAttribute('aria-valuenow', '100');
     await expect((meter.firstElementChild as HTMLElement).style.width).toBe('100%');
+    await expect(meter).toHaveAttribute('aria-valuetext', '140 percent');
+    await expect(within(canvasElement).getByText('140')).toBeInTheDocument();
   },
 };
 

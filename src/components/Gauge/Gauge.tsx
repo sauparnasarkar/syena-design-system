@@ -16,7 +16,7 @@ export interface GaugeProps {
   tone?: 'accent' | 'positive' | 'caution' | 'negative';
 }
 
-/** One value on a bounded scale. It is a measurement, not progress toward a goal: that is `Progress`. */
+/** One value on a bounded scale. It is a measurement, not progress toward a goal: that is `Progress`. The bar is held to the scale; the written and spoken value is always the real one, so what is seen and what is heard agree. */
 export function Gauge({ value, min = 0, max = 100, unit, unitLabel, label, tone = 'accent' }: GaugeProps) {
   const id = useId();
   const clamped = Math.min(max, Math.max(min, value));
@@ -29,7 +29,7 @@ export function Gauge({ value, min = 0, max = 100, unit, unitLabel, label, tone 
         <span id={id} className={styles.label}>{label}</span>
         <Figure size="sm" value={value} unit={unit} unitLabel={unitLabel} tone="primary" />
       </div>
-      <div role="meter" aria-labelledby={id} aria-valuemin={min} aria-valuemax={max} aria-valuenow={clamped} aria-valuetext={[clamped, spoken].filter((part) => part !== undefined && part !== '').join(' ')} className={styles.track}>
+      <div role="meter" aria-labelledby={id} aria-valuemin={min} aria-valuemax={max} aria-valuenow={clamped} aria-valuetext={[value, spoken].filter((part) => part !== undefined && part !== '').join(' ')} className={styles.track}>
         <div className={[styles.fill, styles[tone]].join(' ')} style={{ width: `${percent}%` }} />
       </div>
     </div>

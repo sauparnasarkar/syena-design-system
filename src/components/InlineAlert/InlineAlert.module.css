@@ -63,3 +63,12 @@
   align-items: center;
   gap: var(--syn-space-2);
 }
+
+/* With actions the row may wrap: the message keeps a readable width and the actions drop below it instead of squeezing it. */
+.hasActions {
+  flex-wrap: wrap;
+}
+
+.hasActions .message {
+  flex: 1 1 var(--syn-layout-field-min);
+}
