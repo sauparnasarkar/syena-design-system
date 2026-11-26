@@ -1651,7 +1651,7 @@ with named values; there are no colour-named variants.
 #### Gauge
 
 - **Purpose and props.** One value on a bounded scale, such as a coverage percentage. Props: `value`, `min` (0), `max` (100), `unit` (the suffix), `unitLabel` (the unit spelled for screen readers), `label` and `tone` (`accent` by default, or `positive`, `caution`, `negative` where the metric defines it). Colour is chosen by tone, never by a raw value.
-- **Anatomy.** A horizontal track of `space(2)` thickness with a fill, and the value written as a `Figure`. It is not a chart: no ticks, and no animation under reduced motion.
+- **Anatomy.** A horizontal track of `space(2)` thickness with a fill, and the value written as a `Figure` with every decimal place the value has, so what is read and what is heard agree. The track has its own boundary and the fill ends in a line in `border-emphasis`, so the filled proportion can be seen against the track whatever the tone. It is not a chart: no ticks, and no animation under reduced motion.
 - **States.** Static.
 - **Tokens.** `border-default` (track), `accent-fill` or the matching signal fill, `type-figure-sm`.
 - **Accessibility.** `role="meter"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, a name, and `aria-valuetext` carrying the value with its unit spelled out. `Progress` is determinate task progress; `Gauge` is a measurement.
@@ -1682,7 +1682,7 @@ with named values; there are no colour-named variants.
 
 - **Purpose and props.** A short explanation of a term or figure, shown on hover and keyboard focus. Props: `label`, `placement` (`top` by default), `delay` and `children` (one focusable element that exists to carry the explanation, such as an info icon or a focusable term, and not a control that acts or navigates). It uses the placement helper that `Popover` uses, and is not itself a dialog: it never takes focus and has no close button.
 - **Anatomy.** A small bubble in `surface-inverse` with `text-inverse` in `text-sm`, with an arrow and a maximum width. It never holds interactive content.
-- **States.** Opens on hover after `motion-base` and at once on focus; closes on Escape, on blur and when the pointer leaves; the pointer can move onto the bubble without closing it. Under reduced motion it appears without a transition.
+- **States.** Opens on hover after `motion-base` and at once on focus. It stays open while the trigger is hovered or focused, and closes when neither remains, so leaving with the pointer does not close it while the trigger has focus, nor does blur while the pointer is over it. Escape closes it whichever opened it, whether or not the trigger has focus; it opens again on the next hover or focus. The pointer can move onto the bubble without closing it. Under reduced motion it appears without a transition.
 - **Tokens.** `surface-inverse`, `text-inverse`, `radius-control`, `elevation-2`, `layer-overlay`.
 - **Accessibility.** The trigger carries `aria-describedby` pointing to the bubble (`role="tooltip"`). On touch devices it opens on tap and closes on the next tap. A tooltip is never the only place important information appears.
 
