@@ -230,3 +230,39 @@ export const AChoiceMadeForOneProductDoesNotOverrideAnotherProductsStoredOne: St
     await waitFor(() => expect(text(region, 'choice')).toBe('tidewater'));
   },
 };
+
+function RoundTrip() {
+  const [key, setKey] = useState('syn-story-blocked-a');
+  return (
+    <>
+      <button type="button" onClick={() => setKey('syn-story-blocked-b')}>To B</button>
+      <button type="button" onClick={() => setKey('syn-story-blocked-a')}>To A</button>
+      <SynThemeProvider themes={['night', 'tidewater']} defaultChoice="system" storageKey={key} syncDocument={false}>
+        <Readout />
+      </SynThemeProvider>
+    </>
+  );
+}
+
+export const AChoiceSurvivesAnAToBToARoundTripWithoutStorage: Story = {
+  render: () => <RoundTrip />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const region = canvas.getByRole('region', { name: 'Theme readout' });
+    window.localStorage.removeItem('syn-story-blocked-a');
+    window.localStorage.removeItem('syn-story-blocked-b');
+    // Storage is blocked: nothing can be written, so the session is the only place a choice lives.
+    const write = Storage.prototype.setItem;
+    Storage.prototype.setItem = () => { throw new DOMException('blocked', 'SecurityError'); };
+    try {
+      await userEvent.selectOptions(canvas.getByLabelText('Theme'), 'night');
+      await userEvent.click(canvas.getByRole('button', { name: 'To B' }));
+      await userEvent.selectOptions(canvas.getByLabelText('Theme'), 'tidewater');
+      await userEvent.click(canvas.getByRole('button', { name: 'To A' }));
+      // A's own choice is still held for the session.
+      await waitFor(() => expect(text(region, 'choice')).toBe('night'));
+    } finally {
+      Storage.prototype.setItem = write;
+    }
+  },
+};
