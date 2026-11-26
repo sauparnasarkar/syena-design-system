@@ -16,3 +16,19 @@ export function hoverStyle(element: Element): CSSStyleDeclaration | null {
   }
   return null;
 }
+
+/** The declarations a stylesheet applies to `element` on a touch device (a coarse pointer): the test browser has a fine one, so a story reads the rule. */
+export function coarseStyle(element: Element): CSSStyleDeclaration | null {
+  for (const sheet of Array.from(document.styleSheets)) {
+    let rules: CSSRuleList;
+    try { rules = sheet.cssRules; } catch { continue; }
+    for (const rule of Array.from(rules)) {
+      if (!(rule instanceof CSSMediaRule) || !rule.conditionText.includes('pointer: coarse')) continue;
+      for (const inner of Array.from(rule.cssRules)) {
+        if (!(inner instanceof CSSStyleRule)) continue;
+        try { if (element.matches(inner.selectorText)) return inner.style; } catch { /* a selector the browser cannot match here */ }
+      }
+    }
+  }
+  return null;
+}

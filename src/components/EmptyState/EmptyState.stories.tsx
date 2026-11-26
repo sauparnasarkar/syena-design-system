@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { Button } from '../Button/Button';
+import { coarseStyle } from '../storyHover';
 import { EmptyState } from './EmptyState';
 
 const meta: Meta<typeof EmptyState> = { title: 'Feedback/EmptyState', component: EmptyState, decorators: [(Story) => <div style={{ padding: 'var(--syn-space-5)', width: 'min(100%, 40rem)' }}><Story /></div>] };
@@ -67,3 +68,28 @@ const Gallery = () => (
 export const AllStates: Story = { render: () => <Gallery /> };
 export const AllStatesTidewater: Story = { render: () => <Gallery />, globals: { theme: 'tidewater' } };
 export const AllStatesLedger: Story = { render: () => <Gallery />, globals: { theme: 'ledger' } };
+
+export const ABlockMessageIsAllowed: Story = {
+  args: { title: 'Nothing here', message: <><p>First paragraph.</p><p>Second paragraph.</p></> },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getAllByText(/paragraph/)).toHaveLength(2);
+    await expect(canvasElement.querySelector('p p')).toBeNull();
+  },
+};
+
+export const ALongActionLabelWrapsInANarrowContainer: Story = {
+  render: () => (
+    <div data-syn-frame style={{ width: '14rem' }}>
+      <EmptyState title="Report ready" actions={<Button>Download a complete copy of the report</Button>} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const frame = canvasElement.querySelector('[data-syn-frame]') as HTMLElement;
+    const button = canvas.getByRole('button', { name: 'Download a complete copy of the report' });
+    await expect(button.getBoundingClientRect().right).toBeLessThanOrEqual(frame.getBoundingClientRect().right + 1);
+    await expect(button.scrollWidth).toBeLessThanOrEqual(button.clientWidth + 1);
+    await expect(button.scrollHeight).toBeLessThanOrEqual(button.clientHeight + 1);
+    await expect(coarseStyle(button)?.getPropertyValue('min-height')).toContain('--syn-layout-control-height-touch');
+  },
+};

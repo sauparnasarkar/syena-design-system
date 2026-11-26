@@ -55,3 +55,24 @@
 .negative .icon {
   color: var(--syn-color-signal-negative-text);
 }
+
+.message p {
+  margin: 0;
+}
+
+/* A long action label wraps inside its button instead of overflowing a narrow container, and a touch device keeps its minimum. */
+.actions button {
+  height: auto;
+  min-height: var(--syn-layout-control-height-sm);
+  max-width: 100%;
+  padding-block: var(--syn-space-1);
+  white-space: normal;
+  overflow: visible;
+  text-align: center;
+}
+
+@media (pointer: coarse) {
+  .actions button {
+    min-height: var(--syn-layout-control-height-touch);
+  }
+}

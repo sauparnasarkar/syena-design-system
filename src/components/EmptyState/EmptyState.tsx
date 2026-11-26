@@ -31,7 +31,7 @@ export function EmptyState({ title, message, icon, headingLevel = 3, tone = 'neu
     <div role={role} className={[styles.empty, styles[tone]].join(' ')}>
       {glyph ? <Icon name={glyph} size="large" className={styles.icon} /> : null}
       <Heading className={styles.title}>{title}</Heading>
-      {message ? <p className={styles.message}>{message}</p> : null}
+      {message ? <div className={styles.message}>{message}</div> : null}
       {actions ? <div className={styles.actions}>{actions}</div> : null}
     </div>
   );

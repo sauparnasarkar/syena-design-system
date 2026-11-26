@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { Button } from '../Button/Button';
+import { coarseStyle } from '../storyHover';
 import { InlineAlert } from './InlineAlert';
 
 const meta: Meta<typeof InlineAlert> = { title: 'Feedback/InlineAlert', component: InlineAlert, decorators: [(Story) => <div style={{ padding: 'var(--syn-space-5)', width: 'min(100%, 48rem)' }}><Story /></div>] };
@@ -156,5 +157,13 @@ export const OneLongActionLabelIsShownInFullNotClipped: Story = {
     await expect(button.scrollHeight).toBeLessThanOrEqual(button.clientHeight + 1);
     const label = button.querySelector('span') as HTMLElement;
     await expect(label.getBoundingClientRect().right).toBeLessThanOrEqual(button.getBoundingClientRect().right + 1);
+  },
+};
+
+export const OnATouchDeviceActionsKeepTheTouchMinimum: Story = {
+  render: () => <InlineAlert placement="page" actions={<Button size="small">Review</Button>}>Notice.</InlineAlert>,
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Review' });
+    await expect(coarseStyle(button)?.getPropertyValue('min-height')).toContain('--syn-layout-control-height-touch');
   },
 };

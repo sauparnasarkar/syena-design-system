@@ -85,3 +85,10 @@
   overflow: visible;
   text-align: start;
 }
+
+/* The shared touch minimum is kept: this more specific rule must not lower it. */
+@media (pointer: coarse) {
+  .actions button {
+    min-height: var(--syn-layout-control-height-touch);
+  }
+}
