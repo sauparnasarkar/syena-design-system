@@ -66,6 +66,30 @@ export const ANoteIsNotAChange: Story = {
   },
 };
 
+// With no change to show, a tone is a status: the note says it in words and the colour and a glyph repeat it, so it never rests on colour alone.
+export const ANoteTakesAToneWhenThereIsNoChange: Story = {
+  globals: { theme: 'night' },
+  args: { label: 'Needs review', value: '12', note: 'Needs attention', tone: 'negative' },
+  play: async ({ canvasElement }) => {
+    const stat = within(canvasElement).getByRole('region', { name: 'Needs review' });
+    await expect(stat).toHaveTextContent('Needs attention');
+    await expect(stat.querySelectorAll('svg')).toHaveLength(1);
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--syn-color-signal-negative-text)';
+    canvasElement.appendChild(probe);
+    const expected = getComputedStyle(probe).color;
+    probe.remove();
+    await expect(getComputedStyle(within(stat).getByText('Needs attention')).color).toBe(expected);
+  },
+};
+
+export const AToneWithoutANoteChangesNothing: Story = {
+  args: { label: 'Needs review', value: '0', tone: 'negative' },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('region', { name: 'Needs review' }).querySelectorAll('svg')).toHaveLength(0);
+  },
+};
+
 export const TheValueCanBeAnElementThatWritesItself: Story = {
   args: { label: 'Annual CO₂ emissions', value: <span>{'37.4'}</span>, unit: 'GtCO₂' },
   play: async ({ canvasElement }) => { await expect(within(canvasElement).getByRole('region')).toHaveTextContent('37.4GtCO₂'); },

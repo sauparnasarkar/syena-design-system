@@ -28,6 +28,13 @@
   color: var(--syn-color-text-muted);
 }
 
+.status {
+  display: flex;
+  align-items: center;
+  gap: var(--syn-space-1);
+  font: var(--syn-type-text-sm-weight) var(--syn-type-text-sm-size) / var(--syn-type-text-sm-line) var(--syn-type-text-sm-family);
+}
+
 .positive {
   color: var(--syn-color-signal-positive-text);
 }

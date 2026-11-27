@@ -1924,13 +1924,14 @@ with named values; there are no colour-named variants.
 
 - **Purpose and props.** One headline figure with context. Props: `label`, `value` (a number,
   text, or an element that writes the number itself), `delta`, `deltaDirection`, `tone`, `note`
-  (a plain line that is not a change, such as "of 192 countries"), `card`.
+  (a plain line that is not a change, such as "of 192 countries"; with a `tone` and no `delta` it is a status), `card`.
 - **Anatomy.** Label (`caption`, `text-muted`); value (`figure-md`, `text-primary`) with its
   unit in `figure-unit-md`; delta line: a direction glyph, the signed change, and the comparison
   period in `text-sm`. `card` wraps it in a card.
 - **Zero change.** A change that shows as zero (after rounding to `deltaDecimals`) has no
   direction: it is written without a sign, with a flat glyph, in the neutral tone and spoken as
   "no change", whatever direction or tone were passed.
+- **A status without a change.** When there is no `delta`, a `positive` or `negative` `tone` makes the `note` a status: the note's words, in the tone's signal text colour, with a check or warning glyph before them (the colour is never the only sign). A tone with no note, or a `neutral` tone, changes nothing.
 - **Delta tone.** `tone` is `positive` or `negative`. When it is omitted it is derived from
   `deltaDirection` and the metric: emissions rising is negative, falling is positive. The delta is always shown with a sign or arrow glyph.
 - **States.** Static; loading shows placeholder bars with `aria-busy`.
