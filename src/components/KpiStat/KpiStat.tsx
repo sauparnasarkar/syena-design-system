@@ -16,14 +16,14 @@ export interface KpiStatProps {
   /** The change, as a number or already formatted. Shown with a sign and a direction glyph. */
   delta?: number | string;
   deltaDirection?: 'up' | 'down';
-  /** Whether the change is good, bad or neither. Direction is not a verdict: the metric decides. */
+  /** Whether the change is good, bad or neither. Direction is not a verdict: the metric decides. Without a change, a `positive` or `negative` tone colours the `note` and adds a glyph: the note is the word that says why. */
   tone?: DeltaTone;
   /** What the change is measured against, for example "on 2023". */
   deltaNote?: string;
   deltaDecimals?: number;
   deltaUnit?: string;
   /** Wraps the stat in a card. */
-  /** A plain line under the value that is not a change: what the figure covers, or "of 192 countries". It carries no direction or tone. */
+  /** A plain line under the value that is not a change: what the figure covers, or "of 192 countries". It carries no direction; it takes a tone only from `tone` when there is no change, and then reads as a status ("Needs attention"). */
   note?: string;
   card?: boolean;
   loading?: boolean;
@@ -41,6 +41,8 @@ export function KpiStat({ label, value, unit, unitLabel, decimals, delta, deltaD
   const amount = typeof delta === 'number' ? formatFigure(Math.abs(delta), { decimals: deltaDecimals }) : String(delta).replace(/^[+−-]/, '');
   const unitWords = deltaUnit ? ` ${deltaUnit === '%' ? 'percent' : deltaUnit.trim()}` : '';
   const spoken = delta === undefined ? '' : flat ? `no change ${deltaNote ?? ''}`.trim() : `${direction ?? ''} ${amount}${unitWords} ${deltaNote ?? ''}`.trim();
+  // With no change to colour, a tone is a status: the note says it in words, the colour and glyph repeat it.
+  const status: DeltaTone | undefined = delta === undefined && tone !== 'neutral' ? tone : undefined;
   const body = (
     <section className={styles.stat} aria-label={label} aria-busy={loading || undefined}>
       <span className={styles.label}>{label}</span>
@@ -57,7 +59,14 @@ export function KpiStat({ label, value, unit, unitLabel, decimals, delta, deltaD
               <span className={styles.spoken}>{spoken}</span>
             </span>
           ) : null}
-          {note ? <span className={styles.note}>{note}</span> : null}
+          {note ? (
+            status ? (
+              <span className={[styles.status, toneClass[status]].join(' ')}>
+                <Icon name={status === 'negative' ? 'warning' : 'check'} size="small" />
+                <span>{note}</span>
+              </span>
+            ) : <span className={styles.note}>{note}</span>
+          ) : null}
         </>
       )}
     </section>
