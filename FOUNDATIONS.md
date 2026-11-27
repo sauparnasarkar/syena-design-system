@@ -565,9 +565,13 @@ Semantic tokens are what components consume. Names follow
   step of lightness toward emphasis, capped at `L(0)`.
 - `text-secondary`: body text. Seed.
 - `text-muted`: captions, axis labels, helper text. Seed.
-- `text-disabled`: disabled labels. Lightness at which contrast against the canvas is
-  `√4.5` (the geometric mean of no contrast and the minimum for text). Exempt from the 4.5:1
-  rule by definition and never used for information that is not available elsewhere.
+- `text-disabled`: disabled labels. Contrast `√4.5` (the geometric mean of no contrast and the
+  minimum for text) against the canvas, and at least that on every surface a control can sit on
+  (`surface-base`, `surface-raised`, `surface-sunken`, `surface-overlay`): the colour starts at
+  the lightness that gives `√4.5` on the canvas and moves on in the direction of more contrast
+  until the weakest of the four surfaces reaches it. In a light theme the same floor holds on
+  the data panel's own surfaces. The contrast matrix lists the pair on each surface. Exempt from
+  the 4.5:1 rule by definition and never used for information that is not available elsewhere.
 - `text-on-accent`: label on a filled accent control. The lighter or darker of two neutral
   inks, whichever has more contrast against `accent-fill`. A white label does not
   reach 4.5:1 on night's accent, so night uses the dark ink and tidewater the light ink.
@@ -625,7 +629,7 @@ Semantic tokens are what components consume. Names follow
 | `color-text-primary` | `#f9fbff` | `#071c24` |
 | `color-text-secondary` | `#d7e0f0` | `#3c5460` |
 | `color-text-muted` | `#b4c3df` | `#4a6270` |
-| `color-text-disabled` | `#44536d` | `#95a1a5` |
+| `color-text-disabled` | `#596984` | `#8a969a` |
 | `color-text-on-accent` | `#01061b` | `#f6fcff` |
 | `color-text-inverse` | `#121e35` | `#f6fcff` |
 | `color-text-link` | `#41accd` | `#006784` |
@@ -845,7 +849,7 @@ every colour-vision view. Change marks are always paired with a sign or arrow gl
 UI boundaries, icons and chart marks. Primary text and chart text aim higher (7:1).
 
 <!-- generated:contrast-count -->
-night: 199 required pairs; tidewater: 244 required pairs.
+night: 203 required pairs; tidewater: 252 required pairs.
 <!-- /generated:contrast-count -->
 
 The table shows each pair family at its worst surface in each theme:
@@ -857,6 +861,7 @@ The table shows each pair family at its worst surface in each theme:
 | text-secondary | 4.5:1 | 8.92 | 5.61 | pass |
 | text-muted | 4.5:1 | 6.66 | 4.51 | pass |
 | text-link | 4.5:1 | 4.52 | 4.51 | pass |
+| text-disabled | 2.12:1 | 2.13 | 2.13 | pass |
 | text-on-accent | 4.5:1 | 6.33 | 5.60 | pass |
 | text-inverse | 4.5:1 | 12.52 | 16.90 | pass |
 | signal-positive-text | 4.5:1 | 5.00 | 4.53 | pass |
@@ -868,7 +873,7 @@ The table shows each pair family at its worst surface in each theme:
 | data-text | 7:1 | 7.03 | 7.01 | pass |
 | data-text-muted | 4.5:1 | 4.54 | 4.51 | pass |
 | data-annotation | 4.5:1 | 12.14 | 12.19 | pass |
-| data-no-data | 2.2795070569547775:1 | 2.30 | 2.28 | pass |
+| data-no-data | 2.28:1 | 2.30 | 2.28 | pass |
 | text on data-no-data (data-ink-light) | 4.5:1 | 7.62 | 7.25 | pass |
 | text on data-seq-1 (data-ink-light or data-ink-dark) | 4.5:1 | 5.81 | 5.46 | pass |
 | text on data-seq-2 (data-ink-light or data-ink-dark) | 4.5:1 | 4.50 | 4.65 | pass |
@@ -894,7 +899,7 @@ The table shows each pair family at its worst surface in each theme:
 | data-heat-5 on data-surface (and the borders drawn in it) | 3:1 | 5.98 | 5.85 | pass |
 | data-heat-6 on data-surface (and the borders drawn in it) | 3:1 | 4.70 | 4.67 | pass |
 | data-heat-7 on data-surface (and the borders drawn in it) | 3:1 | 3.68 | 3.68 | pass |
-| the deepest heat step | 3.6742346141747673:1 | 3.68 | 3.68 | pass |
+| the deepest heat step | 3.67:1 | 3.68 | 3.68 | pass |
 | data-band-8 on data-map-panel | 5:1 | 5.22 | 8.94 | pass |
 | data-map-ink on data-map-panel | 4.5:1 | 7.09 | 11.77 | pass |
 | data-map-ink-muted on data-map-panel | 4.5:1 | 5.41 | 6.59 | pass |
@@ -1070,7 +1075,7 @@ pair falls below its target.
 Every pair family listed here passes in `ledger` at the same targets as in the other themes: 4.5:1 for text, 3:1 for boundaries, icons and chart marks, and 7:1 for primary and chart text. Chart marks are validated on the dark `data-surface` panel, as in every theme. The theme is not accepted while any required pair fails.
 
 <!-- generated:ledger-contrast-count -->
-ledger: 245 required pairs.
+ledger: 253 required pairs.
 <!-- /generated:ledger-contrast-count -->
 
 <!-- generated:ledger-contrast-table -->
@@ -1081,6 +1086,11 @@ ledger: 245 required pairs.
 | text-secondary | 4.5:1 | 9.94 | pass |
 | text-muted | 4.5:1 | 4.52 | pass |
 | text-link | 4.5:1 | 4.53 | pass |
+| text-disabled | 2.12:1 | 2.14 | pass |
+| text-disabled on data panel surface-base | 2.12:1 | 2.35 | pass |
+| text-disabled on data panel surface-raised | 2.12:1 | 2.26 | pass |
+| text-disabled on data panel surface-sunken | 2.12:1 | 2.39 | pass |
+| text-disabled on data panel surface-overlay | 2.12:1 | 2.14 | pass |
 | text-on-accent | 4.5:1 | 5.00 | pass |
 | text-inverse | 4.5:1 | 17.66 | pass |
 | signal-positive-text | 4.5:1 | 4.53 | pass |
@@ -1092,7 +1102,7 @@ ledger: 245 required pairs.
 | data-text | 7:1 | 7.02 | pass |
 | data-text-muted | 4.5:1 | 4.52 | pass |
 | data-annotation | 4.5:1 | 12.20 | pass |
-| data-no-data | 2.2795070569547775:1 | 2.28 | pass |
+| data-no-data | 2.28:1 | 2.28 | pass |
 | text on data-no-data (data-ink-light) | 4.5:1 | 7.66 | pass |
 | text on data-seq-1 (data-ink-light or data-ink-dark) | 4.5:1 | 5.81 | pass |
 | text on data-seq-2 (data-ink-light or data-ink-dark) | 4.5:1 | 4.53 | pass |
@@ -1118,7 +1128,7 @@ ledger: 245 required pairs.
 | data-heat-5 on data-surface (and the borders drawn in it) | 3:1 | 6.39 | pass |
 | data-heat-6 on data-surface (and the borders drawn in it) | 3:1 | 5.14 | pass |
 | data-heat-7 on data-surface (and the borders drawn in it) | 3:1 | 4.11 | pass |
-| the deepest heat step | 3.6742346141747673:1 | 4.11 | pass |
+| the deepest heat step | 3.67:1 | 4.11 | pass |
 | data-band-8 on data-map-panel | 5:1 | 8.94 | pass |
 | data-map-ink on data-map-panel | 4.5:1 | 11.77 | pass |
 | data-map-ink-muted on data-map-panel | 4.5:1 | 6.59 | pass |

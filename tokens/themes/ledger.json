@@ -37,7 +37,7 @@
       },
       "disabled": {
         "$type": "color",
-        "$value": "#aaa8a4"
+        "$value": "#a4a29e"
       },
       "on-accent": {
         "$type": "color",
@@ -423,7 +423,7 @@
       },
       "text-disabled": {
         "$type": "color",
-        "$value": "#4e4d4a"
+        "$value": "#545350"
       },
       "text-on-accent": {
         "$type": "color",

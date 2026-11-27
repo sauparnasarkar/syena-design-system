@@ -99,7 +99,7 @@ export function colourBlocks(themes) {
   const sw = summarise(tide);
   const contrastRows = [...sn.keys()].map((g) => {
     const a = sn.get(g); const b = sw.get(g);
-    return [`${g}`, `${a.target}:1`, `${a.ratio.toFixed(2)}`, `${b.ratio.toFixed(2)}`, a.pass && b.pass ? 'pass' : 'FAIL'];
+    return [`${g}`, `${Number(a.target.toFixed(2))}:1`, `${a.ratio.toFixed(2)}`, `${b.ratio.toFixed(2)}`, a.pass && b.pass ? 'pass' : 'FAIL'];
   });
   const checkCount = (t) => `${t.checks.filter((c) => c.kind === 'required').length} required pairs`;
 
@@ -178,7 +178,7 @@ export function themeBlocks(theme) {
     else if (!c.pass) cur.pass = false;
   }
   return {
-    [`${name}-contrast-table`]: table(['Pair (worst surface)', 'Target', name, 'Result'], [...worst.entries()].map(([g, w]) => [g, `${w.target}:1`, w.ratio.toFixed(2), w.pass ? 'pass' : 'FAIL'])),
+    [`${name}-contrast-table`]: table(['Pair (worst surface)', 'Target', name, 'Result'], [...worst.entries()].map(([g, w]) => [g, `${Number(w.target.toFixed(2))}:1`, w.ratio.toFixed(2), w.pass ? 'pass' : 'FAIL'])),
     [`${name}-contrast-count`]: `${name}: ${theme.checks.filter((c) => c.kind === 'required').length} required pairs.`,
     [`${name}-zone-table`]: table(['Hue', name, 'Distance to positive', 'Distance to negative'], theme.zoneRows.map((r) => [r.name, `${r.hue.toFixed(1)}°`, `${r.distancePositive}°`, `${r.distanceNegative}°`])),
   };

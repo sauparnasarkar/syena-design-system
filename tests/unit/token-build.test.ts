@@ -41,6 +41,24 @@ describe('token build', () => {
     expect(new Set(matrix.map((m) => m.theme))).toEqual(new Set(['night', 'tidewater', 'ledger']));
   });
 
+  it('keeps the disabled label at the floor the canvas gives it on every surface it can sit on', () => {
+    const matrix = JSON.parse(readFileSync('src/generated/reports/contrast-matrix.json', 'utf8')) as Array<{ pair: string; pass: boolean; theme: string; ratio: number; required: boolean }>;
+    for (const theme of ['night', 'tidewater', 'ledger']) {
+      for (const surface of ['base', 'raised', 'sunken', 'overlay']) {
+        const pair = matrix.find((m) => m.theme === theme && m.pair === `text-disabled on surface-${surface}`);
+        expect(pair, `${theme} ${surface}`).toBeDefined();
+        expect(pair?.required).toBe(true);
+        expect(pair?.pass).toBe(true);
+        expect(pair!.ratio).toBeGreaterThanOrEqual(2.12);
+      }
+    }
+    for (const theme of ['tidewater', 'ledger']) {
+      for (const surface of ['base', 'raised', 'sunken', 'overlay']) {
+        expect(matrix.find((m) => m.theme === theme && m.pair === `text-disabled on data panel surface-${surface}`)?.pass, `${theme} panel ${surface}`).toBe(true);
+      }
+    }
+  });
+
   it('writes typed constants for the chart and grid themes', () => {
     const ts = readFileSync('src/generated/tokens.ts', 'utf8');
     expect(ts).toContain('export const themes');

@@ -115,7 +115,13 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
 
   const focusRing = solveLightness({ from: accentFill, direction: toward, backgrounds: surfaces, target: 3 });
   const shadow = polarity === 'dark' ? ok(base.l * rho ** -3, nc, nh) : ok(primary.l, primary.c, primary.h);
-  const textDisabled = atContrast({ hue: nh, chroma: nc, background: surfaceBase, target: Math.sqrt(4.5), direction: dir });
+  // Disabled text is quieter than text but must stay a legible label on every surface it can sit on: it takes the lightness at which the
+  // canvas gives √4.5, then moves on in the same direction until each of the four surfaces gives at least that.
+  const disabledFloor = Math.sqrt(4.5);
+  const textDisabled = solveLightness({
+    from: atContrast({ hue: nh, chroma: nc, background: surfaceBase, target: disabledFloor, direction: dir }),
+    direction: toward, backgrounds: surfaces, target: disabledFloor,
+  });
 
   // Data ground and neutrals
   const groundSeed = seed('data-surface');
@@ -289,7 +295,7 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
     const solved = {
       'surface-base': ground, 'surface-raised': raisedP, 'surface-sunken': sunkenP, 'surface-overlay': overlayP, 'surface-inverse': textAt(7),
       'text-primary': textAt(Math.sqrt(7 * 21)), 'text-secondary': textAt(7), 'text-muted': textAt(4.5),
-      'text-disabled': atContrast({ hue: pg.h, chroma: pg.c, background: ground, target: Math.sqrt(4.5), direction: 'lighter' }),
+      'text-disabled': lighter(atContrast({ hue: pg.h, chroma: pg.c, background: ground, target: disabledFloor, direction: 'lighter' }), panelSurfaces, disabledFloor),
       'text-on-accent': ink, 'text-inverse': ground, 'text-link': accentTextP,
       'border-subtle': ok((pg.l + lch(hex(line)).l) / 2, pg.c, pg.h), 'border-default': line, 'border-emphasis': lighter(line, panelSurfaces, 3),
       'accent-fill': fills[0], 'accent-hover': fills[1], 'accent-active': fills[2], 'accent-text': accentTextP, 'accent-tint': tintA,
@@ -403,6 +409,9 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
   const surfaceNames = ['base', 'raised', 'sunken', 'overlay'];
   for (const [id, [foreground, target]] of Object.entries(textRoles)) surfaces.forEach((s, i) => check(`${id} on surface-${surfaceNames[i]}`, foreground, s, target));
   surfaces.forEach((s, i) => check(`text-link on surface-${surfaceNames[i]}`, accentText, s, 4.5));
+  surfaces.forEach((s, i) => check(`text-disabled on surface-${surfaceNames[i]}`, textDisabled, s, disabledFloor));
+  // On a data panel a light theme's disabled label is solved again against the panel's own surfaces; the same floor holds there.
+  if (polarity === 'light') panelSurfaces.forEach((s, i) => check(`text-disabled on data panel surface-${surfaceNames[i]}`, panelColours['text-disabled'], s, disabledFloor));
   check('text-link on accent-tint', accentText, accentTint, 4.5);
   [accentFill, accentHover, accentActive].forEach((background, i) => check(`text-on-accent on accent-${['fill', 'hover', 'active'][i]}`, textOnAccent, background, 4.5));
   check('text-inverse on surface-inverse', textInverse, surfaceInverse, 4.5);
