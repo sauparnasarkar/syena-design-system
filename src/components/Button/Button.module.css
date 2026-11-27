@@ -45,6 +45,12 @@
   background: var(--syn-color-accent-tint);
 }
 
+/* A ghost button has no boundary, disabled or not; the shared disabled rule would otherwise give it one. */
+.button.ghost:disabled,
+.button.ghost[aria-disabled='true'] {
+  border-color: transparent;
+}
+
 /* A pressed toggle shows the selected state. */
 .button[aria-pressed='true'] {
   border-color: var(--syn-color-accent-fill);

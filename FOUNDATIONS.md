@@ -1604,7 +1604,8 @@ with named values; there are no colour-named variants.
 - **Variants.** *Primary*: `accent-fill` with `text-on-accent`. *Secondary*: transparent
   with a `border-emphasis` boundary and `text-primary` label. *Ghost*: no boundary,
   `accent-text` label, `accent-tint` on hover. One primary button per view region.
-- **States.** The common states (§5.1). Pressed toggle buttons show the selected state.
+- **States.** The common states (§5.1). Pressed toggle buttons show the selected state. A
+  disabled ghost button keeps no boundary.
 - **Tokens.** `accent-*`, `text-on-accent`, `border-emphasis`, `focus-ring`,
   `control-height*`, `radius-control`.
 - **Loading.** The label stays and the width does not change: a bar runs along the bottom

@@ -43,6 +43,28 @@ export const Disabled: Story = {
   },
 };
 
+// The disabled rule shared by field-like controls sets a boundary colour; a ghost button has none, so on the overlay surface
+// a disabled one must show no outline.
+export const ADisabledGhostButtonHasNoBoundary: Story = {
+  globals: { theme: 'night' },
+  render: (args) => (
+    <div style={{ background: 'var(--syn-color-surface-overlay)', padding: 'var(--syn-space-4)', display: 'flex', gap: 'var(--syn-space-3)' }}>
+      <Button {...args} variant="ghost" disabled>Reset</Button>
+      <Button {...args} variant="ghost" aria-disabled="true">Reset all</Button>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const buttons = within(canvasElement).getAllByRole('button');
+    await expect(buttons).toHaveLength(2);
+    for (const button of buttons) {
+      const style = getComputedStyle(button);
+      for (const side of ['Top', 'Right', 'Bottom', 'Left'] as const) {
+        await expect(style.getPropertyValue(`border-${side.toLowerCase()}-color`)).toMatch(/(?:,\s*0|\/\s*0)\)$/);
+      }
+    }
+  },
+};
+
 export const Loading: Story = {
   render: (args) => (<><Button {...args} variant="primary" isLoading icon="download" /><Button {...args} isLoading /></>),
   play: async ({ canvasElement, args }) => {
