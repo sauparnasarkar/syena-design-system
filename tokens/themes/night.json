@@ -565,7 +565,7 @@
       },
       "text-disabled": {
         "$type": "color",
-        "$value": "#626a7b"
+        "$value": "#5d6576"
       },
       "text-on-accent": {
         "$type": "color",

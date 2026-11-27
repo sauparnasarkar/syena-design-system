@@ -341,7 +341,7 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
   const mapTint = mix(mapColours.ink, 0.08);
   const mapScope = {
     'surface-base': mapSurfaces[0], 'surface-raised': mapSurfaces[1], 'surface-sunken': mapSurfaces[2], 'surface-overlay': mapSurfaces[3], 'surface-inverse': mapColours.ink,
-    'text-primary': mapColours.ink, 'text-secondary': mapColours.ink, 'text-muted': mapColours.inkMuted, 'text-disabled': darker(mix(mapColours.ink, 0.55), mapSurfaces, disabledFloor),
+    'text-primary': mapColours.ink, 'text-secondary': mapColours.ink, 'text-muted': mapColours.inkMuted, 'text-disabled': darker(mix(mapColours.ink, 0.55), [...mapSurfaces, mapTint], disabledFloor),
     'text-on-accent': mapPanel, 'text-inverse': mapPanel, 'text-link': mapColours.ink,
     'border-subtle': mix(mapColours.ink, 0.18), 'border-default': mix(mapColours.ink, 0.45), 'border-emphasis': mapColours.inkMuted,
     'accent-fill': mapColours.ink, 'accent-hover': mix(mapColours.ink, 0.96), 'accent-active': mix(mapColours.ink, 0.92), 'accent-text': mapColours.ink, 'accent-tint': mapTint, 'accent-secondary': mapColours.inkMuted,
@@ -412,6 +412,9 @@ export function buildTheme({ name, polarity, seeds, rho, top, colourInputs, hues
   surfaces.forEach((s, i) => check(`text-disabled on surface-${surfaceNames[i]}`, textDisabled, s, disabledFloor));
   // On a data panel a light theme's disabled label is solved again against the panel's own surfaces; the same floor holds there.
   mapSurfaces.forEach((s, i) => check(`text-disabled on map panel surface-${surfaceNames[i]}`, mapScope['text-disabled'], s, disabledFloor));
+  // A selected option that is disabled sits on the accent tint.
+  check('text-disabled on accent-tint', textDisabled, accentTint, disabledFloor);
+  check('text-disabled on map panel accent-tint', mapScope['text-disabled'], mapTint, disabledFloor);
   if (polarity === 'light') panelSurfaces.forEach((s, i) => check(`text-disabled on data panel surface-${surfaceNames[i]}`, panelColours['text-disabled'], s, disabledFloor));
   check('text-link on accent-tint', accentText, accentTint, 4.5);
   [accentFill, accentHover, accentActive].forEach((background, i) => check(`text-on-accent on accent-${['fill', 'hover', 'active'][i]}`, textOnAccent, background, 4.5));

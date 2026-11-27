@@ -53,6 +53,9 @@ describe('token build', () => {
       }
     }
     for (const theme of ['night', 'tidewater', 'ledger']) {
+      for (const pair of ['text-disabled on accent-tint', 'text-disabled on map panel accent-tint']) expect(matrix.find((m) => m.theme === theme && m.pair === pair)?.pass, `${theme} ${pair}`).toBe(true);
+    }
+    for (const theme of ['night', 'tidewater', 'ledger']) {
       for (const surface of ['base', 'raised', 'sunken', 'overlay']) {
         expect(matrix.find((m) => m.theme === theme && m.pair === `text-disabled on map panel surface-${surface}`)?.pass, `${theme} map ${surface}`).toBe(true);
       }
