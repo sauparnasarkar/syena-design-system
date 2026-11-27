@@ -1893,8 +1893,8 @@ with named values; there are no colour-named variants.
 - **Anatomy.** An SVG on a square grid drawn with a stroke of `focus-ring-width` in rendered
   pixels; colour is `currentColor`. Size comes from the icon tokens. Glyphs come from an
   open-licensed set and are imported one at a time; consumers use `Icon` by name and never the
-  set directly. Names include `sparkle`, for an assistant, `home`, `correlation`, `sun` and `moon`, for the two colour themes, and `previous` and `next`, for stepping
-  through a set.
+  set directly. Names include `sparkle`, for an assistant, `home`, `correlation`, `sun` and `moon`, for the two colour themes, `previous` and `next`, for stepping
+  through a set, and `calendar` and `document`, for a dated view and a record or filing.
 - **Accessibility.** Decorative by default (`aria-hidden`); an icon that carries meaning
   takes a `title`, which becomes its accessible name.
 
