@@ -52,6 +52,11 @@ describe('token build', () => {
         expect(pair!.ratio).toBeGreaterThanOrEqual(2.12);
       }
     }
+    for (const theme of ['night', 'tidewater', 'ledger']) {
+      for (const surface of ['base', 'raised', 'sunken', 'overlay']) {
+        expect(matrix.find((m) => m.theme === theme && m.pair === `text-disabled on map panel surface-${surface}`)?.pass, `${theme} map ${surface}`).toBe(true);
+      }
+    }
     for (const theme of ['tidewater', 'ledger']) {
       for (const surface of ['base', 'raised', 'sunken', 'overlay']) {
         expect(matrix.find((m) => m.theme === theme && m.pair === `text-disabled on data panel surface-${surface}`)?.pass, `${theme} panel ${surface}`).toBe(true);

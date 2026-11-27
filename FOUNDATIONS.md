@@ -569,8 +569,9 @@ Semantic tokens are what components consume. Names follow
   minimum for text) against the canvas, and at least that on every surface a control can sit on
   (`surface-base`, `surface-raised`, `surface-sunken`, `surface-overlay`): the colour starts at
   the lightness that gives `√4.5` on the canvas and moves on in the direction of more contrast
-  until the weakest of the four surfaces reaches it. In a light theme the same floor holds on
-  the data panel's own surfaces. The contrast matrix lists the pair on each surface. Exempt from
+  until the weakest of the four surfaces reaches it. The same floor holds on the surfaces of the
+  map panel in every theme, and of the data panel in a light theme, where the role is solved
+  again. The contrast matrix lists the pair on each surface. Exempt from
   the 4.5:1 rule by definition and never used for information that is not available elsewhere.
 - `text-on-accent`: label on a filled accent control. The lighter or darker of two neutral
   inks, whichever has more contrast against `accent-fill`. A white label does not
@@ -849,7 +850,7 @@ every colour-vision view. Change marks are always paired with a sign or arrow gl
 UI boundaries, icons and chart marks. Primary text and chart text aim higher (7:1).
 
 <!-- generated:contrast-count -->
-night: 203 required pairs; tidewater: 252 required pairs.
+night: 207 required pairs; tidewater: 256 required pairs.
 <!-- /generated:contrast-count -->
 
 The table shows each pair family at its worst surface in each theme:
@@ -862,6 +863,10 @@ The table shows each pair family at its worst surface in each theme:
 | text-muted | 4.5:1 | 6.66 | 4.51 | pass |
 | text-link | 4.5:1 | 4.52 | 4.51 | pass |
 | text-disabled | 2.12:1 | 2.13 | 2.13 | pass |
+| text-disabled on map panel surface-base | 2.12:1 | 2.13 | 2.15 | pass |
+| text-disabled on map panel surface-raised | 2.12:1 | 2.34 | 2.32 | pass |
+| text-disabled on map panel surface-sunken | 2.12:1 | 2.24 | 2.23 | pass |
+| text-disabled on map panel surface-overlay | 2.12:1 | 2.51 | 2.48 | pass |
 | text-on-accent | 4.5:1 | 6.33 | 5.60 | pass |
 | text-inverse | 4.5:1 | 12.52 | 16.90 | pass |
 | signal-positive-text | 4.5:1 | 5.00 | 4.53 | pass |
@@ -1075,7 +1080,7 @@ pair falls below its target.
 Every pair family listed here passes in `ledger` at the same targets as in the other themes: 4.5:1 for text, 3:1 for boundaries, icons and chart marks, and 7:1 for primary and chart text. Chart marks are validated on the dark `data-surface` panel, as in every theme. The theme is not accepted while any required pair fails.
 
 <!-- generated:ledger-contrast-count -->
-ledger: 253 required pairs.
+ledger: 257 required pairs.
 <!-- /generated:ledger-contrast-count -->
 
 <!-- generated:ledger-contrast-table -->
@@ -1087,6 +1092,10 @@ ledger: 253 required pairs.
 | text-muted | 4.5:1 | 4.52 | pass |
 | text-link | 4.5:1 | 4.53 | pass |
 | text-disabled | 2.12:1 | 2.14 | pass |
+| text-disabled on map panel surface-base | 2.12:1 | 2.15 | pass |
+| text-disabled on map panel surface-raised | 2.12:1 | 2.32 | pass |
+| text-disabled on map panel surface-sunken | 2.12:1 | 2.23 | pass |
+| text-disabled on map panel surface-overlay | 2.12:1 | 2.48 | pass |
 | text-disabled on data panel surface-base | 2.12:1 | 2.35 | pass |
 | text-disabled on data panel surface-raised | 2.12:1 | 2.26 | pass |
 | text-disabled on data panel surface-sunken | 2.12:1 | 2.39 | pass |
