@@ -65,6 +65,25 @@ export const ADisabledGhostButtonHasNoBoundary: Story = {
   },
 };
 
+// The disabled label is tuned on every surface a control can sit on, not only the canvas: on the overlay surface in night it stays as
+// legible as it is on the canvas.
+export const ADisabledSecondaryButtonKeepsItsLabelOnTheOverlaySurfaceInNight: Story = {
+  globals: { theme: 'night' },
+  render: (args) => (
+    <div style={{ background: 'var(--syn-color-surface-overlay)', padding: 'var(--syn-space-4)' }}>
+      <Button {...args} disabled>Reset to featured</Button>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button');
+    const channels = (value: string) => (value.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number).map((v) => { const c = v / 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; });
+    const luminance = (value: string) => { const [r, g, b] = channels(value); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+    const ratio = (a: string, b: string) => { const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x); return (hi + 0.05) / (lo + 0.05); };
+    const surface = getComputedStyle(button.parentElement as HTMLElement).backgroundColor;
+    await expect(ratio(getComputedStyle(button).color, surface)).toBeGreaterThanOrEqual(Math.sqrt(4.5) - 0.005);
+  },
+};
+
 export const Loading: Story = {
   render: (args) => (<><Button {...args} variant="primary" isLoading icon="download" /><Button {...args} isLoading /></>),
   play: async ({ canvasElement, args }) => {
