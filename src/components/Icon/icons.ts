@@ -1,6 +1,6 @@
 // The icons the system uses, from the Lucide set. Importing them one by one lets bundlers drop the rest.
 import {
-  ArrowDown, ArrowLeftRight, ArrowRight, ArrowUp, Check, ChartLine, ChartScatter, House, ChevronDown, ChevronLeft, ChevronRight, Download, GitBranch, Info, LayoutGrid,
+  CalendarDays, FileText, ArrowDown, ArrowLeftRight, ArrowRight, ArrowUp, Check, ChartLine, ChartScatter, House, ChevronDown, ChevronLeft, ChevronRight, Download, GitBranch, Info, LayoutGrid,
   CircleAlert, ExternalLink, MapPin, Menu, Minus, Monitor, Pause, Play, Plus, RotateCcw, MessageSquare, Search, SendHorizontal, Settings, SlidersHorizontal, Sparkles, Square, Sun, Moon, Table, Table2, TrendingUp, TriangleAlert, X,
 } from 'lucide-react';
 
@@ -46,6 +46,8 @@ export const icons = {
   search: Search,
   send: SendHorizontal,
   stop: Square,
+  calendar: CalendarDays,
+  document: FileText,
 } as const;
 
 export type IconName = keyof typeof icons;

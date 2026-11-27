@@ -34,6 +34,22 @@ export const Sizes: Story = {
   },
 };
 
+export const CalendarAndDocumentAreDrawn: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 'var(--syn-space-5)', padding: 'var(--syn-space-5)', color: 'var(--syn-color-text-primary)' }}>
+      <Icon name="calendar" title="Calendar" />
+      <Icon name="document" title="Document" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const glyphs = [...canvasElement.querySelectorAll('svg')];
+    await expect(glyphs).toHaveLength(2);
+    for (const glyph of glyphs) await expect(glyph.querySelectorAll('path, rect, line, polyline').length).toBeGreaterThan(0);
+    await expect(within(canvasElement).getByRole('img', { name: 'Calendar' })).toBeInTheDocument();
+    await expect(within(canvasElement).getByRole('img', { name: 'Document' })).toBeInTheDocument();
+  },
+};
+
 export const DecorativeAndLabelled: Story = {
   render: () => (
     <div style={{ display: 'flex', gap: 'var(--syn-space-5)', padding: 'var(--syn-space-5)', color: 'var(--syn-color-text-primary)' }}>
